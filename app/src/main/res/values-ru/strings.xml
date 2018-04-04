@@ -1,0 +1,58 @@
+<resources>
+    <string name="app_name">TorrServe</string>
+
+    <string name="name">Имя</string>
+    <string name="torr_link">Торрент ссылка</string>
+    <string name="add">Добавить</string>
+    <string name="remove_all">Удалить все</string>
+    <string name="remove">Удалить</string>
+    <string name="clear_cache">Очистить кэш</string>
+    <string name="settings">Настройки</string>
+    <string name="donate">Пожертвование</string>
+
+    <string name="donate_msg">Ваше пожертвование помогает мне развиваться дальше, улучшать программу и создавать новые</string>
+
+    <string name="open">Открыть</string>
+    <string name="send">Отправить</string>
+    <string name="share_magnet">Поделиться magnet-ссылкой</string>
+    <string name="info">Инфо</string>
+
+    <string name="start_server">Запустить локальный сервер</string>
+    <string name="stop_server">Остановить локальный сервер и выйти</string>
+
+    <string name="preparing_torrent">Подготовка торрента...</string>
+    <string name="starting_server">Запуск сервера...</string>
+    <string name="loading_torrent_list">Загрузка торрентов...</string>
+    <string name="server_stoped">Торрент сервер остановлен</string>
+    <string name="stat_server_is_running">Сервер запущен</string>
+    <string name="stat_server_is_not_running">Сервер остановлен или недоступен</string>
+
+    <string name="server_addr">Адрес сервера</string>
+    <string name="cache_size">Размер кэша (Мбайты)</string>
+    <string name="preload_buffer_size">Размер буфера предварительной загрузки (Мбайты)</string>
+    <string name="disable_tcp">Отключить TCP</string>
+    <string name="disable_utp">Отключить UTP</string>
+    <string name="disable_upnp">Отключить UPNP</string>
+    <string name="disable_dht">Отключить DHT</string>
+    <string name="disable_upload">Отключить отдачу</string>
+    <string name="ecnryption">Шифрование (0-включено, 1-отключено, 2-принудительно)</string>
+    <string name="connections_limit">Соединений на торрент</string>
+    <string name="download_rate_limit">Ограничение скорости загрузки (Килобайты, 0-неограниченно)</string>
+    <string name="upload_rate_limit">Ограничение скорости отдачи (Килобайты, 0-неограниченно)</string>
+
+    <string name="retrieve_settings">Получить настройки с сервера</string>
+
+    <string name="permission_storage_msg">Доступ к памяти требуется для записи настроек в файл</string>
+    <string name="permission_btn">РАЗРЕШИТЬ</string>
+
+    <string name="crash_app">"Ооооой... Во мне случилась ошибка,\nНо не волнуйтесь, Вы можете отправить отчет об ошибке разработчику, чтобы он её поскорее исправил."</string>
+
+    <string name="error_server_start">Ошибка запуска сервера</string>
+    <string name="error_torrent_with_this_link_exists">Торрент с этой ссылкой существует</string>
+    <string name="error_open_torrent">Ошибка при открытии торрента</string>
+    <string name="error_add_torrent">Ошибка при добавлении торрента</string>
+    <string name="error_retrieving_settings">Ошибка при получении настроек</string>
+    <string name="error_sending_settings">Ошибка при отправке настроек</string>
+
+    <string name="error_remove_torrent">Ошибка удаления торрента</string>
+</resources>

@@ -1,0 +1,31 @@
+{
+	"1.0.10": [
+		"- Improvements in the server",
+		"- Changes in the interface"
+	],
+	"1.0.9": [
+		"- Improvements in the server",
+		"- Changes in the interface",
+		"- Fixed some bugs"
+	],
+	"1.0.5": [
+		"- Report by crash",
+		"- Cache in memory",
+		"- Fixed some bugs"
+	],
+	"1.0.4": [
+		"- Release",
+		"- Some interface changes",
+		"- Fixed some bugs",
+		"- You can add magnet links, files and links to files from the network"
+	],
+	"0.0.3 Beta": [
+		"- Change android api to 15"
+	],
+	"0.0.2 Beta": [
+		"- Basic functionality added"
+	],
+	"0.0.1 Alpha": [
+		"- Creating a kernel and a test assembly"
+	]
+}

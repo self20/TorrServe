@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/itemShareMagnet"
+        android:icon="@drawable/ic_send_black_24dp"
+        android:title="@string/share_magnet"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/itemInfoTorrent"
+        android:icon="@drawable/ic_info_black_24dp"
+        android:title="@string/info"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/itemRemove"
+        android:icon="@drawable/ic_trash_black_24dp"
+        android:title="@string/remove"
+        app:showAsAction="ifRoom" />
+</menu>
