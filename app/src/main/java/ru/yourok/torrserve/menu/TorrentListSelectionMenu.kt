@@ -32,8 +32,8 @@ class TorrentListSelectionMenu(val activity: Activity, val adapter: TorrentListA
         return false
     }
 
-    override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
-        when (item?.itemId) {
+    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+        when (item.itemId) {
             R.id.itemShareMagnet -> {
                 var msg = ""
                 selected.forEach {
@@ -70,21 +70,16 @@ class TorrentListSelectionMenu(val activity: Activity, val adapter: TorrentListA
                                 Toast.makeText(activity, activity.getText(R.string.error_remove_torrent).toString() + ": " + err, Toast.LENGTH_SHORT).show()
                             }
                         }
-                        activity.runOnUiThread {
-                            adapter.updateList()
-                        }
+                        adapter.updateList()
                     }
                 }
-                clearChoice()
             }
-            else -> return false
         }
-        mode?.finish()
-        return true
+        mode.finish()
+        return false
     }
 
     override fun onDestroyActionMode(mode: ActionMode?) {
-        clearChoice()
     }
 
     override fun onItemCheckedStateChanged(mode: ActionMode?, position: Int, id: Long, checked: Boolean) {
@@ -101,5 +96,6 @@ class TorrentListSelectionMenu(val activity: Activity, val adapter: TorrentListA
             lv.setItemChecked(i, false)
         lv.post(Runnable { lv.choiceMode = ListView.CHOICE_MODE_NONE })
         adapter.notifyDataSetChanged()
+        lv.requestLayout()
     }
 }

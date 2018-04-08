@@ -61,6 +61,10 @@ class FilesActivity : AppCompatActivity() {
                         listViewFiles.adapter = adapter
                         listViewFiles.setOnItemClickListener { _, _, i, _ ->
                             val file = torr.Files[i]
+                            adapter.torrent?.let {
+                                it.Files[i].Viewed = true
+                                adapter.notifyDataSetChanged()
+                            }
                             ServerApi.view(this, file.Name, file.Link)
                         }
                         listViewFiles.setOnItemLongClickListener { _, view, i, _ ->

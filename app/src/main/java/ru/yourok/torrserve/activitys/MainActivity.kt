@@ -26,6 +26,7 @@ import java.util.*
 import kotlin.concurrent.schedule
 import kotlin.concurrent.thread
 
+
 class MainActivity : AppCompatActivity() {
     val torrAdapter = TorrentListAdapter(this)
     lateinit var drawer: Drawer
@@ -142,7 +143,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
-            //Stop server
+            //Clear cache
                 KeyEvent.KEYCODE_3, KeyEvent.KEYCODE_NUMPAD_3, KeyEvent.KEYCODE_BUTTON_3 -> {
                     ServerApi.cleanCache()
                 }
