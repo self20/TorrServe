@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"time"
 
+	"torrentserver/db"
 	"torrentserver/server"
 	"torrentserver/settings"
 )
 
 func Start(setpath string) {
 	if setpath != "" {
-		err := settings.LoadFile(setpath)
+		db.Path = setpath
+		err := settings.LoadFile()
+		settings.Get().SettingPath = setpath
 		if err != nil {
 			fmt.Println("Error load settings on start server:", setpath)
 		}
@@ -29,4 +32,5 @@ func WaitServer() string {
 
 func Stop() {
 	go server.Stop()
+	db.CloseDB()
 }

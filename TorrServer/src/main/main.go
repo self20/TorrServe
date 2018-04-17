@@ -15,7 +15,7 @@ func main() {
 	}
 
 	torrentserver.Start(path)
-	settings.SaveFile(path)
+	settings.SaveFile()
 
 	fmt.Println(torrentserver.WaitServer())
 }

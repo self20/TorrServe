@@ -7,10 +7,8 @@ import (
 	"net"
 	"net/http"
 	"runtime"
-	"sort"
 
 	"torrentserver/server/templates"
-	"torrentserver/settings"
 	"torrentserver/torrent"
 	"torrentserver/utils"
 
@@ -28,6 +26,10 @@ var (
 )
 
 func Start() {
+	if server != nil {
+		Stop()
+	}
+
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	fmt.Println("Start web server, version:", utils.Version)
 	mutex.Lock()
@@ -70,10 +72,10 @@ func Stop() {
 	fnMutex.Lock()
 	defer fnMutex.Unlock()
 	if server != nil {
+		fmt.Println("Stop web server")
 		go torrent.Disconnect()
 		server.Close()
 		server = nil
-		settings.CloseDB()
 	}
 }
 
@@ -84,7 +86,8 @@ func Wait() error {
 }
 
 func mainPage(c echo.Context) error {
-	return c.Render(http.StatusOK, "mainPage", torrent.List())
+	list, _ := torrent.List()
+	return c.Render(http.StatusOK, "mainPage", list)
 }
 
 func echoPage(c echo.Context) error {
@@ -114,43 +117,43 @@ func cachePage(c echo.Context) error {
 }
 
 func statePage(c echo.Context) error {
-	torrs := torrent.List()
-
-	msg := ""
-
-	sort.Slice(torrs, func(i, j int) bool {
-		return torrs[i].Name() < torrs[j].Name()
-	})
-
-	for _, tor := range torrs {
-		st := tor.Stats()
-
-		msg += fmt.Sprintf("Torrent: %v\n", tor.Name())
-		msg += fmt.Sprintf("TotalPeers: %v\n", st.TotalPeers)
-		msg += fmt.Sprintf("PendingPeers: %v\n", st.PendingPeers)
-		msg += fmt.Sprintf("ActivePeers: %v\n", st.ActivePeers)
-		msg += fmt.Sprintf("ConnectedSeeders: %v\n", st.ConnectedSeeders)
-		msg += fmt.Sprintf("HalfOpenPeers: %v\n", st.HalfOpenPeers)
-
-		msg += fmt.Sprintf("BytesWritten: %v\n", st.BytesWritten)
-		msg += fmt.Sprintf("BytesWrittenData: %v\n", st.BytesWrittenData)
-
-		msg += fmt.Sprintf("BytesRead: %v\n", st.BytesRead)
-		msg += fmt.Sprintf("BytesReadData: %v\n", st.BytesReadData)
-		msg += fmt.Sprintf("BytesReadUsefulData: %v\n", st.BytesReadUsefulData)
-
-		msg += fmt.Sprintf("ChunksWritten: %v\n", st.ChunksWritten)
-
-		msg += fmt.Sprintf("ChunksRead: %v\n", st.ChunksRead)
-		msg += fmt.Sprintf("ChunksReadUseful: %v\n", st.ChunksReadUseful)
-		msg += fmt.Sprintf("ChunksReadUnwanted: %v\n", st.ChunksReadUnwanted)
-
-		msg += fmt.Sprintf("PiecesDirtiedGood: %v\n", st.PiecesDirtiedGood)
-		msg += fmt.Sprintf("PiecesDirtiedBad: %v\n", st.PiecesDirtiedBad)
-
-		msg += "\n"
-	}
-	return c.String(http.StatusOK, msg)
+	//torrs := torrent.List()
+	//
+	//msg := ""
+	//
+	//sort.Slice(torrs, func(i, j int) bool {
+	//	return torrs[i].Name() < torrs[j].Name()
+	//})
+	//
+	//for _, tor := range torrs {
+	//	st := tor.Stats()
+	//
+	//	msg += fmt.Sprintf("Torrent: %v\n", tor.Name())
+	//	msg += fmt.Sprintf("TotalPeers: %v\n", st.TotalPeers)
+	//	msg += fmt.Sprintf("PendingPeers: %v\n", st.PendingPeers)
+	//	msg += fmt.Sprintf("ActivePeers: %v\n", st.ActivePeers)
+	//	msg += fmt.Sprintf("ConnectedSeeders: %v\n", st.ConnectedSeeders)
+	//	msg += fmt.Sprintf("HalfOpenPeers: %v\n", st.HalfOpenPeers)
+	//
+	//	msg += fmt.Sprintf("BytesWritten: %v\n", st.BytesWritten)
+	//	msg += fmt.Sprintf("BytesWrittenData: %v\n", st.BytesWrittenData)
+	//
+	//	msg += fmt.Sprintf("BytesRead: %v\n", st.BytesRead)
+	//	msg += fmt.Sprintf("BytesReadData: %v\n", st.BytesReadData)
+	//	msg += fmt.Sprintf("BytesReadUsefulData: %v\n", st.BytesReadUsefulData)
+	//
+	//	msg += fmt.Sprintf("ChunksWritten: %v\n", st.ChunksWritten)
+	//
+	//	msg += fmt.Sprintf("ChunksRead: %v\n", st.ChunksRead)
+	//	msg += fmt.Sprintf("ChunksReadUseful: %v\n", st.ChunksReadUseful)
+	//	msg += fmt.Sprintf("ChunksReadUnwanted: %v\n", st.ChunksReadUnwanted)
+	//
+	//	msg += fmt.Sprintf("PiecesDirtiedGood: %v\n", st.PiecesDirtiedGood)
+	//	msg += fmt.Sprintf("PiecesDirtiedBad: %v\n", st.PiecesDirtiedBad)
+	//
+	//	msg += "\n"
+	//}
+	return c.String(http.StatusOK, "")
 }
 
 func HTTPErrorHandler(err error, c echo.Context) {

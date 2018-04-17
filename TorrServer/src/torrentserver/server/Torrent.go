@@ -7,8 +7,7 @@ import (
 	"net/url"
 	"sort"
 
-	gotorrent "github.com/anacrolix/torrent"
-	"torrentserver/settings"
+	"torrentserver/db"
 	"torrentserver/torrent"
 	"torrentserver/utils"
 
@@ -16,9 +15,7 @@ import (
 )
 
 func initTorrent(e *echo.Echo) {
-
 	torrent.Connect()
-
 	e.POST("/torrent/add", torrentAdd)
 	e.POST("/torrent/get", torrentGet)
 	e.POST("/torrent/rem", torrentRem)
@@ -84,7 +81,10 @@ func torrentGet(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Hash must be non-empty")
 	}
 
-	tor := torrent.Get(jreq.Hash)
+	tor, err := torrent.Get(jreq.Hash)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 	js, err := getTorrentJS(tor)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -109,7 +109,8 @@ func torrentRem(c echo.Context) error {
 
 func torrentList(c echo.Context) error {
 	js := make([]TorrentJsonResponse, 0)
-	for _, tor := range torrent.List() {
+	list, _ := torrent.List()
+	for _, tor := range list {
 		jsTor, err := getTorrentJS(tor)
 		if err != nil {
 			fmt.Println("Error get torrent:", err)
@@ -135,8 +136,8 @@ func torrentStat(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Hash must be non-empty")
 	}
 
-	tor := torrent.Get(jreq.Hash)
-	return c.JSON(http.StatusOK, tor.Stats())
+	//tor := torrent.Get(jreq.Hash)
+	return c.JSON(http.StatusOK, "")
 }
 
 func torrentCleanCache(c echo.Context) error {
@@ -161,27 +162,24 @@ func torrentView(c echo.Context) error {
 	return torrent.Play(hash, fileLink, c)
 }
 
-func getTorrentJS(tor *gotorrent.Torrent) (*TorrentJsonResponse, error) {
+func getTorrentJS(tor *db.Torrent) (*TorrentJsonResponse, error) {
 	js := new(TorrentJsonResponse)
-	js.Name = tor.Name()
-	js.Magnet = torrent.Magnet(tor)
-	js.Hash = tor.InfoHash().HexString()
-	js.AddTime, _ = torrent.GetTime(tor)
+	js.Name = tor.Name
+	js.Magnet = tor.Magnet
+	js.Hash = tor.Hash
+	js.AddTime = tor.Timestamp
 	var size int64 = 0
-	if torrent.GotInfo(tor) == nil {
-		for _, f := range torrent.Files(tor) {
-			size += f.Length()
-			viewed, _ := settings.ExistTorrView(tor.InfoHash().HexString(), f.Path())
-			tf := TorFile{
-				Name:   f.Path(),
-				Link:   "/torrent/view/" + js.Hash + "/" + utils.FileToLink(f.Path()),
-				Size:   f.Length(),
-				Viewed: viewed,
-			}
-			js.Files = append(js.Files, tf)
+	for _, f := range tor.Files {
+		size += f.Size
+		tf := TorFile{
+			Name:   f.Name,
+			Link:   "/torrent/view/" + js.Hash + "/" + utils.FileToLink(f.Name),
+			Size:   f.Size,
+			Viewed: f.Viewed,
 		}
-		js.Length = size
+		js.Files = append(js.Files, tf)
 	}
+	js.Length = size
 	return js, nil
 }
 

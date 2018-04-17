@@ -3,6 +3,7 @@ package torrent
 import (
 	"fmt"
 	"io"
+	"time"
 
 	"torrentserver/settings"
 
@@ -18,25 +19,16 @@ type Reader struct {
 	file   *torrent.File
 	reader torrent.Reader
 
-	hash   string
-	path   string
-	offset int64
+	hash     string
+	path     string
+	offset   int64
+	lastRead time.Time
 
 	piecesLength int64
 	pieceCurrent int
 }
 
-var (
-	clients map[string]int
-)
-
-func init() {
-	clients = make(map[string]int)
-}
-
 func NewReader(t *torrent.Torrent, f *torrent.File) *Reader {
-	clients[f.Path()]++
-	fmt.Println("Client connect", clients[f.Path()])
 	r := new(Reader)
 
 	reader := f.NewReader()
@@ -48,6 +40,7 @@ func NewReader(t *torrent.Torrent, f *torrent.File) *Reader {
 	r.hash = t.InfoHash().HexString()
 	r.reader = reader
 	r.piecesLength = r.tor.Info().PieceLength
+	r.lastRead = time.Now().Add(time.Minute)
 	return r
 }
 
@@ -60,6 +53,7 @@ func (r *Reader) Seek(offset int64, whence int) (int64, error) {
 	r.offset = off
 	fmt.Println("Seek", r.offset, ", piece:", r.GetCurrentPiece())
 	r.tor.PieceStateRuns()
+	r.lastRead = time.Now().Add(time.Minute)
 	return off, err
 }
 
@@ -73,6 +67,7 @@ func (r *Reader) Read(p []byte) (n int, err error) {
 
 	n, err = r.reader.Read(p)
 	r.offset += int64(n)
+	r.lastRead = time.Now()
 
 	readedPiece := r.GetCurrentPiece()
 	if readedPiece != r.pieceCurrent {
@@ -85,8 +80,6 @@ func (r *Reader) Read(p []byte) (n int, err error) {
 
 func (r *Reader) Close() error {
 	r.reader.Close()
-	clients[r.path]--
-	fmt.Println("Client disconnect", clients[r.path])
 	return nil
 }
 

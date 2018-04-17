@@ -8,21 +8,22 @@ import (
 	"runtime/debug"
 	"time"
 
+	"torrentserver/db"
 	"torrentserver/settings"
 	"torrentserver/storage/memcache"
 
 	"github.com/anacrolix/dht"
 	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/iplist"
-	"github.com/anacrolix/torrent/metainfo"
 	"golang.org/x/time/rate"
 
 	"sync"
 )
 
 var (
-	config *torrent.Config
-	client *torrent.Client
+	config  *torrent.Config
+	client  *torrent.Client
+	handler *Handler
 
 	storage *memcache.Storage
 
@@ -76,13 +77,15 @@ func Connect() error {
 	blocklist, _ := iplist.MMapPackedFile(filepath.Join(settings.Get().SettingPath, "blocklist"))
 	client.SetIPBlockList(blocklist)
 
-	return loadTorrents()
+	handler = NewHandler()
+	return nil
 }
 
 func Disconnect() {
 	mutex.Lock()
 	defer mutex.Unlock()
 	if client != nil {
+		handler.Close()
 		client.Close()
 		client = nil
 		time.Sleep(time.Second * 3)
@@ -91,7 +94,7 @@ func Disconnect() {
 	}
 }
 
-func Add(link string) (*torrent.Torrent, error) {
+func Add(link string) (*db.Torrent, error) {
 	if client == nil {
 		return nil, errors.New("list empty")
 	}
@@ -112,56 +115,52 @@ func Add(link string) (*torrent.Torrent, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	defer tor.Drop()
+
 	fmt.Println("Adding", tor.Name())
 	err = GotInfo(tor)
 	if err != nil {
 		return nil, err
 	}
 
-	addTime(tor)
-	saveTorrents()
-	return tor, nil
-}
-
-func Get(hashHex string) *torrent.Torrent {
-	mutex.Lock()
-	defer mutex.Unlock()
-
-	hash := metainfo.NewHashFromHex(hashHex)
-	tor, _ := client.Torrent(hash)
-	GotInfo(tor)
-	return tor
-}
-
-func Rem(hashHex string) {
-	mutex.Lock()
-	defer mutex.Unlock()
-
-	hash := metainfo.NewHashFromHex(hashHex)
-	if tor, ok := client.Torrent(hash); ok {
-		fmt.Println("Remove:", tor.Name())
-		tor.Drop()
-		remTime(tor)
+	torDb := new(db.Torrent)
+	torDb.Name = tor.Name()
+	torDb.Hash = tor.InfoHash().HexString()
+	torDb.Size = tor.Length()
+	torDb.Magnet = mag
+	torDb.Timestamp = time.Now().Unix()
+	for _, f := range tor.Files() {
+		ff := db.File{
+			f.Path(),
+			f.Length(),
+			false,
+		}
+		torDb.Files = append(torDb.Files, ff)
 	}
-	saveTorrents()
+	err = db.SaveTorrentDB(torDb)
+	return torDb, err
 }
 
-func List() []*torrent.Torrent {
+func Get(hashHex string) (*db.Torrent, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	torrs := client.Torrents()
-	var wa sync.WaitGroup
-	wa.Add(len(torrs))
-	for _, t := range torrs {
-		go func() {
-			GotInfo(t)
-			wa.Done()
-		}()
-	}
-	wa.Wait()
+	return db.LoadTorrentDB(hashHex)
+}
 
-	return client.Torrents()
+func Rem(hashHex string) error {
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	return db.RemoveTorrentDB(hashHex)
+}
+
+func List() ([]*db.Torrent, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	return db.LoadTorrentsDB()
 }
 
 func GetStates() []memcache.CacheState {

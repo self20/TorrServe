@@ -33,7 +33,8 @@ func settingsWrite(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	settings.SaveFile(path)
+	settings.Get().SettingPath = path
+	settings.SaveFile()
 	fmt.Println("Restart torrent engine")
 	torrent.Disconnect()
 	err = torrent.Connect()

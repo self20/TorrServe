@@ -1,6 +1,11 @@
 package settings
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+
+	"torrentserver/db"
+)
 
 type Settings struct {
 	CacheSize         int // in byte, def 200 mb
@@ -37,14 +42,19 @@ func Get() *Settings {
 	return sets
 }
 
-func LoadFile(path string) error {
-	sets.SettingPath = path
-	return ReadSettingsDB()
+func LoadFile() error {
+	buf, err := db.ReadSettingsDB()
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(buf, sets)
+	return err
 }
 
-func SaveFile(path string) error {
-	if path == "" {
-		path = sets.SettingPath
+func SaveFile() error {
+	buf, err := json.Marshal(sets)
+	if err != nil {
+		return err
 	}
-	return SaveSettingsDB()
+	return db.SaveSettingsDB(buf)
 }

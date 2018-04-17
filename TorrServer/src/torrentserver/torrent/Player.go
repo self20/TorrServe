@@ -4,38 +4,27 @@ import (
 	"net/http"
 	"time"
 
+	"torrentserver/db"
 	"torrentserver/settings"
 	"torrentserver/utils"
 
-	"github.com/anacrolix/torrent"
 	"github.com/labstack/echo"
 )
 
 var (
-	currentTorrent *torrent.Torrent
+	currentTorrent *db.Torrent
 )
 
 func Play(hash, fileLink string, c echo.Context) error {
-	tor := Get(hash)
-	if tor == nil {
-		return c.String(http.StatusNotFound, "Torrent not found: "+hash+"/"+fileLink)
+	tordb, err := Get(hash)
+	if err != nil {
+		return c.String(http.StatusNotFound, "Torrent not found:"+err.Error()+" "+hash+"/"+fileLink)
 	}
 
-	if currentTorrent == nil || tor.InfoHash() != currentTorrent.InfoHash() {
-		if currentTorrent != nil {
-			go Stop(currentTorrent)
-		}
-		currentTorrent = tor
-
-		if err := GotInfo(tor); err != nil {
-			return err
-		}
-	}
-
-	var file *torrent.File
-	for _, f := range tor.Files() {
-		if utils.FileToLink(f.Path()) == fileLink {
-			file = f
+	var file *db.File
+	for _, f := range tordb.Files {
+		if utils.FileToLink(f.Name) == fileLink {
+			file = &f
 			break
 		}
 	}
@@ -44,29 +33,20 @@ func Play(hash, fileLink string, c echo.Context) error {
 		return c.String(http.StatusNotFound, "File in torrent not found: "+hash+"/"+fileLink)
 	}
 
-	go settings.SaveTorrentView(tor.InfoHash().HexString(), file.Path())
+	go db.SetViewed(tordb.Hash, file.Name)
 
-	reader := NewReader(tor, file)
-
-	tmi, _ := GetTime(tor)
-	tm := settings.StartTime
-	if tmi != 0 {
-		tm = time.Unix(tmi, 0)
+	reader, err := handler.NewReader(tordb, file.Name)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	utils.ServeContentTorrent(c.Response(), c.Request(), tor.Name(), tm, file.Length(), reader)
+	tm := settings.StartTime
+	if tordb.Timestamp != 0 {
+		tm = time.Unix(tordb.Timestamp, 0)
+	}
+
+	utils.ServeContentTorrent(c.Response(), c.Request(), tordb.Name, tm, file.Size, reader)
 
 	reader.Close()
 	return c.JSON(http.StatusOK, nil)
-}
-
-func Stop(tor *torrent.Torrent) {
-	if tor == nil {
-		return
-	}
-	mutex.Lock()
-	defer mutex.Unlock()
-	info := tor.Metainfo()
-	tor.Drop()
-	client.AddTorrent(&info)
 }
