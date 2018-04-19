@@ -9,7 +9,6 @@ import android.os.Handler
 import android.os.Looper
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat.startActivity
-import android.view.View
 import ru.yourok.torrserve.serverhelper.Preferences
 import java.util.*
 import kotlin.concurrent.thread
@@ -60,7 +59,7 @@ object Donate {
                     Preferences.setLastViewDonate(System.currentTimeMillis() + 5 * 60 * 1000)
                 }
 
-                val snackbar = Snackbar.make(activity.findViewById<View>(R.id.main_layout), R.string.donate, Snackbar.LENGTH_INDEFINITE)
+                val snackbar = Snackbar.make(activity.findViewById(android.R.id.content), R.string.donate, Snackbar.LENGTH_INDEFINITE)
                 Handler(Looper.getMainLooper()).postDelayed(Runnable {
                     snackbar
                             .setAction(android.R.string.ok) {

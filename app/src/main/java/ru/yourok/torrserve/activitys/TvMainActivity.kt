@@ -154,6 +154,7 @@ class TvMainActivity : AppCompatActivity() {
                         textViewStatus.setText(R.string.error_server_start)
                     }
                 }
+                Donate.showDonate(this)
             }
         }
     }

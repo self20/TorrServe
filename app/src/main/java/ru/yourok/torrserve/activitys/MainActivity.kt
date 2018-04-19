@@ -1,11 +1,14 @@
 package ru.yourok.torrserve.activitys
 
 import android.Manifest
+import android.app.UiModeManager
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
+import android.util.DisplayMetrics
 import android.view.KeyEvent
 import android.view.KeyEvent.KEYCODE_DPAD_LEFT
 import android.view.KeyEvent.KEYCODE_DPAD_RIGHT
@@ -33,6 +36,22 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        var isAndroidTV = false
+        val uiModeManager = getSystemService(UI_MODE_SERVICE) as UiModeManager
+        if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
+            isAndroidTV = true
+        val dm = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(dm)
+        val wi = dm.widthPixels.toDouble() / dm.xdpi.toDouble()
+        val hi = dm.heightPixels.toDouble() / dm.ydpi.toDouble()
+        val screenInches = Math.sqrt(wi * wi + hi * hi)
+        if (screenInches >= 10 || isAndroidTV) {
+            startActivity(Intent(this, TvMainActivity::class.java))
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_main)
 
         drawer = NavigationBar.setup(this)
