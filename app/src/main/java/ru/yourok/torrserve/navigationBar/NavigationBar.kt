@@ -72,15 +72,11 @@ object NavigationBar {
                             false
                         }
                     }
-                    secondaryItem(R.string.stop_server) {
+                    secondaryItem(R.string.exit) {
                         icon = R.drawable.ic_cancel_black_24dp
                         selectable = false
                         onClick { _ ->
-                            thread {
-                                TorrService.stop()
-                                Thread.sleep(1000)
-                                System.exit(0)
-                            }
+                            TorrService.stopAndExit()
                             false
                         }
                     }

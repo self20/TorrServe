@@ -20,15 +20,17 @@
     <string name="share_magnet">Share magnet</string>
     <string name="info">Info</string>
 
-    <string name="start_server">Start local server</string>
-    <string name="stop_server">Stop local server and exit</string>
+    <string name="restart_server">Restart local server</string>
+    <string name="exit">Exit</string>
 
     <string name="preparing_torrent">Preparing the torrent...</string>
     <string name="starting_server">Starting server...</string>
     <string name="loading_torrent_list">Loading torrent list...</string>
     <string name="server_stoped">Torrent server is stopped</string>
-    <string name="stat_server_is_running">Server is running</string>
+    <string name="stat_server_is_running">Torrent server is running</string>
     <string name="stat_server_is_not_running">Server is stopped or unavailable</string>
+
+    <string name="start_server_on_boot">Start server on boot</string>
 
     <string name="server_addr">Server address</string>
     <string name="cache_size">Cache size (MBytes)</string>

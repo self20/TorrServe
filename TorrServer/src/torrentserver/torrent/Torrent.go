@@ -32,7 +32,3 @@ func Files(t *torrent.Torrent) []*torrent.File {
 	})
 	return files
 }
-
-func State(t *torrent.Torrent) torrent.TorrentStats {
-	return t.Stats()
-}

@@ -1,6 +1,8 @@
 package templates
 
-import "torrentserver/utils"
+import (
+	"torrentserver/version"
+)
 
 var mainPage = `
 <!DOCTYPE html>
@@ -37,7 +39,7 @@ var mainPage = `
 	</div>
 
 	<div data-role="footer">
-	<center><p>TorrServer ` + utils.Version + `</p></center>
+	<center><p>TorrServer ` + version.Version + `</p></center>
 	</div>
 </div> 
 

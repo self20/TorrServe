@@ -7,10 +7,11 @@ import (
 	"net"
 	"net/http"
 	"runtime"
+	"sort"
 
 	"torrentserver/server/templates"
 	"torrentserver/torrent"
-	"torrentserver/utils"
+	"torrentserver/version"
 
 	"github.com/anacrolix/sync"
 	"github.com/labstack/echo"
@@ -31,7 +32,7 @@ func Start() {
 	}
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	fmt.Println("Start web server, version:", utils.Version)
+	fmt.Println("Start web server, version:", version.Version)
 	mutex.Lock()
 	defer func() {
 		if r := recover(); r != nil {
@@ -95,7 +96,7 @@ func echoPage(c echo.Context) error {
 }
 
 func cachePage(c echo.Context) error {
-	infoStates := torrent.GetStates()
+	infoStates := torrent.CacheState()
 
 	msg := ""
 
@@ -117,43 +118,50 @@ func cachePage(c echo.Context) error {
 }
 
 func statePage(c echo.Context) error {
-	//torrs := torrent.List()
-	//
-	//msg := ""
-	//
-	//sort.Slice(torrs, func(i, j int) bool {
-	//	return torrs[i].Name() < torrs[j].Name()
-	//})
-	//
-	//for _, tor := range torrs {
-	//	st := tor.Stats()
-	//
-	//	msg += fmt.Sprintf("Torrent: %v\n", tor.Name())
-	//	msg += fmt.Sprintf("TotalPeers: %v\n", st.TotalPeers)
-	//	msg += fmt.Sprintf("PendingPeers: %v\n", st.PendingPeers)
-	//	msg += fmt.Sprintf("ActivePeers: %v\n", st.ActivePeers)
-	//	msg += fmt.Sprintf("ConnectedSeeders: %v\n", st.ConnectedSeeders)
-	//	msg += fmt.Sprintf("HalfOpenPeers: %v\n", st.HalfOpenPeers)
-	//
-	//	msg += fmt.Sprintf("BytesWritten: %v\n", st.BytesWritten)
-	//	msg += fmt.Sprintf("BytesWrittenData: %v\n", st.BytesWrittenData)
-	//
-	//	msg += fmt.Sprintf("BytesRead: %v\n", st.BytesRead)
-	//	msg += fmt.Sprintf("BytesReadData: %v\n", st.BytesReadData)
-	//	msg += fmt.Sprintf("BytesReadUsefulData: %v\n", st.BytesReadUsefulData)
-	//
-	//	msg += fmt.Sprintf("ChunksWritten: %v\n", st.ChunksWritten)
-	//
-	//	msg += fmt.Sprintf("ChunksRead: %v\n", st.ChunksRead)
-	//	msg += fmt.Sprintf("ChunksReadUseful: %v\n", st.ChunksReadUseful)
-	//	msg += fmt.Sprintf("ChunksReadUnwanted: %v\n", st.ChunksReadUnwanted)
-	//
-	//	msg += fmt.Sprintf("PiecesDirtiedGood: %v\n", st.PiecesDirtiedGood)
-	//	msg += fmt.Sprintf("PiecesDirtiedBad: %v\n", st.PiecesDirtiedBad)
-	//
-	//	msg += "\n"
-	//}
-	return c.String(http.StatusOK, "")
+	torrs, err := torrent.List()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	msg := ""
+
+	sort.Slice(torrs, func(i, j int) bool {
+		return torrs[i].Name < torrs[j].Name
+	})
+
+	for _, tor := range torrs {
+		st, err := torrent.State(tor.Hash)
+		if err == nil {
+			msg += fmt.Sprintf("Torrent: %v<br>\n", tor.Name)
+			msg += fmt.Sprintf("TotalPeers: %v<br>\n", st.TotalPeers)
+			msg += fmt.Sprintf("PendingPeers: %v<br>\n", st.PendingPeers)
+			msg += fmt.Sprintf("ActivePeers: %v<br>\n", st.ActivePeers)
+			msg += fmt.Sprintf("ConnectedSeeders: %v<br>\n", st.ConnectedSeeders)
+			msg += fmt.Sprintf("HalfOpenPeers: %v<br>\n<br>\n", st.HalfOpenPeers)
+
+			msg += fmt.Sprintf("BytesWritten: %v<br>\n", st.BytesWritten)
+			msg += fmt.Sprintf("BytesWrittenData: %v<br>\n<br>\n", st.BytesWrittenData)
+
+			msg += fmt.Sprintf("BytesRead: %v<br>\n", st.BytesRead)
+			msg += fmt.Sprintf("BytesReadData: %v<br>\n", st.BytesReadData)
+			msg += fmt.Sprintf("BytesReadUsefulData: %v<br>\n<br>\n", st.BytesReadUsefulData)
+
+			msg += fmt.Sprintf("ChunksWritten: %v<br>\n<br>\n", st.ChunksWritten)
+
+			msg += fmt.Sprintf("ChunksRead: %v<br>\n", st.ChunksRead)
+			msg += fmt.Sprintf("ChunksReadUseful: %v<br>\n", st.ChunksReadUseful)
+			msg += fmt.Sprintf("ChunksReadUnwanted: %v<br>\n<br>\n", st.ChunksReadUnwanted)
+
+			msg += fmt.Sprintf("PiecesDirtiedGood: %v<br>\n", st.PiecesDirtiedGood)
+			msg += fmt.Sprintf("PiecesDirtiedBad: %v<br>\n", st.PiecesDirtiedBad)
+
+			msg += "<hr><br>\n\n"
+		}
+	}
+	if msg == "" {
+		msg = "No connected torrents"
+	}
+	return c.HTML(http.StatusOK, msg)
 }
 
 func HTTPErrorHandler(err error, c echo.Context) {
@@ -165,8 +173,8 @@ func HTTPErrorHandler(err error, c echo.Context) {
 	if he, ok := err.(*echo.HTTPError); ok {
 		code = he.Code
 		msg = he.Message
-		if he.Inner != nil {
-			msg = fmt.Sprintf("%v, %v", err, he.Inner)
+		if he.Internal != nil {
+			msg = fmt.Sprintf("%v, %v", err, he.Internal)
 		}
 	} else {
 		msg = http.StatusText(code)

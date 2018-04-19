@@ -19,10 +19,13 @@ type Reader struct {
 	file   *torrent.File
 	reader torrent.Reader
 
-	hash     string
-	path     string
-	offset   int64
+	hash   string
+	path   string
+	offset int64
+
 	lastRead time.Time
+	closed   bool
+	readNow  bool
 
 	piecesLength int64
 	pieceCurrent int
@@ -41,6 +44,7 @@ func NewReader(t *torrent.Torrent, f *torrent.File) *Reader {
 	r.reader = reader
 	r.piecesLength = r.tor.Info().PieceLength
 	r.lastRead = time.Now().Add(time.Minute)
+	r.readNow = true
 	return r
 }
 
@@ -49,7 +53,9 @@ func (r *Reader) Seek(offset int64, whence int) (int64, error) {
 		return 0, io.ErrUnexpectedEOF
 	}
 
+	r.readNow = true
 	off, err := r.reader.Seek(offset, whence)
+	r.readNow = false
 	r.offset = off
 	fmt.Println("Seek", r.offset, ", piece:", r.GetCurrentPiece())
 	r.tor.PieceStateRuns()
@@ -65,22 +71,34 @@ func (r *Reader) Read(p []byte) (n int, err error) {
 	default:
 	}
 
+	r.readNow = true
 	n, err = r.reader.Read(p)
 	r.offset += int64(n)
 	r.lastRead = time.Now()
+	r.readNow = false
 
 	readedPiece := r.GetCurrentPiece()
 	if readedPiece != r.pieceCurrent {
-		fmt.Println("Read", r.offset, ", piece:", r.pieceCurrent)
 		r.pieceCurrent = readedPiece
 		storage.GetCache(r.hash).CurrentRead(readedPiece)
+		fmt.Println("Read", r.offset, ", piece:", r.pieceCurrent)
 	}
 	return n, err
 }
 
 func (r *Reader) Close() error {
 	r.reader.Close()
+	r.closed = true
+	r.readNow = false
 	return nil
+}
+
+func (r *Reader) IsClosed() bool {
+	return r.closed
+}
+
+func (r *Reader) IsExpired() bool {
+	return !r.readNow && r.lastRead.Add(time.Minute).Before(time.Now())
 }
 
 func (r *Reader) GetCurrentPiece() int {

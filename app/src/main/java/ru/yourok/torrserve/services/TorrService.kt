@@ -22,6 +22,15 @@ class TorrService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         thread {
             intent?.let {
+                if (it.action != null) {
+                    when (it.action) {
+                        "ru.yourok.torrserve.notifications.action_exit" -> stopAndExit()
+                        "ru.yourok.torrserve.notifications.action_restart" -> restartServer()
+                    }
+                    return@thread
+                }
+
+
                 if (it.hasExtra("Cmd")) {
                     val cmd = it.getStringExtra("Cmd")
                     when (cmd) {
@@ -31,7 +40,6 @@ class TorrService : Service() {
                     }
                     return@thread
                 }
-
             }
             startServer()
         }
@@ -39,8 +47,10 @@ class TorrService : Service() {
     }
 
     private fun startServer() {
-        if (!ServerApi.echo())
+        if (!ServerApi.echo()) {
             torrentserver.Torrentserver.start(Utils.getAppPath())
+            NotificationServer.Show(this)
+        }
     }
 
     private fun stopServer() {
@@ -51,6 +61,7 @@ class TorrService : Service() {
                 Handler(this.getMainLooper()).post(Runnable {
                     Toast.makeText(this, R.string.server_stoped, Toast.LENGTH_LONG).show()
                 })
+                NotificationServer.Close(this)
             }
             stopSelf()
         }
@@ -60,6 +71,9 @@ class TorrService : Service() {
         torrentserver.Torrentserver.stop()
         torrentserver.Torrentserver.waitServer()
         torrentserver.Torrentserver.start(Utils.getAppPath())
+        Handler(this.getMainLooper()).post(Runnable {
+            Toast.makeText(this, R.string.stat_server_is_running, Toast.LENGTH_SHORT).show()
+        })
     }
 
     companion object {
@@ -80,6 +94,14 @@ class TorrService : Service() {
                 App.getContext().startService(intent)
             } catch (e: Exception) {
                 e.printStackTrace()
+            }
+        }
+
+        fun stopAndExit() {
+            thread {
+                TorrService.stop()
+                Thread.sleep(1000)
+                System.exit(0)
             }
         }
 

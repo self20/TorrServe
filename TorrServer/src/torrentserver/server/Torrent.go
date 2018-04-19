@@ -136,8 +136,11 @@ func torrentStat(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Hash must be non-empty")
 	}
 
-	//tor := torrent.Get(jreq.Hash)
-	return c.JSON(http.StatusOK, "")
+	stat, err := torrent.State(jreq.Hash)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, stat)
 }
 
 func torrentCleanCache(c echo.Context) error {

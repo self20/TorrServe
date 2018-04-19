@@ -1,4 +1,4 @@
-package ru.yourok.m3u8loader.activitys.mainActivity
+package ru.yourok.torrserve.menu
 
 import android.app.Activity
 import android.content.Intent

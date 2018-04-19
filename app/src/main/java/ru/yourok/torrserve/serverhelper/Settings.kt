@@ -9,6 +9,14 @@ import ru.yourok.torrserve.App
 
 
 object Preferences {
+    fun isAutoStart(): Boolean {
+        return get("AutoStart", false) as Boolean
+    }
+
+    fun setAutoStart(v: Boolean) {
+        set("AutoStart", v)
+    }
+
     fun getServerAddress(): String {
         return get("ServerAddress", "http://localhost:8090") as String
     }

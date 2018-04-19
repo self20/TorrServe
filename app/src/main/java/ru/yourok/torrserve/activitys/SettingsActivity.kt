@@ -75,6 +75,9 @@ class SettingsActivity : AppCompatActivity() {
         val addr = Preferences.getServerAddress()
         editTextServerAddr.setText(addr)
 
+        val autoStart = Preferences.isAutoStart()
+        checkBoxStartOnBoot.isChecked = autoStart
+
         val sets = ServerApi.readSettings()
         if (sets == null) {
             Toast.makeText(this, R.string.error_retrieving_settings, Toast.LENGTH_SHORT).show()
@@ -101,6 +104,8 @@ class SettingsActivity : AppCompatActivity() {
     fun saveSettings() {
         val addr = editTextServerAddr.text.toString()
         Preferences.setServerAddress(addr)
+        val autoStart = checkBoxStartOnBoot.isChecked
+        Preferences.setAutoStart(autoStart)
 
         val sets = ServerSettings(
                 editTextCacheSize.text.toString().toInt(),

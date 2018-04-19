@@ -3,7 +3,6 @@ package torrent
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 	"runtime"
 	"runtime/debug"
 	"time"
@@ -14,7 +13,7 @@ import (
 
 	"github.com/anacrolix/dht"
 	"github.com/anacrolix/torrent"
-	"github.com/anacrolix/torrent/iplist"
+	"github.com/anacrolix/torrent/metainfo"
 	"golang.org/x/time/rate"
 
 	"sync"
@@ -49,11 +48,9 @@ func configure() {
 		DownloadRateLimiter: rate.NewLimiter(rate.Inf, 2<<16),
 		UploadRateLimiter:   rate.NewLimiter(rate.Inf, 2<<16),
 
-		DHTConfig: dht.ServerConfig{
-			StartingNodes: dht.GlobalBootstrapAddrs,
-		},
-		DefaultStorage: storage,
-		ListenAddr:     "0.0.0.0:0",
+		DhtStartingNodes: dht.GlobalBootstrapAddrs,
+		DefaultStorage:   storage,
+		ListenHost:       func(string) string { return "" },
 	}
 
 	if settings.Get().DownloadRateLimit > 0 {
@@ -74,8 +71,8 @@ func Connect() error {
 		return err
 	}
 
-	blocklist, _ := iplist.MMapPackedFile(filepath.Join(settings.Get().SettingPath, "blocklist"))
-	client.SetIPBlockList(blocklist)
+	//blocklist, _ := iplist.MMapPackedFile(filepath.Join(settings.Get().SettingPath, "blocklist"))
+	//client.SetIPBlockList(blocklist)
 
 	handler = NewHandler()
 	return nil
@@ -163,7 +160,18 @@ func List() ([]*db.Torrent, error) {
 	return db.LoadTorrentsDB()
 }
 
-func GetStates() []memcache.CacheState {
+func State(hashHex string) (*torrent.TorrentStats, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
+	hash := metainfo.NewHashFromHex(hashHex)
+	if tor, ok := client.Torrent(hash); ok {
+		st := tor.Stats()
+		return &st, nil
+	}
+	return nil, errors.New("torrent not connected")
+}
+
+func CacheState() []memcache.CacheState {
 	if storage != nil {
 		return storage.GetStats()
 	}

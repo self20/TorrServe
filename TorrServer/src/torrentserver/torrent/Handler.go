@@ -41,24 +41,26 @@ func (h *Handler) watch() {
 	go func() {
 		for h.watching && len(h.Handlers) > 0 {
 			h.mu.Lock()
-			deletedHandler := 0
-			for hi := range h.Handlers {
-				handle := h.Handlers[hi-deletedHandler]
-				deleted := 0
-				for i := range handle.Readers {
-					j := i - deleted
-					if handle.Readers[j].lastRead.Add(time.Minute).Before(time.Now()) {
-						handle.Readers[j].Close()
-						handle.Readers = append(handle.Readers[:j], handle.Readers[j+1:]...)
-						deleted++
-						fmt.Println("Remove reader:", handle.Torrent.Name(), len(handle.Readers))
+
+			for handleIndex := 0; handleIndex < len(h.Handlers); handleIndex++ {
+				handle := h.Handlers[handleIndex]
+				for readerIndex := 0; readerIndex < len(handle.Readers); readerIndex++ {
+					if handle.Readers[readerIndex].IsClosed() || handle.Readers[readerIndex].IsExpired() {
+						if h.removeReader(handle, readerIndex) {
+							if readerIndex > 0 {
+								readerIndex--
+							}
+							fmt.Println("Remove reader:", handle.Torrent.Name(), len(handle.Readers))
+						}
 					}
 				}
 				if len(handle.Readers) == 0 {
-					fmt.Println("Remove torrent:", handle.Torrent.Name())
-					handle.Torrent.Drop()
-					j := hi - deletedHandler
-					h.Handlers = append(h.Handlers[:j], h.Handlers[j+1:]...)
+					if h.removeTorrent(handleIndex) {
+						if handleIndex > 0 {
+							handleIndex--
+						}
+						fmt.Println("Remove torrent:", handle.Torrent.Name())
+					}
 				}
 			}
 			h.mu.Unlock()
@@ -107,6 +109,24 @@ func (h *Handler) addReader(tor *torrent.Torrent, reader *Reader) {
 	handl.Readers = append(handl.Readers, reader)
 	h.Handlers = append(h.Handlers, handl)
 	fmt.Println("Add reader:", tor.Name())
+}
+
+func (h *Handler) removeTorrent(torrentIndex int) bool {
+	if torrentIndex >= 0 && torrentIndex < len(h.Handlers) {
+		h.Handlers[torrentIndex].Torrent.Drop()
+		h.Handlers = append(h.Handlers[:torrentIndex], h.Handlers[torrentIndex+1:]...)
+		return true
+	}
+	return false
+}
+
+func (h *Handler) removeReader(handle *Handle, readerIndex int) bool {
+	if readerIndex >= 0 && readerIndex < len(handle.Readers) {
+		handle.Readers[readerIndex].Close()
+		handle.Readers = append(handle.Readers[:readerIndex], handle.Readers[readerIndex+1:]...)
+		return true
+	}
+	return false
 }
 
 func getTorrent(tordb *db.Torrent) (*torrent.Torrent, error) {

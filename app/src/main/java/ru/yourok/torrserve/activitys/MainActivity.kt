@@ -14,10 +14,10 @@ import android.widget.ListView
 import android.widget.ProgressBar
 import com.mikepenz.materialdrawer.Drawer
 import kotlinx.android.synthetic.main.activity_main.*
-import ru.yourok.m3u8loader.activitys.mainActivity.TorrentListSelectionMenu
 import ru.yourok.torrserve.Donate
 import ru.yourok.torrserve.R
 import ru.yourok.torrserve.adapters.TorrentListAdapter
+import ru.yourok.torrserve.menu.TorrentListSelectionMenu
 import ru.yourok.torrserve.navigationBar.NavigationBar
 import ru.yourok.torrserve.serverhelper.ServerApi
 import ru.yourok.torrserve.serverhelper.Torrent
@@ -143,16 +143,20 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
-            //Clear cache
+            //Donate
                 KeyEvent.KEYCODE_3, KeyEvent.KEYCODE_NUMPAD_3, KeyEvent.KEYCODE_BUTTON_3 -> {
                     ServerApi.cleanCache()
                 }
-            //Stop server
+            //Clear cache
                 KeyEvent.KEYCODE_4, KeyEvent.KEYCODE_NUMPAD_4, KeyEvent.KEYCODE_BUTTON_4 -> {
-                    TorrService.stop()
+                    ServerApi.cleanCache()
+                }
+            //Exit
+                KeyEvent.KEYCODE_5, KeyEvent.KEYCODE_NUMPAD_5, KeyEvent.KEYCODE_BUTTON_5 -> {
+                    TorrService.stopAndExit()
                 }
             //Settings
-                KeyEvent.KEYCODE_5, KeyEvent.KEYCODE_NUMPAD_4, KeyEvent.KEYCODE_BUTTON_4 -> {
+                KeyEvent.KEYCODE_6, KeyEvent.KEYCODE_NUMPAD_6, KeyEvent.KEYCODE_BUTTON_6 -> {
                     startActivity(Intent(this, SettingsActivity::class.java))
                 }
                 else -> return super.onKeyUp(keyCode, event)
