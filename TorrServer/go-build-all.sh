@@ -114,3 +114,4 @@ if [[ "${FAILURES}" != "" ]]; then
   exit 1
 fi
 
+./compile.sh

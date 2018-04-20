@@ -21,6 +21,7 @@ type Handler struct {
 }
 
 type Handle struct {
+	expired time.Time
 	Torrent *torrent.Torrent
 	Readers []*Reader
 }
@@ -45,7 +46,7 @@ func (h *Handler) watch() {
 			for handleIndex := 0; handleIndex < len(h.Handlers); handleIndex++ {
 				handle := h.Handlers[handleIndex]
 				for readerIndex := 0; readerIndex < len(handle.Readers); readerIndex++ {
-					if handle.Readers[readerIndex].IsClosed() || handle.Readers[readerIndex].IsExpired() {
+					if handle.Readers[readerIndex].IsClosed() {
 						if h.removeReader(handle, readerIndex) {
 							if readerIndex > 0 {
 								readerIndex--
@@ -54,7 +55,7 @@ func (h *Handler) watch() {
 						}
 					}
 				}
-				if len(handle.Readers) == 0 {
+				if len(handle.Readers) == 0 && time.Now().After(handle.expired) {
 					if h.removeTorrent(handleIndex) {
 						if handleIndex > 0 {
 							handleIndex--
@@ -124,6 +125,9 @@ func (h *Handler) removeReader(handle *Handle, readerIndex int) bool {
 	if readerIndex >= 0 && readerIndex < len(handle.Readers) {
 		handle.Readers[readerIndex].Close()
 		handle.Readers = append(handle.Readers[:readerIndex], handle.Readers[readerIndex+1:]...)
+		if len(handle.Readers) == 0 {
+			handle.expired = time.Now().Add(time.Minute)
+		}
 		return true
 	}
 	return false
