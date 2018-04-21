@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"torrentserver/db"
+	"torrentserver/settings"
 
 	"github.com/anacrolix/sync"
 	"github.com/anacrolix/torrent"
@@ -56,6 +57,11 @@ func (h *Handler) watch() {
 					}
 				}
 				if len(handle.Readers) == 0 && time.Now().After(handle.expired) {
+					//TODO отключается во время просмотра
+					fmt.Println(len(handle.Readers))
+					fmt.Println(time.Now().After(handle.expired))
+					fmt.Println(time.Now())
+					fmt.Println(handle.expired)
 					if h.removeTorrent(handleIndex) {
 						if handleIndex > 0 {
 							handleIndex--
@@ -142,6 +148,7 @@ func getTorrent(tordb *db.Torrent) (*torrent.Torrent, error) {
 	if err != nil {
 		return nil, err
 	}
+	tor.SetMaxEstablishedConns(settings.Get().ConnectionsLimit)
 	err = GotInfo(tor)
 	if err != nil {
 		return nil, err

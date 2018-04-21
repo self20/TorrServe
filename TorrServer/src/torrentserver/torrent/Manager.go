@@ -3,6 +3,7 @@ package torrent
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"runtime"
 	"runtime/debug"
 	"time"
@@ -10,9 +11,11 @@ import (
 	"torrentserver/db"
 	"torrentserver/settings"
 	"torrentserver/storage/memcache"
+	"torrentserver/utils"
 
 	"github.com/anacrolix/dht"
 	"github.com/anacrolix/torrent"
+	"github.com/anacrolix/torrent/iplist"
 	"github.com/anacrolix/torrent/metainfo"
 	"golang.org/x/time/rate"
 
@@ -32,6 +35,11 @@ var (
 func configure() {
 	storage = memcache.NewStorage(settings.Get().CacheSize)
 
+	blocklist, _ := iplist.MMapPackedFile(filepath.Join(settings.Get().SettingPath, "blocklist"))
+
+	userAgent := "uTorrent/3.4.9"
+	peerID := "-UT3490-"
+
 	config = &torrent.Config{
 		//Debug: true,
 
@@ -48,9 +56,17 @@ func configure() {
 		DownloadRateLimiter: rate.NewLimiter(rate.Inf, 2<<16),
 		UploadRateLimiter:   rate.NewLimiter(rate.Inf, 2<<16),
 
+		IPBlocklist: blocklist,
+
 		DhtStartingNodes: dht.GlobalBootstrapAddrs,
 		DefaultStorage:   storage,
 		ListenHost:       func(string) string { return "" },
+
+		Bep20:         peerID,
+		PeerID:        utils.PeerIDRandom(peerID),
+		HTTPUserAgent: userAgent,
+
+		EstablishedConnsPerTorrent: settings.Get().ConnectionsLimit,
 	}
 
 	if settings.Get().DownloadRateLimit > 0 {
@@ -70,9 +86,6 @@ func Connect() error {
 	if err != nil {
 		return err
 	}
-
-	//blocklist, _ := iplist.MMapPackedFile(filepath.Join(settings.Get().SettingPath, "blocklist"))
-	//client.SetIPBlockList(blocklist)
 
 	handler = NewHandler()
 	return nil
