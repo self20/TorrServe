@@ -173,15 +173,11 @@ func List() ([]*db.Torrent, error) {
 	return db.LoadTorrentsDB()
 }
 
-func State(hashHex string) (*torrent.TorrentStats, error) {
+func State(hashHex string) (*TorrentStat, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
 	hash := metainfo.NewHashFromHex(hashHex)
-	if tor, ok := client.Torrent(hash); ok {
-		st := tor.Stats()
-		return &st, nil
-	}
-	return nil, errors.New("torrent not connected")
+	return handler.GetState(hash)
 }
 
 func CacheState() []memcache.CacheState {

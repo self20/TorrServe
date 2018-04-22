@@ -38,6 +38,9 @@ class Info {
     var PiecesDirtiedGood: Long = 0
     var PiecesDirtiedBad: Long = 0
 
+    var DownloadSpeed: Double = 0.0
+    var UploadSpeed: Double = 0.0
+
     var TotalPeers: Int = 0
     var PendingPeers: Int = 0
     var ActivePeers: Int = 0
@@ -72,6 +75,9 @@ fun js2Info(js: JSONObject): Info {
 
     info.PiecesDirtiedGood = js.getLong("PiecesDirtiedGood")
     info.PiecesDirtiedBad = js.getLong("PiecesDirtiedBad")
+
+    info.DownloadSpeed = js.getDouble("DownloadSpeed")
+    info.UploadSpeed = js.getDouble("UploadSpeed")
 
     info.TotalPeers = js.getInt("TotalPeers")
     info.PendingPeers = js.getInt("PendingPeers")

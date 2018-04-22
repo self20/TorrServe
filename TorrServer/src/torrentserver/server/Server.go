@@ -133,27 +133,31 @@ func statePage(c echo.Context) error {
 		st, err := torrent.State(tor.Hash)
 		if err == nil {
 			msg += fmt.Sprintf("Torrent: %v<br>\n", tor.Name)
-			msg += fmt.Sprintf("TotalPeers: %v<br>\n", st.TotalPeers)
-			msg += fmt.Sprintf("PendingPeers: %v<br>\n", st.PendingPeers)
-			msg += fmt.Sprintf("ActivePeers: %v<br>\n", st.ActivePeers)
+			msg += fmt.Sprintf("Hash: %v<br>\n<br>\n", tor.Hash)
+
+			msg += fmt.Sprintf("TotalPeers:   	 %v<br>\n", st.TotalPeers)
+			msg += fmt.Sprintf("PendingPeers: 	 %v<br>\n", st.PendingPeers)
+			msg += fmt.Sprintf("ActivePeers:      %v<br>\n", st.ActivePeers)
 			msg += fmt.Sprintf("ConnectedSeeders: %v<br>\n", st.ConnectedSeeders)
-			msg += fmt.Sprintf("HalfOpenPeers: %v<br>\n<br>\n", st.HalfOpenPeers)
+			msg += fmt.Sprintf("HalfOpenPeers: 	 %v<br>\n<br>\n", st.HalfOpenPeers)
 
-			msg += fmt.Sprintf("BytesWritten: %v<br>\n", st.BytesWritten)
-			msg += fmt.Sprintf("BytesWrittenData: %v<br>\n<br>\n", st.BytesWrittenData)
+			msg += fmt.Sprintf("BytesWritten:     %v<br>\n", bytes.Format(st.BytesWritten))
+			msg += fmt.Sprintf("BytesWrittenData: %v<br>\n<br>\n", bytes.Format(st.BytesWrittenData))
 
-			msg += fmt.Sprintf("BytesRead: %v<br>\n", st.BytesRead)
-			msg += fmt.Sprintf("BytesReadData: %v<br>\n", st.BytesReadData)
-			msg += fmt.Sprintf("BytesReadUsefulData: %v<br>\n<br>\n", st.BytesReadUsefulData)
+			msg += fmt.Sprintf("BytesRead: 			%v<br>\n", bytes.Format(st.BytesRead))
+			msg += fmt.Sprintf("BytesReadData: 		%v<br>\n", bytes.Format(st.BytesReadData))
+			msg += fmt.Sprintf("BytesReadUsefulData: %v<br>\n<br>\n", bytes.Format(st.BytesReadUsefulData))
 
-			msg += fmt.Sprintf("ChunksWritten: %v<br>\n<br>\n", st.ChunksWritten)
+			msg += fmt.Sprintf("Download Speed: %v/Sec<br>\n", bytes.FormatF64(st.DownloadSpeed))
+			msg += fmt.Sprintf("Upload Speed:   %v/Sec<br>\n<br>\n", bytes.FormatF64(st.UploadSpeed))
 
-			msg += fmt.Sprintf("ChunksRead: %v<br>\n", st.ChunksRead)
-			msg += fmt.Sprintf("ChunksReadUseful: %v<br>\n", st.ChunksReadUseful)
+			msg += fmt.Sprintf("ChunksWritten:      %v<br>\n", st.ChunksWritten)
+			msg += fmt.Sprintf("ChunksRead: 	       %v<br>\n", st.ChunksRead)
+			msg += fmt.Sprintf("ChunksReadUseful:   %v<br>\n", st.ChunksReadUseful)
 			msg += fmt.Sprintf("ChunksReadUnwanted: %v<br>\n<br>\n", st.ChunksReadUnwanted)
 
 			msg += fmt.Sprintf("PiecesDirtiedGood: %v<br>\n", st.PiecesDirtiedGood)
-			msg += fmt.Sprintf("PiecesDirtiedBad: %v<br>\n", st.PiecesDirtiedBad)
+			msg += fmt.Sprintf("PiecesDirtiedBad:  %v<br>\n", st.PiecesDirtiedBad)
 
 			msg += "<hr><br>\n\n"
 		}

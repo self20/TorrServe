@@ -65,7 +65,7 @@ class FilesActivity : AppCompatActivity() {
                                 it.Files[i].Viewed = true
                                 adapter.notifyDataSetChanged()
                             }
-                            ServerApi.view(this, file.Name, file.Link)
+                            ServerApi.view(this, torr.Hash, file.Name, file.Link)
                         }
                         listViewFiles.setOnItemLongClickListener { _, view, i, _ ->
                             showPopupMenu(view, torr.Files[i])
@@ -96,7 +96,7 @@ class FilesActivity : AppCompatActivity() {
                         return true
                     }
                     R.id.itemOpen -> {
-                        ServerApi.view(this@FilesActivity, file.Name, file.Link)
+                        ServerApi.view(this@FilesActivity, torrent!!.Hash, file.Name, file.Link)
                         return true
                     }
                     else -> return false

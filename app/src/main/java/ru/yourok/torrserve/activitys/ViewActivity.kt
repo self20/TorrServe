@@ -102,7 +102,7 @@ class ViewActivity : AppCompatActivity() {
         tor.let {
             val fpList = findPlayableFiles(it)
             if (fpList.size == 1) {
-                ServerApi.view(this, torr.Name, fpList.values.first())
+                ServerApi.view(this, it.Hash, torr.Name, fpList.values.first())
                 finish()
             } else if (fpList.size > 1) {
                 runOnUiThread {
@@ -114,7 +114,7 @@ class ViewActivity : AppCompatActivity() {
                     listViewFiles.setOnItemClickListener { _, _, i, _ ->
                         val link = fpList[i]
                         link?.let {
-                            ServerApi.view(this, torr.Name, it)
+                            ServerApi.view(this, torr.Hash, torr.Name, it)
                         }
                         finish()
                     }

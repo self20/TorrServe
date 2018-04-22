@@ -1,8 +1,12 @@
 package ru.yourok.torrserve.activitys
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_settings.*
@@ -38,6 +42,11 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         textViewVersion.setText("YouROK " + getText(R.string.app_name) + " ${BuildConfig.FLAVOR} ${BuildConfig.VERSION_NAME}")
+
+        checkBoxShowWndInfo.setOnCheckedChangeListener { compoundButton, b ->
+            if (b)
+                checkPermission()
+        }
     }
 
     override fun onResume() {
@@ -78,6 +87,9 @@ class SettingsActivity : AppCompatActivity() {
         val autoStart = Preferences.isAutoStart()
         checkBoxStartOnBoot.isChecked = autoStart
 
+        val showWnd = Preferences.isShowState()
+        checkBoxShowWndInfo.isChecked = showWnd
+
         val sets = ServerApi.readSettings()
         if (sets == null) {
             Toast.makeText(this, R.string.error_retrieving_settings, Toast.LENGTH_SHORT).show()
@@ -106,6 +118,8 @@ class SettingsActivity : AppCompatActivity() {
         Preferences.setServerAddress(addr)
         val autoStart = checkBoxStartOnBoot.isChecked
         Preferences.setAutoStart(autoStart)
+        val showWnd = checkBoxShowWndInfo.isChecked
+        Preferences.setShowState(showWnd)
 
         val sets = ServerSettings(
                 editTextCacheSize.text.toString().toInt(),
@@ -125,6 +139,16 @@ class SettingsActivity : AppCompatActivity() {
                 Handler(Looper.getMainLooper()).post {
                     Toast.makeText(App.getContext(), R.string.error_sending_settings, Toast.LENGTH_SHORT).show()
                 }
+        }
+    }
+
+    fun checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:$packageName"))
+                startActivity(intent)
+            }
         }
     }
 }

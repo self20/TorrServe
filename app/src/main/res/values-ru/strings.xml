@@ -28,6 +28,7 @@
     <string name="stat_server_is_not_running">Сервер остановлен или недоступен</string>
 
     <string name="start_server_on_boot">Запустить сервер при загрузке</string>
+    <string name="show_info_window">Показывать окно информации</string>
 
     <string name="server_addr">Адрес сервера</string>
     <string name="cache_size">Размер кэша (Мбайты)</string>

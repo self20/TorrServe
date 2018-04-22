@@ -1,6 +1,7 @@
 package torrent
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -25,6 +26,7 @@ type Handle struct {
 	expired time.Time
 	Torrent *torrent.Torrent
 	Readers []*Reader
+	Watcher *Watcher
 }
 
 func NewHandler() *Handler {
@@ -57,11 +59,6 @@ func (h *Handler) watch() {
 					}
 				}
 				if len(handle.Readers) == 0 && time.Now().After(handle.expired) {
-					//TODO отключается во время просмотра
-					fmt.Println(len(handle.Readers))
-					fmt.Println(time.Now().After(handle.expired))
-					fmt.Println(time.Now())
-					fmt.Println(handle.expired)
 					if h.removeTorrent(handleIndex) {
 						if handleIndex > 0 {
 							handleIndex--
@@ -93,6 +90,17 @@ func (h *Handler) NewReader(torrent *db.Torrent, filename string) (*Reader, erro
 	return nil, fmt.Errorf("File in torrent not found: %v/%v", torr.InfoHash().HexString(), filename)
 }
 
+func (h *Handler) GetState(hash metainfo.Hash) (*TorrentStat, error) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	for _, h := range h.Handlers {
+		if h.Watcher.hash == hash {
+			return h.Watcher.GetState(), nil
+		}
+	}
+	return nil, errors.New("torrent not connected or not found")
+}
+
 func (h *Handler) Close() {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -114,6 +122,7 @@ func (h *Handler) addReader(tor *torrent.Torrent, reader *Reader) {
 	handl := new(Handle)
 	handl.Torrent = tor
 	handl.Readers = append(handl.Readers, reader)
+	handl.Watcher = NewWatcher(tor.InfoHash())
 	h.Handlers = append(h.Handlers, handl)
 	fmt.Println("Add reader:", tor.Name())
 }

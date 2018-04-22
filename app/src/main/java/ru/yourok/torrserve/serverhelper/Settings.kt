@@ -9,6 +9,14 @@ import ru.yourok.torrserve.App
 
 
 object Preferences {
+    fun isShowState(): Boolean {
+        return get("ShowState", false) as Boolean
+    }
+
+    fun setShowState(v: Boolean) {
+        set("ShowState", v)
+    }
+
     fun isAutoStart(): Boolean {
         return get("AutoStart", false) as Boolean
     }

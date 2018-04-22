@@ -6,6 +6,7 @@ import android.net.Uri
 import org.json.JSONArray
 import org.json.JSONObject
 import ru.yourok.torrserve.App
+import ru.yourok.torrserve.services.TorrentInfo
 import ru.yourok.torrserve.utils.Mime
 import java.io.File
 import java.io.FileInputStream
@@ -110,7 +111,7 @@ object ServerApi {
         }
     }
 
-    fun view(context: Context, name: String, link: String) {
+    fun view(context: Context, hash: String, name: String, link: String) {
         var addr = Preferences.getServerAddress()
         addr += link
         val browserIntent = Intent(Intent.ACTION_VIEW)
@@ -123,6 +124,7 @@ object ServerApi {
             val intent = Intent.createChooser(browserIntent, "")
             context.startActivity(intent)
         }
+        TorrentInfo.showWindow(hash)
     }
 
     fun echo(): Boolean {
