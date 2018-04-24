@@ -1,7 +1,6 @@
 package memcache
 
 import (
-	"fmt"
 	"sort"
 	"sync"
 
@@ -25,7 +24,6 @@ func NewStorage(capacity int) *Storage {
 }
 
 func (s *Storage) OpenTorrent(info *metainfo.Info, infoHash metainfo.Hash) (storage.TorrentImpl, error) {
-	fmt.Println("Open torrent", info.Name)
 	ch := NewCache(s.capacity)
 	ch.Init(info, infoHash)
 	s.mu.Lock()

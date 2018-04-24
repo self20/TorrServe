@@ -44,8 +44,11 @@ class SettingsActivity : AppCompatActivity() {
         textViewVersion.setText("YouROK " + getText(R.string.app_name) + " ${BuildConfig.FLAVOR} ${BuildConfig.VERSION_NAME}")
 
         checkBoxShowWndInfo.setOnCheckedChangeListener { compoundButton, b ->
-            if (b)
-                checkPermission()
+            if (b) {
+                val ret = checkPermission()
+                if (!ret)
+                    checkBoxShowWndInfo.isChecked = false
+            }
         }
     }
 
@@ -142,13 +145,18 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    fun checkPermission() {
+    fun checkPermission(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(this)) {
                 val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                         Uri.parse("package:$packageName"))
-                startActivity(intent)
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent)
+                    return true
+                }
+                return false
             }
         }
+        return true
     }
 }

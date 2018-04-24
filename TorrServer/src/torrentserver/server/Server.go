@@ -87,8 +87,7 @@ func Wait() error {
 }
 
 func mainPage(c echo.Context) error {
-	list, _ := torrent.List()
-	return c.Render(http.StatusOK, "mainPage", list)
+	return c.Render(http.StatusOK, "mainPage", nil)
 }
 
 func echoPage(c echo.Context) error {

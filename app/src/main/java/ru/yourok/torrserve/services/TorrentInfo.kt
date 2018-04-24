@@ -33,7 +33,13 @@ class TorrentInfo : Service() {
         }
 
         val view = FloatingView(this)
-        view.create()
+        try {
+            view.create()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            stopSelf()
+            return
+        }
 
         thread {
             view?.getView()?.let { view ->
@@ -55,7 +61,7 @@ class TorrentInfo : Service() {
                 }
             }
             isWatching = false
-
+            stopSelf()
         }
     }
 

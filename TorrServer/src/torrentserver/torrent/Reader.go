@@ -3,16 +3,24 @@ package torrent
 import (
 	"fmt"
 	"io"
+	"sync"
 
 	"torrentserver/settings"
 
 	"github.com/anacrolix/torrent"
 )
 
+var (
+	count = 0
+	mu    sync.Mutex
+)
+
 type Reader struct {
 	io.Reader
 	io.Seeker
 	io.Closer
+
+	index int
 
 	tor    *torrent.Torrent
 	file   *torrent.File
@@ -34,6 +42,11 @@ func NewReader(t *torrent.Torrent, f *torrent.File) *Reader {
 	reader := f.NewReader()
 	reader.SetReadahead(int64(settings.Get().PreloadBufferSize))
 
+	mu.Lock()
+	count++
+	r.index = count
+	mu.Unlock()
+
 	r.tor = t
 	r.file = f
 	r.path = f.Path()
@@ -50,7 +63,7 @@ func (r *Reader) Seek(offset int64, whence int) (int64, error) {
 
 	off, err := r.reader.Seek(offset, whence)
 	r.offset = off
-	fmt.Println("Seek", r.offset, ", piece:", r.GetCurrentPiece())
+	fmt.Println("Seek", r.index, r.offset, ", piece:", r.GetCurrentPiece())
 	r.tor.PieceStateRuns()
 	return off, err
 }
@@ -70,7 +83,7 @@ func (r *Reader) Read(p []byte) (n int, err error) {
 	if readedPiece != r.pieceCurrent {
 		r.pieceCurrent = readedPiece
 		storage.GetCache(r.hash).CurrentRead(readedPiece)
-		fmt.Println("Read", r.offset, ", piece:", r.pieceCurrent)
+		fmt.Println("Read", r.index, r.offset, ", piece:", r.pieceCurrent)
 	}
 	return n, err
 }

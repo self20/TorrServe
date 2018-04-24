@@ -50,6 +50,9 @@ func (w *Watcher) start() {
 	go func() {
 		for w.isWatching {
 			time.Sleep(time.Second)
+			if client == nil {
+				continue
+			}
 			if tor, ok := client.Torrent(w.hash); ok {
 				w.getSpeed(tor.Stats())
 			} else {

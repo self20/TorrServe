@@ -39,6 +39,7 @@ type TorrentJsonResponse struct {
 	Hash    string    `json:",omitempty"`
 	Length  int64     `json:",omitempty"`
 	AddTime int64     `json:",omitempty"`
+	Size    int64     `json:",omitempty"`
 	Files   []TorFile `json:",omitempty"`
 }
 
@@ -171,6 +172,7 @@ func getTorrentJS(tor *db.Torrent) (*TorrentJsonResponse, error) {
 	js.Magnet = tor.Magnet
 	js.Hash = tor.Hash
 	js.AddTime = tor.Timestamp
+	js.Size = tor.Size
 	var size int64 = 0
 	for _, f := range tor.Files {
 		size += f.Size

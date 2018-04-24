@@ -41,6 +41,7 @@ func NewCache(capacity int) *Cache {
 }
 
 func (c *Cache) Init(info *metainfo.Info, hash metainfo.Hash) {
+	fmt.Println("Create cache for:", info.Name)
 	//Min capacity of 10 pieces length
 	cap := int(info.PieceLength * 10)
 	if c.capacity < cap {
@@ -75,6 +76,7 @@ func (c *Cache) Piece(m metainfo.Piece) storage.PieceImpl {
 }
 
 func (c *Cache) Close() error {
+	fmt.Println("Close cache for:", c.hash)
 	c.Clean()
 	return nil
 }
@@ -181,6 +183,7 @@ func (c *Cache) cleanPieces() {
 			c.removePiece(removes[pos].Hash)
 			pos++
 		}
+		releaseMemory()
 	}
 }
 
@@ -189,7 +192,6 @@ func (c *Cache) removePiece(hash string) {
 		piece.Release()
 		st := fmt.Sprintf("%v\t%s\t%s\t%v", piece.Id, piece.accessed.Format("15:04:05.000"), piece.Hash, c.currentPiece)
 		fmt.Println("Remove cache piece:", st)
-		releaseMemory()
 	}
 }
 

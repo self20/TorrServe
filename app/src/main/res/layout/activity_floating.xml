@@ -3,10 +3,11 @@
     android:layout_width="210dp"
     android:layout_height="match_parent"
     android:padding="10dp"
-    android:background="@color/colorAccent"
+    android:background="#212121"
     android:orientation="vertical">
 
     <TextView
+        android:textColor="#ffffff"
         android:layout_gravity="center"
         android:text="Peers:"
         android:id="@+id/textViewPeers"
@@ -14,6 +15,7 @@
         android:layout_height="wrap_content" />
 
     <TextView
+        android:textColor="#ffffff"
         android:layout_gravity="center"
         android:text="Download speed:"
         android:id="@+id/textViewSpeedDL"
@@ -21,6 +23,7 @@
         android:layout_height="wrap_content" />
 
     <TextView
+        android:textColor="#ffffff"
         android:layout_gravity="center"
         android:text="Upload speed:"
         android:id="@+id/textViewSpeedUL"

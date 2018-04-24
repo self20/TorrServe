@@ -85,7 +85,7 @@ var mainPage = `
 					var tor = data[key];
 					$("<hr>").appendTo(torrents);
 					var divColl = $('<div id="'+tor.Hash+'" data-role="collapsible"></div>')
-					$("<h3>"+tor.Name+"</h3>").appendTo(divColl);
+					$("<h3>"+tor.Name+" "+humanizeSize(tor.Size)+"</h3>").appendTo(divColl);
 					$('<button data-icon="delete" onclick="removeTorrent(\''+tor.Hash+'\');">Remove ['+tor.Name+']</button>').appendTo(divColl);
 					$("<br>").appendTo(divColl);
 					for(var i in tor.Files){
