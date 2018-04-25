@@ -30,7 +30,9 @@ type Reader struct {
 	path   string
 	offset int64
 
-	closed bool
+	closed     bool
+	isParallel bool
+	mu         sync.Mutex
 
 	piecesLength int64
 	pieceCurrent int

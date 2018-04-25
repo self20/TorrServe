@@ -1,13 +1,9 @@
 package ru.yourok.torrserve.services
 
-import android.app.Service
-import android.content.Intent
 import android.os.Handler
-import android.os.IBinder
 import android.os.Looper
 import android.view.View
 import android.widget.TextView
-import ru.yourok.torrserve.App
 import ru.yourok.torrserve.R
 import ru.yourok.torrserve.serverhelper.Preferences
 import ru.yourok.torrserve.serverhelper.ServerApi
@@ -16,12 +12,22 @@ import ru.yourok.torrserve.views.FloatingView
 import kotlin.concurrent.thread
 
 
-class TorrentInfo : Service() {
-    override fun onBind(p0: Intent?): IBinder? = null
+object TorrentInfo {
 
-    override fun onCreate() {
-        super.onCreate()
+    private var Hash: String = ""
+    private var isWatching: Boolean = false
+
+    fun showWindow(hash: String?) {
+        if (hash == null) {
+            closeWindow()
+            return
+        }
+        Hash = hash
         watching()
+    }
+
+    fun closeWindow() {
+        isWatching = false
     }
 
     private fun watching() {
@@ -32,20 +38,32 @@ class TorrentInfo : Service() {
             isWatching = true
         }
 
-        val view = FloatingView(this)
+        val view = FloatingView()
+
         try {
-            view.create()
+            Handler(Looper.getMainLooper()).post {
+                view?.create()
+            }
         } catch (e: Exception) {
+            isWatching = false
             e.printStackTrace()
-            stopSelf()
             return
         }
 
+        view?.onCancel(View.OnClickListener {
+            isWatching = false
+            view?.remove()
+        })
+
         thread {
-            view?.getView()?.let { view ->
-                while (isWatching && Preferences.isShowState()) {
+            var isShow = false
+            while (isWatching && Preferences.isShowState()) {
+                view.getView() ?: let { isWatching = false }
+
+                view?.getView()?.let { view ->
                     val info = ServerApi.info(Hash)
                     info?.let {
+                        isShow = true
                         Handler(Looper.getMainLooper()).post {
                             view.visibility = View.VISIBLE
                             (view.findViewById(R.id.textViewPeers) as TextView?)?.text = "Peers: " + it.ConnectedSeeders.toString() + " / " + it.TotalPeers.toString()
@@ -56,32 +74,12 @@ class TorrentInfo : Service() {
                         Handler(Looper.getMainLooper()).post {
                             view.visibility = View.GONE
                         }
+                        if (isShow)
+                            isWatching = false
                     }
                     Thread.sleep(1000)
                 }
             }
-            isWatching = false
-            stopSelf()
-        }
-    }
-
-    companion object {
-        private var Hash: String = ""
-        private var isWatching: Boolean = false
-
-
-        fun showWindow(hash: String) {
-            Hash = hash
-            if (!isWatching)
-                try {
-                    val intent = Intent(App.getContext(), TorrentInfo::class.java)
-                    App.getContext().startService(intent)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-        }
-
-        fun closeWindow() {
             isWatching = false
         }
     }

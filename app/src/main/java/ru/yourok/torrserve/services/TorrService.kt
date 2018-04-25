@@ -36,6 +36,7 @@ class TorrService : Service() {
                     when (cmd) {
                         "Stop" -> stopServer()
                         "Restart" -> restartServer()
+                        "Watching" -> TorrentInfo.showWindow(it.getStringExtra("Hash"))
                         else -> startServer()
                     }
                     return@thread
@@ -54,6 +55,8 @@ class TorrService : Service() {
     }
 
     private fun stopServer() {
+        NotificationServer.Close(this)
+        TorrentInfo.closeWindow()
         thread {
             if (ServerApi.echo()) {
                 torrentserver.Torrentserver.stop()
@@ -61,7 +64,6 @@ class TorrService : Service() {
                 Handler(this.getMainLooper()).post(Runnable {
                     Toast.makeText(this, R.string.server_stoped, Toast.LENGTH_LONG).show()
                 })
-                NotificationServer.Close(this)
             }
             stopSelf()
         }
@@ -75,7 +77,6 @@ class TorrService : Service() {
             Toast.makeText(this, R.string.stat_server_is_running, Toast.LENGTH_SHORT).show()
         })
     }
-
 
     companion object {
         fun start() {
@@ -118,6 +119,17 @@ class TorrService : Service() {
                     return false
             }
             return true
+        }
+
+        fun showInfoWindow(hash: String) {
+            try {
+                val intent = Intent(App.getContext(), TorrService::class.java)
+                intent.putExtra("Cmd", "Watching")
+                intent.putExtra("Hash", hash)
+                App.getContext().startService(intent)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

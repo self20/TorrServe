@@ -24,7 +24,6 @@ type Cache struct {
 	muRemove sync.Mutex
 	isRemove bool
 
-	muPieces     sync.Mutex
 	pieces       map[string]*Piece
 	currentPiece int
 	endPiece     int
@@ -49,7 +48,6 @@ func (c *Cache) Init(info *metainfo.Info, hash metainfo.Hash) {
 	}
 	c.pieceLength = info.PieceLength
 	c.pieceCount = info.NumPieces()
-	//c.bufferPool = NewBufferPool(int(c.pieceLength)) //c.capacity/int(info.PieceLength)+5
 	c.hash = hash.HexString()
 
 	for i := 0; i < c.pieceCount; i++ {
@@ -57,7 +55,6 @@ func (c *Cache) Init(info *metainfo.Info, hash metainfo.Hash) {
 			Id:     i,
 			Length: info.Piece(i).Length(),
 			Hash:   info.Piece(i).Hash().HexString(),
-			//bufferPool: c.bufferPool,
 		}
 	}
 }
@@ -67,8 +64,6 @@ func (c *Cache) Piece(m metainfo.Piece) storage.PieceImpl {
 		return nil
 	}
 
-	c.muPieces.Lock()
-	defer c.muPieces.Unlock()
 	if val, ok := c.pieces[m.Hash().HexString()]; ok {
 		return val
 	}
@@ -82,8 +77,6 @@ func (c *Cache) Close() error {
 }
 
 func (c *Cache) Clean() {
-	c.muPieces.Lock()
-	defer c.muPieces.Unlock()
 	for key, val := range c.pieces {
 		if len(val.buffer) > 0 && val.complete {
 			c.removePiece(key)
@@ -93,9 +86,6 @@ func (c *Cache) Clean() {
 }
 
 func (c *Cache) GetState() CacheState {
-	c.muPieces.Lock()
-	defer c.muPieces.Unlock()
-
 	cState := CacheState{}
 	cState.Capacity = c.capacity
 	cState.PiecesLength = int(c.pieceLength)
@@ -139,9 +129,6 @@ func (c *Cache) GetState() CacheState {
 }
 
 func (c *Cache) CurrentRead(piece int) {
-	c.muPieces.Lock()
-	defer c.muPieces.Unlock()
-
 	c.currentPiece = piece
 	c.endPiece = piece + (c.capacity / int(c.pieceLength))
 	if c.endPiece > c.pieceCount {
@@ -168,13 +155,8 @@ func (c *Cache) cleanPieces() {
 		return
 	}
 	c.isRemove = true
-	defer func() {
-		c.isRemove = false
-	}()
+	defer func() { c.isRemove = false }()
 	c.muRemove.Unlock()
-
-	c.muPieces.Lock()
-	defer c.muPieces.Unlock()
 
 	if c.capacity > 0 {
 		removes := c.getRemoveItems()

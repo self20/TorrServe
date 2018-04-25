@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         val wi = dm.widthPixels.toDouble() / dm.xdpi.toDouble()
         val hi = dm.heightPixels.toDouble() / dm.ydpi.toDouble()
         val screenInches = Math.sqrt(wi * wi + hi * hi)
-        if (screenInches >= 10 || isAndroidTV) {
+        if (screenInches >= 8 || isAndroidTV) {
             startActivity(Intent(this, TvMainActivity::class.java))
             finish()
             return

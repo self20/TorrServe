@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
+    android:gravity="right"
     android:background="@drawable/ic_header"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -21,66 +22,54 @@
         <Button
             android:textSize="24sp"
             android:id="@+id/buttonAdd"
-            android:focusable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/add"
-            android:drawableLeft="@drawable/ic_add_black_24dp"
             android:layout_weight="1"
             android:background="?android:attr/selectableItemBackground" />
 
         <Button
             android:textSize="24sp"
             android:id="@+id/buttonRemoveAll"
-            android:focusable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/remove_all"
-            android:drawableLeft="@drawable/ic_trash_black_24dp"
             android:layout_weight="1"
             android:background="?android:attr/selectableItemBackground" />
 
         <Button
             android:textSize="24sp"
             android:id="@+id/buttonDonate"
-            android:focusable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/donate"
-            android:drawableLeft="@drawable/ic_donate_black"
             android:layout_weight="1"
             android:background="?android:attr/selectableItemBackground" />
 
         <Button
             android:textSize="24sp"
             android:id="@+id/buttonClearCache"
-            android:focusable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/clear_cache"
-            android:drawableLeft="@drawable/ic_clean_cache_black_24dp"
             android:layout_weight="1"
             android:background="?android:attr/selectableItemBackground" />
 
         <Button
             android:textSize="24sp"
             android:id="@+id/buttonExit"
-            android:focusable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/exit"
-            android:drawableLeft="@drawable/ic_cancel_black_24dp"
             android:layout_weight="1"
             android:background="?android:attr/selectableItemBackground" />
 
         <Button
             android:textSize="24sp"
             android:id="@+id/buttonSettings"
-            android:focusable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/settings"
-            android:drawableLeft="@drawable/ic_settings_black_24dp"
             android:layout_weight="1"
             android:background="?android:attr/selectableItemBackground" />
     </LinearLayout>

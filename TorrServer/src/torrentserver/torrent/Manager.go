@@ -70,10 +70,10 @@ func configure() {
 	}
 
 	if settings.Get().DownloadRateLimit > 0 {
-		config.DownloadRateLimiter = rate.NewLimiter(rate.Inf, settings.Get().DownloadRateLimit*1024)
+		config.DownloadRateLimiter = rate.NewLimiter(rate.Inf, settings.Get().DownloadRateLimit)
 	}
 	if settings.Get().UploadRateLimit > 0 {
-		config.UploadRateLimiter = rate.NewLimiter(rate.Inf, settings.Get().UploadRateLimit*1024)
+		config.UploadRateLimiter = rate.NewLimiter(rate.Inf, settings.Get().UploadRateLimit)
 	}
 }
 

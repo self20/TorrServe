@@ -37,7 +37,6 @@
         </receiver>
 
         <service android:name=".services.TorrService" />
-        <service android:name=".services.TorrentInfo" />
 
         <activity
             android:name=".activitys.TvMainActivity"
