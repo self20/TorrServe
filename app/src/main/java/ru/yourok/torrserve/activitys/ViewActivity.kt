@@ -135,15 +135,6 @@ class ViewActivity : AppCompatActivity() {
         }
     }
 
-    fun findTorrent(): Torrent? {
-        val torrList = ServerApi.list()
-        torrList.forEach {
-            if (it.Magnet == torrentLink)
-                return ServerApi.get(it.Hash)
-        }
-        return null
-    }
-
     fun findPlayableFiles(tor: Torrent): Map<Int, String> {
         val retList = mutableMapOf<Int, String>()
         tor.Files.forEachIndexed { index, it ->

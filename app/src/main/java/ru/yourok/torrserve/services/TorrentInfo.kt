@@ -40,26 +40,20 @@ object TorrentInfo {
 
         val view = FloatingView()
 
-        try {
-            Handler(Looper.getMainLooper()).post {
+        Handler(Looper.getMainLooper()).post {
+            try {
                 view?.create()
+            } catch (e: Exception) {
+                isWatching = false
+                e.printStackTrace()
             }
-        } catch (e: Exception) {
-            isWatching = false
-            e.printStackTrace()
-            return
         }
-
-        view?.onCancel(View.OnClickListener {
-            isWatching = false
-            view?.remove()
-        })
+        if (!isWatching)
+            return
 
         thread {
             var isShow = false
             while (isWatching && Preferences.isShowState()) {
-                view.getView() ?: let { isWatching = false }
-
                 view?.getView()?.let { view ->
                     val info = ServerApi.info(Hash)
                     info?.let {
@@ -81,6 +75,7 @@ object TorrentInfo {
                 }
             }
             isWatching = false
+            view?.remove()
         }
     }
 }

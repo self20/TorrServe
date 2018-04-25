@@ -6,7 +6,6 @@ import android.content.res.Resources
 import android.graphics.PixelFormat
 import android.os.Build
 import android.view.*
-import android.widget.ImageView
 import ru.yourok.torrserve.App
 import ru.yourok.torrserve.R
 
@@ -97,11 +96,6 @@ class FloatingView {
 
     fun getView(): View? {
         return view
-    }
-
-    fun onCancel(l: View.OnClickListener) {
-        val btn = view?.findViewById<ImageView>(R.id.buttonCancel)
-        btn?.setOnClickListener(l)
     }
 
     fun remove() {
