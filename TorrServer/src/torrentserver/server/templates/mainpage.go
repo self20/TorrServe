@@ -48,7 +48,7 @@ var mainPage = `
 		var magnet = $("#magnet").val();
 		$("#magnet").val("");
 		if(magnet!=""){
-			var magJS = JSON.stringify({ Magnet: magnet });
+			var magJS = JSON.stringify({ Link: magnet });
 			$.post('/torrent/add',magJS)
 			.done(function( data ) {
 				loadTorrents();

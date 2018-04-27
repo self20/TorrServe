@@ -42,14 +42,6 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         textViewVersion.setText("YouROK " + getText(R.string.app_name) + " ${BuildConfig.FLAVOR} ${BuildConfig.VERSION_NAME}")
-
-        checkBoxShowWndInfo.setOnCheckedChangeListener { compoundButton, b ->
-            if (b) {
-                val ret = checkPermission()
-                if (!ret)
-                    checkBoxShowWndInfo.isChecked = false
-            }
-        }
     }
 
     override fun onResume() {
@@ -90,9 +82,6 @@ class SettingsActivity : AppCompatActivity() {
         val autoStart = Preferences.isAutoStart()
         checkBoxStartOnBoot.isChecked = autoStart
 
-        val showWnd = Preferences.isShowState()
-        checkBoxShowWndInfo.isChecked = showWnd
-
         val sets = ServerApi.readSettings()
         if (sets == null) {
             Toast.makeText(this, R.string.error_retrieving_settings, Toast.LENGTH_SHORT).show()
@@ -121,8 +110,6 @@ class SettingsActivity : AppCompatActivity() {
         Preferences.setServerAddress(addr)
         val autoStart = checkBoxStartOnBoot.isChecked
         Preferences.setAutoStart(autoStart)
-        val showWnd = checkBoxShowWndInfo.isChecked
-        Preferences.setShowState(showWnd)
 
         val sets = ServerSettings(
                 editTextCacheSize.text.toString().toInt(),

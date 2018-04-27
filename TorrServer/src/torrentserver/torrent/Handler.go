@@ -23,10 +23,11 @@ type Handler struct {
 }
 
 type Handle struct {
-	expired time.Time
-	Torrent *torrent.Torrent
-	Readers []*Reader
-	Watcher *Watcher
+	expired   time.Time
+	preloaded bool
+	Torrent   *torrent.Torrent
+	Readers   []*Reader
+	Watcher   *Watcher
 }
 
 func NewHandler() *Handler {
@@ -81,8 +82,7 @@ func (h *Handler) NewReader(torrent *db.Torrent, filename string) (*Reader, erro
 	}
 	for _, f := range torr.Files() {
 		if f.Path() == filename {
-			reader := NewReader(torr, f)
-			h.addReader(torr, reader)
+			reader := h.addReader(torr, f)
 			h.watch()
 			return reader, nil
 		}
@@ -109,22 +109,25 @@ func (h *Handler) Close() {
 	}
 }
 
-func (h *Handler) addReader(tor *torrent.Torrent, reader *Reader) {
+func (h *Handler) addReader(tor *torrent.Torrent, file *torrent.File) *Reader {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	for _, h := range h.Handlers {
 		if h.Torrent == tor {
+			reader := NewReader(h, tor, file)
 			h.Readers = append(h.Readers, reader)
 			fmt.Println("Add reader:", tor.Name(), len(h.Readers))
-			return
+			return reader
 		}
 	}
 	handl := new(Handle)
 	handl.Torrent = tor
+	reader := NewReader(handl, tor, file)
 	handl.Readers = append(handl.Readers, reader)
 	handl.Watcher = NewWatcher(tor.InfoHash())
 	h.Handlers = append(h.Handlers, handl)
 	fmt.Println("Add reader:", tor.Name())
+	return reader
 }
 
 func (h *Handler) removeTorrent(torrentIndex int) bool {

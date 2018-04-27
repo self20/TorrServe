@@ -25,27 +25,29 @@ class InfoActivity : AppCompatActivity() {
                     var msg = ""
                     it.forEach {
                         val info = ServerApi.info(it)
+
                         val torr = ServerApi.get(it)
                         msg += "Name: ${torr?.Name}\n"
                         msg += "Length: ${torr?.Length}\n"
-
-                        msg += "BytesWritten: ${info?.BytesWritten}\n"
-                        msg += "BytesWrittenData: ${info?.BytesWrittenData}\n"
-                        msg += "BytesRead: ${info?.BytesRead}\n"
-                        msg += "BytesReadData: ${info?.BytesReadData}\n"
-                        msg += "BytesReadUsefulData: ${info?.BytesReadUsefulData}\n"
-                        msg += "ChunksWritten: ${info?.ChunksWritten}\n"
-                        msg += "ChunksRead: ${info?.ChunksRead}\n"
-                        msg += "ChunksReadUseful: ${info?.ChunksReadUseful}\n"
-                        msg += "ChunksReadUnwanted: ${info?.ChunksReadUnwanted}\n"
-                        msg += "PiecesDirtiedGood: ${info?.PiecesDirtiedGood}\n"
-                        msg += "PiecesDirtiedBad: ${info?.PiecesDirtiedBad}\n"
-                        msg += "TotalPeers: ${info?.TotalPeers}\n"
-                        msg += "PendingPeers: ${info?.PendingPeers}\n"
-                        msg += "ActivePeers: ${info?.ActivePeers}\n"
-                        msg += "ConnectedSeeders: ${info?.ConnectedSeeders}\n"
-                        msg += "HalfOpenPeers: ${info?.HalfOpenPeers}\n"
-                        msg += "\n"
+                        info?.let { info ->
+                            msg += "BytesWritten: ${info.BytesWritten}\n"
+                            msg += "BytesWrittenData: ${info.BytesWrittenData}\n"
+                            msg += "BytesRead: ${info.BytesRead}\n"
+                            msg += "BytesReadData: ${info.BytesReadData}\n"
+                            msg += "BytesReadUsefulData: ${info.BytesReadUsefulData}\n"
+                            msg += "ChunksWritten: ${info.ChunksWritten}\n"
+                            msg += "ChunksRead: ${info.ChunksRead}\n"
+                            msg += "ChunksReadUseful: ${info.ChunksReadUseful}\n"
+                            msg += "ChunksReadUnwanted: ${info.ChunksReadUnwanted}\n"
+                            msg += "PiecesDirtiedGood: ${info.PiecesDirtiedGood}\n"
+                            msg += "PiecesDirtiedBad: ${info.PiecesDirtiedBad}\n"
+                            msg += "TotalPeers: ${info.TotalPeers}\n"
+                            msg += "PendingPeers: ${info.PendingPeers}\n"
+                            msg += "ActivePeers: ${info.ActivePeers}\n"
+                            msg += "ConnectedSeeders: ${info.ConnectedSeeders}\n"
+                            msg += "HalfOpenPeers: ${info.HalfOpenPeers}\n"
+                            msg += "\n"
+                        }
                     }
                     runOnUiThread { textViewInfo.text = msg }
                     Thread.sleep(1000)

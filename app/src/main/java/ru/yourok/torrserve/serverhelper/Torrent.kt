@@ -1,11 +1,9 @@
 package ru.yourok.torrserve.serverhelper
 
-import org.json.JSONObject
-
 /**
  * Created by yourok on 11.03.18.
  */
-
+/*
 class Torrent {
     var Name: String = ""
     var Magnet: String = ""
@@ -108,3 +106,4 @@ fun js2Torrent(js: JSONObject): Torrent {
     }
     return tor
 }
+        */

@@ -18,7 +18,7 @@ func TorrentServerAdd(host, magnet string) (string, error) {
 	}
 
 	jsReq := new(server.TorrentJsonRequest)
-	jsReq.Magnet = magnet
+	jsReq.Link = magnet
 
 	buf, err := json.Marshal(jsReq)
 	if err != nil {

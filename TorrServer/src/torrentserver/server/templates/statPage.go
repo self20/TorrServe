@@ -31,7 +31,7 @@ var statPage = `
 
 <script>
 	$( document ).ready(function() {
-		loadStat();
+		setInterval(loadStat(), 1000);
 	});
 
 	function loadStat() {

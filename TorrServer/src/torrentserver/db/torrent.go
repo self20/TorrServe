@@ -78,7 +78,7 @@ func SaveTorrentDB(torrent *Torrent) error {
 		if err != nil {
 			return fmt.Errorf("error save torrent: %v", err)
 		}
-		err = hdb.Put([]byte("Magnet"), []byte(torrent.Magnet))
+		err = hdb.Put([]byte("Link"), []byte(torrent.Magnet))
 		if err != nil {
 			return fmt.Errorf("error save torrent: %v", err)
 		}
@@ -159,7 +159,7 @@ func LoadTorrentDB(hash string) (*Torrent, error) {
 			}
 			torr.Name = string(tmp)
 
-			tmp = hdb.Get([]byte("Magnet"))
+			tmp = hdb.Get([]byte("Link"))
 			if tmp == nil {
 				return fmt.Errorf("error load torrent")
 			}
@@ -229,7 +229,7 @@ func LoadTorrentsDB() ([]*Torrent, error) {
 				}
 				torr.Name = string(tmp)
 
-				tmp = hdb.Get([]byte("Magnet"))
+				tmp = hdb.Get([]byte("Link"))
 				if tmp == nil {
 					return fmt.Errorf("error load torrent")
 				}

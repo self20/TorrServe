@@ -82,7 +82,6 @@ func (c *Cache) Clean() {
 			c.removePiece(key)
 		}
 	}
-	releaseMemory()
 }
 
 func (c *Cache) GetState() CacheState {
@@ -165,7 +164,6 @@ func (c *Cache) cleanPieces() {
 			c.removePiece(removes[pos].Hash)
 			pos++
 		}
-		releaseMemory()
 	}
 }
 
@@ -174,6 +172,7 @@ func (c *Cache) removePiece(hash string) {
 		piece.Release()
 		st := fmt.Sprintf("%v\t%s\t%s\t%v", piece.Id, piece.accessed.Format("15:04:05.000"), piece.Hash, c.currentPiece)
 		fmt.Println("Remove cache piece:", st)
+		releaseMemory()
 	}
 }
 

@@ -29,8 +29,8 @@ func initTorrent(e *echo.Echo) {
 }
 
 type TorrentJsonRequest struct {
-	Magnet string `json:",omitempty"`
-	Hash   string `json:",omitempty"`
+	Link string `json:",omitempty"`
+	Hash string `json:",omitempty"`
 }
 
 type TorrentJsonResponse struct {
@@ -56,11 +56,11 @@ func torrentAdd(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if jreq.Magnet == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Magnet must be non-empty")
+	if jreq.Link == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Link must be non-empty")
 	}
 
-	torr, err := torrent.Add(jreq.Magnet)
+	torr, err := torrent.Add(jreq.Link)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -139,7 +139,7 @@ func torrentStat(c echo.Context) error {
 
 	stat, err := torrent.State(jreq.Hash)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
 	return c.JSON(http.StatusOK, stat)
 }

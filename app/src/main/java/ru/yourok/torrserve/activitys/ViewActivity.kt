@@ -89,35 +89,24 @@ class ViewActivity : AppCompatActivity() {
         }
     }
 
-    fun play(torr: Torrent) {
-        var tor: Torrent? = torr
-        if (torr.Files.size == 0)
-            tor = ServerApi.get(torr.Hash)
-
-        if (tor == null) {
-            showToast(R.string.error_open_torrent)
+    fun play(tor: Torrent) {
+        val fpList = findPlayableFiles(tor)
+        if (fpList.size == 1) {
+            ServerApi.view(this, tor.Hash, tor.Name, fpList.values.first())
             finish()
-            return
-        }
-        tor.let {
-            val fpList = findPlayableFiles(it)
-            if (fpList.size == 1) {
-                ServerApi.view(this, it.Hash, torr.Name, fpList.values.first())
-                finish()
-            } else if (fpList.size > 1) {
-                runOnUiThread {
-                    textViewStatus.visibility = View.GONE
-                    progressBar.visibility = View.GONE
-                    val adapter = TorrentListFileAdapter(this, it.Hash)
-                    val listViewFiles = findViewById<ListView>(R.id.listViewTorrentFiles)
-                    listViewFiles.adapter = adapter
-                    listViewFiles.setOnItemClickListener { _, _, i, _ ->
-                        val link = fpList[i]
-                        link?.let {
-                            ServerApi.view(this, torr.Hash, torr.Name, it)
-                        }
-                        finish()
+        } else if (fpList.size > 1) {
+            runOnUiThread {
+                textViewStatus.visibility = View.GONE
+                progressBar.visibility = View.GONE
+                val adapter = TorrentListFileAdapter(this, tor.Hash)
+                val listViewFiles = findViewById<ListView>(R.id.listViewTorrentFiles)
+                listViewFiles.adapter = adapter
+                listViewFiles.setOnItemClickListener { _, _, i, _ ->
+                    val link = fpList[i]
+                    link?.let {
+                        ServerApi.view(this, tor.Hash, tor.Name, it)
                     }
+                    finish()
                 }
             }
         }

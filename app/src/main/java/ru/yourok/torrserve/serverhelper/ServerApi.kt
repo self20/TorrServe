@@ -3,10 +3,8 @@ package ru.yourok.torrserve.serverhelper
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import org.json.JSONArray
-import org.json.JSONObject
 import ru.yourok.torrserve.App
-import ru.yourok.torrserve.services.TorrService
+import ru.yourok.torrserve.services.NotificationServer
 import ru.yourok.torrserve.utils.Mime
 import java.io.File
 import java.io.FileInputStream
@@ -38,23 +36,17 @@ object ServerApi {
             isRemove = true
         }
 
-
         val addr = Preferences.getServerAddress()
-        val ret = torrentserver.Torrentserver.torrentServerAdd(addr, link)
-        val tor = Torrent()
-        val js = JSONObject(ret)
-        tor.Name = js.getString("Name")
-        tor.Magnet = js.getString("Magnet")
-        tor.Hash = js.getString("Hash")
+        val tor = ServerRequest.serverAdd(addr, link)
         if (isRemove)
             File(link).delete()
         return tor
     }
 
-    fun rem(id: String): String {
+    fun rem(hash: String): String {
         var addr = Preferences.getServerAddress()
         try {
-            torrentserver.Torrentserver.torrentServerRem(addr, id)
+            ServerRequest.serverRem(addr, hash)
             return ""
         } catch (e: Exception) {
             e.printStackTrace()
@@ -62,11 +54,10 @@ object ServerApi {
         }
     }
 
-    fun get(id: String): Torrent? {
+    fun get(hash: String): Torrent? {
         val addr = Preferences.getServerAddress()
         try {
-            val js = torrentserver.Torrentserver.torrentServerGet(addr, id)
-            return js2Torrent(js)
+            return ServerRequest.serverGet(addr, hash)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -77,14 +68,7 @@ object ServerApi {
         val retArr = mutableListOf<Torrent>()
         try {
             val addr = Preferences.getServerAddress()
-            val ret = torrentserver.Torrentserver.torrentServerList(addr)
-            val jsArr = JSONArray(ret)
-
-            for (i in 0 until jsArr.length()) {
-                val js = jsArr.getJSONObject(i)
-                val tor = js2Torrent(js)
-                retArr.add(tor)
-            }
+            return ServerRequest.serverList(addr)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -92,12 +76,12 @@ object ServerApi {
     }
 
     fun info(hash: String): Info? {
-        val addr = Preferences.getServerAddress()
+        if (hash.isEmpty())
+            return null
         try {
-            val js = torrentserver.Torrentserver.torrentServerInfo(addr, hash)
-            return js2Info(js)
+            val addr = Preferences.getServerAddress()
+            return ServerRequest.serverInfo(addr, hash)
         } catch (e: Exception) {
-            e.printStackTrace()
         }
         return null
     }
@@ -105,7 +89,7 @@ object ServerApi {
     fun cleanCache() {
         try {
             val addr = Preferences.getServerAddress()
-            torrentserver.Torrentserver.torrentServerCleanCache(addr)
+            ServerRequest.serverCleanCache(addr)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -124,7 +108,7 @@ object ServerApi {
             val intent = Intent.createChooser(browserIntent, "")
             context.startActivity(intent)
         }
-        TorrService.showInfoWindow(hash)
+        NotificationServer.Show(context, hash)
     }
 
     fun echo(): Boolean {
@@ -132,7 +116,7 @@ object ServerApi {
         var echo = false
         thread {
             try {
-                torrentserver.Torrentserver.torrentServerEcho(addr)
+                ServerRequest.serverEcho(addr)
                 echo = true
             } catch (e: Exception) {
             }
@@ -142,24 +126,11 @@ object ServerApi {
 
     fun readSettings(): ServerSettings? {
         try {
-            val addr = Preferences.getServerAddress()
-            val strSets = torrentserver.Torrentserver.torrentServerReadSets(addr)
-
-            val js = JSONObject(strSets)
-
-            return ServerSettings(
-                    js.getInt("CacheSize") / (1024 * 1024),
-                    js.getInt("PreloadBufferSize") / (1024 * 1024),
-                    js.getBoolean("DisableTCP"),
-                    js.getBoolean("DisableUTP"),
-                    js.getBoolean("DisableUPNP"),
-                    js.getBoolean("DisableDHT"),
-                    js.getBoolean("DisableUpload"),
-                    js.getInt("Encryption"),
-                    js.getInt("DownloadRateLimit"),
-                    js.getInt("UploadRateLimit"),
-                    js.getInt("ConnectionsLimit"))
-
+            var sets: ServerSettings? = null
+            thread {
+                sets = ServerRequest.readSettings()
+            }.join()
+            return sets
         } catch (e: Exception) {
             e.printStackTrace()
             return null
@@ -167,38 +138,17 @@ object ServerApi {
     }
 
     fun writeSettings(sets: ServerSettings): String {
-        try {
-            val addr = Preferences.getServerAddress()
-            val js = JSONObject()
-            js.put("CacheSize", sets.CacheSize * (1024 * 1024))
-            js.put("PreloadBufferSize", sets.PreloadBufferSize * (1024 * 1024))
-            js.put("DisableTCP", sets.DisableTCP)
-            js.put("DisableUTP", sets.DisableUTP)
-            js.put("DisableUPNP", sets.DisableUPNP)
-            js.put("DisableDHT", sets.DisableDHT)
-            js.put("DisableUpload", sets.DisableUpload)
-            js.put("Encryption", sets.Encryption)
-            js.put("DownloadRateLimit", sets.DownloadRateLimit)
-            js.put("UploadRateLimit", sets.UploadRateLimit)
-            js.put("ConnectionsLimit", sets.ConnectionsLimit)
-            torrentserver.Torrentserver.torrentServerWriteSets(addr, js.toString())
-            return ""
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return e.message ?: "error parse settings"
-        }
+        var err = ""
+        thread {
+            try {
+                ServerRequest.writeSettings(sets)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                err = e.message ?: "error parse settings"
+            }
+        }.join()
+        return err
     }
 }
 
-data class ServerSettings(var CacheSize: Int,
-                          var PreloadBufferSize: Int,
-                          var DisableTCP: Boolean,
-                          var DisableUTP: Boolean,
-                          var DisableUPNP: Boolean,
-                          var DisableDHT: Boolean,
-                          var DisableUpload: Boolean,
-                          var Encryption: Int,
-                          var DownloadRateLimit: Int,
-                          var UploadRateLimit: Int,
-                          var ConnectionsLimit: Int)
 

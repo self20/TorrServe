@@ -10,50 +10,92 @@ import android.os.Build
 import android.support.v4.app.NotificationCompat
 import ru.yourok.torrserve.R
 import ru.yourok.torrserve.activitys.MainActivity
+import ru.yourok.torrserve.serverhelper.ServerApi
+import ru.yourok.torrserve.utils.Utils
+import kotlin.concurrent.thread
 
 
 object NotificationServer {
 
     private val channelId = "ru.yourok.torrserve"
     private val channelName = "ru.yourok.torrserve"
+    private var update = false
+    private var hash = ""
+    private var builder: NotificationCompat.Builder? = null
+    private val lock = Any()
 
-    fun Show(context: Context) {
+    private fun build(context: Context, msg: String) {
+        synchronized(lock) {
+            val restartIntent = Intent(context, TorrService::class.java)
+            restartIntent.setAction("ru.yourok.torrserve.notifications.action_restart")
+            val restartPendingIntent = PendingIntent.getService(context, 0, restartIntent, 0)
 
-        val restartIntent = Intent(context, TorrService::class.java)
-        restartIntent.setAction("ru.yourok.torrserve.notifications.action_restart")
-        val restartPendingIntent = PendingIntent.getService(context, 0, restartIntent, 0)
+            val exitIntent = Intent(context, TorrService::class.java)
+            exitIntent.setAction("ru.yourok.torrserve.notifications.action_exit")
+            val exitPendingIntent = PendingIntent.getService(context, 0, exitIntent, 0)
 
-        val exitIntent = Intent(context, TorrService::class.java)
-        exitIntent.setAction("ru.yourok.torrserve.notifications.action_exit")
-        val exitPendingIntent = PendingIntent.getService(context, 0, exitIntent, 0)
+            val intent = Intent(context, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT)
 
-        val intent = Intent(context, MainActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+                context.getSystemService<NotificationManager>(NotificationManager::class.java)!!.createNotificationChannel(channel)
+            }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
-            context.getSystemService<NotificationManager>(NotificationManager::class.java)!!.createNotificationChannel(channel)
+            if (builder == null)
+                builder = NotificationCompat.Builder(context, channelId)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle(context.getString(R.string.app_name))
+//                .setContentText(msg)
+                        .setAutoCancel(false)
+                        .setOngoing(true)
+                        .setContentIntent(pendingIntent)
+                        .setStyle(NotificationCompat.BigTextStyle().bigText(msg))
+                        .addAction(android.R.drawable.stat_notify_sync, context.getText(R.string.restart_server), restartPendingIntent)
+                        .addAction(android.R.drawable.ic_delete, context.getText(R.string.exit), exitPendingIntent)
+            else
+                builder?.setStyle(NotificationCompat.BigTextStyle().bigText(msg))
+
+            builder?.let {
+                val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.notify(0, it.build())
+            }
+        }
+    }
+
+    fun Show(context: Context, hash: String) {
+        this.hash = hash
+        synchronized(update) {
+            if (update)
+                return
+            update = true
         }
 
-
-        val builder = NotificationCompat.Builder(context, channelId)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(context.getString(R.string.app_name))
-                .setContentText(context.getText(R.string.stat_server_is_running))
-                .setAutoCancel(false)
-                .setOngoing(true)
-                .setContentIntent(pendingIntent)
-                .addAction(android.R.drawable.stat_notify_sync, context.getText(R.string.restart_server), restartPendingIntent)
-                .addAction(android.R.drawable.ic_delete, context.getText(R.string.exit), exitPendingIntent)
-        val notification = builder.build()
-
-        val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(0, notification)
+        thread {
+            while (update) {
+                val info = ServerApi.info(this.hash)
+                info?.let {
+                    val msg = "Peers: " + it.ConnectedSeeders.toString() + " / " + it.TotalPeers.toString() + "\n" +
+                            "Download speed: " + Utils.byteFmt(it.DownloadSpeed) + "\n" +
+                            "Upload speed: " + Utils.byteFmt(it.UploadSpeed)
+                    build(context, msg)
+                } ?: let {
+                    build(context, context.getText(R.string.stat_server_is_running).toString())
+                }
+                Thread.sleep(1000)
+            }
+            build(context, context.getText(R.string.stat_server_is_running).toString())
+            update = false
+        }
     }
 
     fun Close(context: Context) {
-        val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(0)
+        synchronized(lock) {
+            update = false
+            builder = null
+            val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(0)
+        }
     }
 }
