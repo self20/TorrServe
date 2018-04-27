@@ -8,8 +8,11 @@ import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.os.Build
 import android.support.v4.app.NotificationCompat
+import ru.yourok.torrserve.App
 import ru.yourok.torrserve.R
 import ru.yourok.torrserve.activitys.MainActivity
+import ru.yourok.torrserve.activitys.ViewActivity
+import ru.yourok.torrserve.serverhelper.Preferences
 import ru.yourok.torrserve.serverhelper.ServerApi
 import ru.yourok.torrserve.utils.Utils
 import kotlin.concurrent.thread
@@ -76,10 +79,21 @@ object NotificationServer {
             while (update) {
                 val info = ServerApi.info(this.hash)
                 info?.let {
-                    val msg = "Peers: " + it.ConnectedSeeders.toString() + " / " + it.TotalPeers.toString() + "\n" +
-                            "Download speed: " + Utils.byteFmt(it.DownloadSpeed) + "\n" +
-                            "Upload speed: " + Utils.byteFmt(it.UploadSpeed)
+                    var msg = context.getString(R.string.peers) + ": " + it.ConnectedSeeders.toString() + " / " + it.TotalPeers.toString() + "\n" +
+                            context.getString(R.string.download_speed) + ": " + Utils.byteFmt(it.DownloadSpeed)
+                    if (it.UploadSpeed > 0)
+                        msg += "\n" + context.getString(R.string.upload_speed) + ": " + Utils.byteFmt(it.UploadSpeed)
+
+                    if (info.IsPreload) {
+                        msg += "\n" + context.getString(R.string.buffer) + ": " + (info.PreloadOffset * 100 / info.PreloadLength).toString() + "% " + Utils.byteFmt(info.PreloadOffset) + "/" + Utils.byteFmt(info.PreloadLength)
+                        if (Preferences.isShowPreloadWnd()) {
+                            val intent = Intent(App.getContext(), ViewActivity::class.java)
+                            intent.putExtra("Preload", this.hash)
+                            App.getContext().startActivity(intent)
+                        }
+                    }
                     build(context, msg)
+
                 } ?: let {
                     build(context, context.getText(R.string.stat_server_is_running).toString())
                 }

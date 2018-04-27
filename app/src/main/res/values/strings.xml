@@ -23,6 +23,12 @@
     <string name="restart_server">Restart local server</string>
     <string name="exit">Exit</string>
 
+    <string name="buffering_torrent">Buffering torrent</string>
+    <string name="buffer">Buffer</string>
+    <string name="peers">Peers</string>
+    <string name="download_speed">Download speed</string>
+    <string name="upload_speed">Upload speed</string>
+
     <string name="preparing_torrent">Preparing the torrent...</string>
     <string name="starting_server">Starting server...</string>
     <string name="loading_torrent_list">Loading torrent list...</string>
@@ -31,7 +37,7 @@
     <string name="stat_server_is_not_running">Server is stopped or unavailable</string>
 
     <string name="start_server_on_boot">Start server on boot</string>
-    <string name="show_info_window">Show info window</string>
+    <string name="show_preload_window">Show preload window</string>
 
     <string name="server_addr">Server address</string>
     <string name="cache_size">Cache size (MBytes)</string>

@@ -180,6 +180,18 @@ func State(hashHex string) (*TorrentStat, error) {
 	return handler.GetState(hash)
 }
 
+func GetPreloadStat(hashHex string) *PreloadStat {
+	mutex.Lock()
+	defer mutex.Unlock()
+	hash := metainfo.NewHashFromHex(hashHex)
+	hl := handler.GetHandle(hash)
+	if hl != nil && hl.Preload != nil {
+		st := hl.Preload.Stat()
+		return &st
+	}
+	return nil
+}
+
 func CacheState() []memcache.CacheState {
 	if storage != nil {
 		return storage.GetStats()

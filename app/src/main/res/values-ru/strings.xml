@@ -20,6 +20,13 @@
     <string name="restart_server">Перезапустить локальный сервер</string>
     <string name="exit">Выход</string>
 
+    <string name="buffering_torrent">Буферизация торрента</string>
+    <string name="buffer">Буфер</string>
+    <string name="peers">Пиры</string>
+    <string name="download_speed">Скорость скачивания</string>
+    <string name="upload_speed">Скорость отдачи</string>
+
+
     <string name="preparing_torrent">Подготовка торрента...</string>
     <string name="starting_server">Запуск сервера...</string>
     <string name="loading_torrent_list">Загрузка торрентов...</string>
@@ -28,7 +35,7 @@
     <string name="stat_server_is_not_running">Сервер остановлен или недоступен</string>
 
     <string name="start_server_on_boot">Запустить сервер при загрузке</string>
-    <string name="show_info_window">Показывать окно информации</string>
+    <string name="show_preload_window">Показывать окно предварительной загрузки</string>
 
     <string name="server_addr">Адрес сервера</string>
     <string name="cache_size">Размер кэша (Мбайты)</string>

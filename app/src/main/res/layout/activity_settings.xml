@@ -167,6 +167,12 @@
                 android:layout_height="wrap_content"
                 android:text="@string/start_server_on_boot" />
 
+            <CheckBox
+                android:id="@+id/checkBoxShowPreload"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/show_preload_window" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="30dp"

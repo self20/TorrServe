@@ -68,7 +68,7 @@ func ServeContentTorrent(w ResponseWriter, r *Request, name string, modtime time
 			// single range, or to a request for a set of ranges
 			// that overlap without any holes), this content is
 			// transmitted with a Content-Range header, and a
-			// Content-Length header showing the number of bytes
+			// Content-PreloadLength header showing the number of bytes
 			// actually transferred.
 			// ...
 			// A response to a request for a single range MUST NOT
@@ -113,7 +113,7 @@ func ServeContentTorrent(w ResponseWriter, r *Request, name string, modtime time
 
 		w.Header().Set("Accept-Ranges", "bytes")
 		if w.Header().Get("Content-Encoding") == "" {
-			w.Header().Set("Content-Length", strconv.FormatInt(sendSize, 10))
+			w.Header().Set("Content-PreloadLength", strconv.FormatInt(sendSize, 10))
 		}
 	}
 
@@ -321,7 +321,7 @@ func writeNotModified(w ResponseWriter) {
 	// response does not have an ETag field).
 	h := w.Header()
 	delete(h, "Content-Type")
-	delete(h, "Content-Length")
+	delete(h, "Content-PreloadLength")
 	if h.Get("Etag") != "" {
 		delete(h, "Last-Modified")
 	}

@@ -31,13 +31,12 @@ type Reader struct {
 	offset int64
 
 	closed bool
-	handle *Handle
 
 	piecesLength int64
 	pieceCurrent int
 }
 
-func NewReader(handle *Handle, t *torrent.Torrent, f *torrent.File) *Reader {
+func NewReader(t *torrent.Torrent, f *torrent.File) *Reader {
 	r := new(Reader)
 
 	reader := f.NewReader()
@@ -54,7 +53,6 @@ func NewReader(handle *Handle, t *torrent.Torrent, f *torrent.File) *Reader {
 	r.hash = t.InfoHash().HexString()
 	r.reader = reader
 	r.piecesLength = r.tor.Info().PieceLength
-	r.handle = handle
 	return r
 }
 
@@ -77,9 +75,6 @@ func (r *Reader) Read(p []byte) (n int, err error) {
 	default:
 	}
 
-	if !r.handle.preloaded && r.offset > 5*1024*1024 && r.offset < r.file.Length()-int64(settings.Get().CacheSize) {
-		r.waitPreload()
-	}
 	n, err = r.reader.Read(p)
 	r.offset += int64(n)
 
@@ -108,36 +103,4 @@ func (r *Reader) GetCurrentPiece() int {
 
 func (r *Reader) GetCountPieces() int {
 	return int((r.file.Offset() + r.file.Length()) / r.piecesLength)
-}
-
-func (r *Reader) waitPreload() {
-	r.handle.preloaded = true
-	if settings.Get().PreloadBufferSize == 0 {
-		return
-	}
-	offset := r.file.Offset() + r.offset
-	end := offset + int64(settings.Get().PreloadBufferSize)
-	ps := int((r.file.Offset() + offset) / r.piecesLength)
-	pe := int((r.file.Offset() + end) / r.piecesLength)
-	fmt.Println("Starting preload from", ps, "to", pe)
-	reader := r.file.NewReader()
-	reader.SetReadahead(r.piecesLength * 10)
-	_, err := reader.Seek(offset, io.SeekStart)
-	if err != nil {
-		fmt.Println("Error seek preload:", err)
-		return
-	}
-	buf := make([]byte, 65536)
-	for offset < end && !r.closed {
-		readed, err := reader.Read(buf)
-		if err != nil {
-			fmt.Println("Error read preload:", err)
-			return
-		}
-		offset += int64(readed)
-		if ps != int((r.file.Offset()+offset)/r.piecesLength) {
-			ps = int((r.file.Offset() + offset) / r.piecesLength)
-			fmt.Println("Preload:", ps, "of", pe)
-		}
-	}
 }

@@ -141,7 +141,19 @@ func torrentStat(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
-	return c.JSON(http.StatusOK, stat)
+
+	pstat := torrent.GetPreloadStat(jreq.Hash)
+
+	type jsret struct {
+		*torrent.TorrentStat
+		*torrent.PreloadStat
+	}
+
+	ret := new(jsret)
+	ret.TorrentStat = stat
+	ret.PreloadStat = pstat
+
+	return c.JSON(http.StatusOK, ret)
 }
 
 func torrentCleanCache(c echo.Context) error {

@@ -45,7 +45,7 @@ var statPage = `
 					$("<p>"+tor.Magnet+"</p>").appendTo(torrents);
 					for(var i in tor.Files){
 						var file = tor.Files[i];
-						$("<p>"+file.Path+" "+file.Offset+" / "+" "+file.Size+" "+file.Priority+"</p>").appendTo(torrents);
+						$("<p>"+file.Path+" "+file.PreloadOffset+" / "+" "+file.Size+" "+file.Priority+"</p>").appendTo(torrents);
 					}
 					$("<br>").appendTo(torrents);
 					for(var i in tor.Pieces){

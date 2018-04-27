@@ -50,7 +50,11 @@ data class Info(
         var PendingPeers: Int,
         var ActivePeers: Int,
         var ConnectedSeeders: Int,
-        var HalfOpenPeers: Int
+        var HalfOpenPeers: Int,
+
+        var IsPreload: Boolean,
+        var PreloadOffset: Long,
+        var PreloadLength: Long
 )
 
 
@@ -98,7 +102,7 @@ fun getTorrent(js: JSONObject): Torrent {
             js.getLong("Length"),
             js.getLong("AddTime"),
             js.getLong("Size"),
-            fileList
+            fileList.toList()
     )
     return ret
 }
@@ -133,7 +137,11 @@ fun js2Info(js: JSONObject): Info {
             js.getInt("PendingPeers"),
             js.getInt("ActivePeers"),
             js.getInt("ConnectedSeeders"),
-            js.getInt("HalfOpenPeers")
+            js.getInt("HalfOpenPeers"),
+
+            js.getBoolean("IsPreload"),
+            js.getLong("PreloadOffset"),
+            js.getLong("PreloadLength")
     )
 }
 

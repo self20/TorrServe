@@ -8,7 +8,7 @@ class Torrent {
     var Name: String = ""
     var Magnet: String = ""
     var Hash: String = ""
-    var Length: Long = 0
+    var PreloadLength: Long = 0
     var Files: MutableList<File> = mutableListOf()
 }
 
@@ -90,8 +90,8 @@ fun js2Torrent(js: JSONObject): Torrent {
     tor.Name = js.getString("Name")
     tor.Magnet = js.getString("Magnet")
     tor.Hash = js.getString("Hash")
-    if (js.has("Length"))
-        tor.Length = js.getLong("Length")
+    if (js.has("PreloadLength"))
+        tor.PreloadLength = js.getLong("PreloadLength")
     if (js.has("Files")) {
         var jsArr = js.getJSONArray("Files")
         for (i in 0 until jsArr.length()) {

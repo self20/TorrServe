@@ -28,7 +28,7 @@ class InfoActivity : AppCompatActivity() {
 
                         val torr = ServerApi.get(it)
                         msg += "Name: ${torr?.Name}\n"
-                        msg += "Length: ${torr?.Length}\n"
+                        msg += "PreloadLength: ${torr?.Length}\n"
                         info?.let { info ->
                             msg += "BytesWritten: ${info.BytesWritten}\n"
                             msg += "BytesWrittenData: ${info.BytesWrittenData}\n"

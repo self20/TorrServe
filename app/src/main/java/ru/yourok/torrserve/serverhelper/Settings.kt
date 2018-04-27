@@ -9,6 +9,15 @@ import ru.yourok.torrserve.App
 
 
 object Preferences {
+
+    fun isShowPreloadWnd(): Boolean {
+        return get("ShowPreload", true) as Boolean
+    }
+
+    fun setShowPreloadWnd(v: Boolean) {
+        set("ShowPreload", v)
+    }
+
     fun isAutoStart(): Boolean {
         return get("AutoStart", false) as Boolean
     }

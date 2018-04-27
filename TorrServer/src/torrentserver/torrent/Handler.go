@@ -13,8 +13,6 @@ import (
 	"github.com/anacrolix/torrent/metainfo"
 )
 
-var ()
-
 type Handler struct {
 	Handlers []*Handle
 
@@ -23,11 +21,13 @@ type Handler struct {
 }
 
 type Handle struct {
-	expired   time.Time
-	preloaded bool
-	Torrent   *torrent.Torrent
-	Readers   []*Reader
-	Watcher   *Watcher
+	expired time.Time
+	hash    metainfo.Hash
+
+	Torrent *torrent.Torrent
+	Readers []*Reader
+	Watcher *Watcher
+	Preload *Preloader
 }
 
 func NewHandler() *Handler {
@@ -82,23 +82,32 @@ func (h *Handler) NewReader(torrent *db.Torrent, filename string) (*Reader, erro
 	}
 	for _, f := range torr.Files() {
 		if f.Path() == filename {
-			reader := h.addReader(torr, f)
+			reader := NewReader(torr, f)
+			h.addReader(torr, reader)
 			h.watch()
 			return reader, nil
 		}
 	}
-	return nil, fmt.Errorf("File in torrent not found: %v/%v", torr.InfoHash().HexString(), filename)
+	return nil, fmt.Errorf("PreloadFile in torrent not found: %v/%v", torr.InfoHash().HexString(), filename)
 }
 
 func (h *Handler) GetState(hash metainfo.Hash) (*TorrentStat, error) {
+	hl := h.GetHandle(hash)
+	if hl != nil {
+		return hl.Watcher.GetState(), nil
+	}
+	return nil, errors.New("torrent not connected or not found")
+}
+
+func (h *Handler) GetHandle(hash metainfo.Hash) *Handle {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	for _, h := range h.Handlers {
-		if h.Watcher.hash == hash {
-			return h.Watcher.GetState(), nil
+		if h.hash == hash {
+			return h
 		}
 	}
-	return nil, errors.New("torrent not connected or not found")
+	return nil
 }
 
 func (h *Handler) Close() {
@@ -109,25 +118,27 @@ func (h *Handler) Close() {
 	}
 }
 
-func (h *Handler) addReader(tor *torrent.Torrent, file *torrent.File) *Reader {
+func (h *Handler) addReader(tor *torrent.Torrent, reader *Reader) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	for _, h := range h.Handlers {
 		if h.Torrent == tor {
-			reader := NewReader(h, tor, file)
 			h.Readers = append(h.Readers, reader)
 			fmt.Println("Add reader:", tor.Name(), len(h.Readers))
-			return reader
+			return
 		}
 	}
+
 	handl := new(Handle)
+	handl.hash = tor.InfoHash()
 	handl.Torrent = tor
-	reader := NewReader(handl, tor, file)
 	handl.Readers = append(handl.Readers, reader)
 	handl.Watcher = NewWatcher(tor.InfoHash())
+	handl.Preload = NewPreloader(reader.file)
+	handl.Preload.Preload()
+
 	h.Handlers = append(h.Handlers, handl)
 	fmt.Println("Add reader:", tor.Name())
-	return reader
 }
 
 func (h *Handler) removeTorrent(torrentIndex int) bool {

@@ -82,6 +82,9 @@ class SettingsActivity : AppCompatActivity() {
         val autoStart = Preferences.isAutoStart()
         checkBoxStartOnBoot.isChecked = autoStart
 
+        val showWnd = Preferences.isShowPreloadWnd()
+        checkBoxShowPreload.isChecked = showWnd
+
         val sets = ServerApi.readSettings()
         if (sets == null) {
             Toast.makeText(this, R.string.error_retrieving_settings, Toast.LENGTH_SHORT).show()
@@ -110,6 +113,8 @@ class SettingsActivity : AppCompatActivity() {
         Preferences.setServerAddress(addr)
         val autoStart = checkBoxStartOnBoot.isChecked
         Preferences.setAutoStart(autoStart)
+        val showWnd = checkBoxShowPreload.isChecked
+        Preferences.setShowPreloadWnd(showWnd)
 
         val sets = ServerSettings(
                 editTextCacheSize.text.toString().toInt(),

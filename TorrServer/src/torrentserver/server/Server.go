@@ -159,6 +159,13 @@ func statePage(c echo.Context) error {
 			msg += fmt.Sprintf("PiecesDirtiedGood: %v<br>\n", st.PiecesDirtiedGood)
 			msg += fmt.Sprintf("PiecesDirtiedBad:  %v<br>\n", st.PiecesDirtiedBad)
 
+			pstat := torrent.GetPreloadStat(tor.Hash)
+			if pstat != nil && pstat.IsPreload {
+				msg += fmt.Sprintf("<br>\nPreloadFile: %v<br>\n", pstat.PreloadFile)
+				msg += fmt.Sprintf("PreloadOffset:  %v<br>\n", bytes.Format(pstat.PreloadOffset))
+				msg += fmt.Sprintf("PreloadLength:  %v<br>\n", bytes.Format(pstat.PreloadLength))
+			}
+
 			msg += "<hr><br>\n\n"
 		}
 	}
