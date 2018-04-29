@@ -7,6 +7,7 @@
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:paddingLeft="10dp"
         android:orientation="vertical"
         android:id="@+id/mainMenu"
         android:layout_width="match_parent"

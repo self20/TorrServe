@@ -62,7 +62,6 @@ class ViewActivity : AppCompatActivity() {
             } else {
                 prepareTorrent()
             }
-
         }
     }
 
@@ -75,6 +74,7 @@ class ViewActivity : AppCompatActivity() {
             return
         }
         setMessage(R.string.preparing_torrent)
+        //TODO не возвращает файлы из сериала (полицейский с рублевки)
         val tor = addTorrent()
 
         if (tor == null) {
@@ -127,8 +127,10 @@ class ViewActivity : AppCompatActivity() {
     fun play(tor: Torrent) {
         val fpList = findPlayableFiles(tor)
         if (fpList.size == 1) {
-            ServerApi.view(this, tor.Hash, tor.Name, fpList.values.first())
             finish()
+            thread {
+                ServerApi.view(this, tor.Hash, tor.Name, fpList.values.first())
+            }
         } else if (fpList.size > 1) {
             runOnUiThread {
                 findViewById<TextView>(R.id.textViewStatus).visibility = View.GONE
@@ -139,7 +141,10 @@ class ViewActivity : AppCompatActivity() {
                 listViewFiles.setOnItemClickListener { _, _, i, _ ->
                     val link = fpList[i]
                     link?.let {
-                        ServerApi.view(this, tor.Hash, tor.Name, it)
+                        finish()
+                        thread {
+                            ServerApi.view(this, tor.Hash, tor.Name, it)
+                        }
                     }
                 }
             }
@@ -166,12 +171,14 @@ class ViewActivity : AppCompatActivity() {
 
             if (!info.IsPreload)
                 return
-            var msg = ""
-            val prc = (info.PreloadOffset * 100 / info.PreloadLength).toInt()
-            msg += getString(R.string.buffer) + ": " + (prc).toString() + "% " + Utils.byteFmt(info.PreloadOffset) + "/" + Utils.byteFmt(info.PreloadLength) + "\n"
-            msg += getString(R.string.peers) + ": " + info.ConnectedSeeders.toString() + "/" + info.TotalPeers.toString() + "\n"
-            msg += getString(R.string.download_speed) + ": " + Utils.byteFmt(info.DownloadSpeed) + "/Sec"
-            setMessage(msg, prc)
+            if (info.PreloadLength > 0) {
+                var msg = ""
+                val prc = (info.PreloadOffset * 100 / info.PreloadLength).toInt()
+                msg += getString(R.string.buffer) + ": " + (prc).toString() + "% " + Utils.byteFmt(info.PreloadOffset) + "/" + Utils.byteFmt(info.PreloadLength) + "\n"
+                msg += getString(R.string.peers) + ": " + info.ConnectedSeeders.toString() + "/" + info.TotalPeers.toString() + "\n"
+                msg += getString(R.string.download_speed) + ": " + Utils.byteFmt(info.DownloadSpeed) + "/Sec"
+                setMessage(msg, prc)
+            }
         }
     }
 

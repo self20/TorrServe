@@ -48,7 +48,7 @@ object NotificationServer {
 
             if (builder == null)
                 builder = NotificationCompat.Builder(context, channelId)
-                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setSmallIcon(R.drawable.ic_launcher)
                         .setContentTitle(context.getString(R.string.app_name))
 //                .setContentText(msg)
                         .setAutoCancel(false)
@@ -76,6 +76,7 @@ object NotificationServer {
         }
 
         thread {
+            var isShow = false
             while (update) {
                 val info = ServerApi.info(this.hash)
                 info?.let {
@@ -84,12 +85,14 @@ object NotificationServer {
                     if (it.UploadSpeed > 0)
                         msg += "\n" + context.getString(R.string.upload_speed) + ": " + Utils.byteFmt(it.UploadSpeed)
 
-                    if (info.IsPreload) {
+                    if (info.IsPreload && !isShow && info.PreloadLength > 0) {
                         msg += "\n" + context.getString(R.string.buffer) + ": " + (info.PreloadOffset * 100 / info.PreloadLength).toString() + "% " + Utils.byteFmt(info.PreloadOffset) + "/" + Utils.byteFmt(info.PreloadLength)
                         if (Preferences.isShowPreloadWnd()) {
                             val intent = Intent(App.getContext(), ViewActivity::class.java)
                             intent.putExtra("Preload", this.hash)
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             App.getContext().startActivity(intent)
+                            isShow = true
                         }
                     }
                     build(context, msg)

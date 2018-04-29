@@ -6,6 +6,7 @@ import (
 	"runtime/debug"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/anacrolix/torrent/metainfo"
 	"github.com/anacrolix/torrent/storage"
@@ -57,6 +58,7 @@ func (c *Cache) Init(info *metainfo.Info, hash metainfo.Hash) {
 			Hash:   info.Piece(i).Hash().HexString(),
 		}
 	}
+	go c.cleanPieces()
 }
 
 func (c *Cache) Piece(m metainfo.Piece) storage.PieceImpl {
@@ -71,6 +73,7 @@ func (c *Cache) Piece(m metainfo.Piece) storage.PieceImpl {
 }
 
 func (c *Cache) Close() error {
+	c.isRemove = false
 	fmt.Println("Close cache for:", c.hash)
 	c.Clean()
 	return nil
@@ -78,7 +81,7 @@ func (c *Cache) Close() error {
 
 func (c *Cache) Clean() {
 	for key, val := range c.pieces {
-		if len(val.buffer) > 0 && val.complete {
+		if len(val.buffer) > 0 {
 			c.removePiece(key)
 		}
 	}
@@ -101,28 +104,13 @@ func (c *Cache) GetState() CacheState {
 			stats = append(stats, stat)
 		}
 	}
-	curr := c.currentPiece
-	end := c.endPiece
 	sort.Slice(stats, func(i, j int) bool {
 		id1 := stats[i].Id
 		id2 := stats[j].Id
-
-		id1in := id1 >= curr && id1 <= end
-		id2in := id2 >= curr && id2 <= end
-		if id1in && !id2in {
-			return false
-		}
-		if !id1in && id2in {
-			return true
-		}
-
-		if id1 > curr && id2 > curr {
-			return id1 > id2
-		}
 		return id1 < id2
 	})
-
-	cState.Pieces = c.getRemoveItems()
+	cState.PiecesInCache = stats
+	cState.PiecesForDel = c.getRemoveItems()
 	cState.Filled = c.filled
 	return cState
 }
@@ -143,11 +131,12 @@ func (c *Cache) CurrentRead(piece int) {
 	if c.filled < c.capacity {
 		return
 	}
-
-	go c.cleanPieces()
 }
 
 func (c *Cache) cleanPieces() {
+	if c.isRemove {
+		return
+	}
 	c.muRemove.Lock()
 	if c.isRemove {
 		c.muRemove.Unlock()
@@ -157,13 +146,16 @@ func (c *Cache) cleanPieces() {
 	defer func() { c.isRemove = false }()
 	c.muRemove.Unlock()
 
-	if c.capacity > 0 {
-		removes := c.getRemoveItems()
-		pos := 0
-		for c.getFilled() > c.capacity && len(removes) > 0 && pos < len(removes) {
-			c.removePiece(removes[pos].Hash)
-			pos++
+	for c.isRemove {
+		if c.capacity > 0 {
+			removes := c.getRemoveItems()
+			pos := 0
+			for c.getFilled() > c.capacity && len(removes) > 0 && pos < len(removes) {
+				c.removePiece(removes[pos].Hash)
+				pos++
+			}
 		}
+		time.Sleep(time.Second)
 	}
 }
 

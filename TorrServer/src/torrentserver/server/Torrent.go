@@ -1,13 +1,16 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"sort"
 
 	"torrentserver/db"
+	"torrentserver/settings"
 	"torrentserver/torrent"
 	"torrentserver/utils"
 
@@ -26,6 +29,7 @@ func initTorrent(e *echo.Echo) {
 
 	e.GET("/torrent/view/:hash/:file", torrentView)
 	e.HEAD("/torrent/view/:hash/:file", torrentView)
+	e.GET("/torrent/preload/:hash/:file", torrentPreload)
 }
 
 type TorrentJsonRequest struct {
@@ -156,6 +160,33 @@ func torrentStat(c echo.Context) error {
 	return c.JSON(http.StatusOK, ret)
 }
 
+func torrentPreload(c echo.Context) error {
+	if settings.Get().PreloadBufferSize > 0 {
+
+		hash, err := url.PathUnescape(c.Param("hash"))
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		fileLink, err := url.PathUnescape(c.Param("file"))
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		if hash == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, "Hash must be non-empty")
+		}
+		if fileLink == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, "File link must be non-empty")
+		}
+
+		err = torrent.Preload(hash, fileLink)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+	}
+	return c.NoContent(http.StatusOK)
+}
+
 func torrentCleanCache(c echo.Context) error {
 	if err := torrent.Connect(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Torrent server not started: "+err.Error())
@@ -201,7 +232,9 @@ func getTorrentJS(tor *db.Torrent) (*TorrentJsonResponse, error) {
 }
 
 func getJsReq(c echo.Context) (*TorrentJsonRequest, error) {
-	decoder := json.NewDecoder(c.Request().Body)
+	buf, _ := ioutil.ReadAll(c.Request().Body)
+	jsstr := string(buf)
+	decoder := json.NewDecoder(bytes.NewBufferString(jsstr))
 	js := new(TorrentJsonRequest)
 	err := decoder.Decode(js)
 	if err != nil {

@@ -40,7 +40,6 @@ func NewReader(t *torrent.Torrent, f *torrent.File) *Reader {
 	r := new(Reader)
 
 	reader := f.NewReader()
-	reader.SetReadahead(int64(float64(settings.Get().CacheSize) * 0.33))
 
 	mu.Lock()
 	count++
@@ -53,6 +52,8 @@ func NewReader(t *torrent.Torrent, f *torrent.File) *Reader {
 	r.hash = t.InfoHash().HexString()
 	r.reader = reader
 	r.piecesLength = r.tor.Info().PieceLength
+
+	reader.SetReadahead(int64(float64(settings.Get().CacheSize)) - r.piecesLength*2)
 	return r
 }
 

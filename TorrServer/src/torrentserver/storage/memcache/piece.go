@@ -18,18 +18,12 @@ type Piece struct {
 	complete bool
 	readed   bool
 	accessed time.Time
-
-	bufferPool *BufferPool
-	buffer     []byte
+	buffer   []byte
 }
 
 func (p *Piece) WriteAt(b []byte, off int64) (n int, err error) {
 	if p.buffer == nil {
-		if p.bufferPool != nil {
-			p.buffer = p.bufferPool.Get()
-		} else {
-			p.buffer = make([]byte, p.Length)
-		}
+		p.buffer = make([]byte, p.Length)
 	}
 	n = copy(p.buffer[off:], b[:])
 	p.accessed = time.Now().Add(time.Second * 5)
@@ -77,9 +71,6 @@ func (p *Piece) Completion() storage.Completion {
 }
 
 func (p *Piece) Release() {
-	if p.bufferPool != nil {
-		p.bufferPool.Put(p.buffer)
-	}
 	p.buffer = nil
 	p.complete = false
 }

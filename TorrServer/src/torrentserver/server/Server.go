@@ -109,9 +109,16 @@ func cachePage(c echo.Context) error {
 		msg += fmt.Sprintf("Current Size: %d (%v)\n", info.Filled, bytes.Format(int64(info.Filled)))
 		msg += fmt.Sprintf("Piece read: %d - %d of %d\n", info.CurrentRead, info.CurrentRead+(info.Capacity/info.PiecesLength), info.PiecesCount)
 
-		for _, item := range info.Pieces {
+		msg += "Pieces for delete\n"
+		for _, item := range info.PiecesForDel {
 			msg += fmt.Sprintf("Hash: %v \t Access: %s\t Buffer size: %d(%s)\t Complete: %v \t Hash: %s\n", item.Id, item.Accessed.Format("15:04:05.000"), item.BufferSize, bytes.Format(int64(item.BufferSize)), item.Completed, item.Hash)
 		}
+
+		msg += "\nPieces with buffer\n"
+		for _, item := range info.PiecesInCache {
+			msg += fmt.Sprintf("Hash: %v \t Access: %s\t Buffer size: %d(%s)\t Complete: %v \t Hash: %s\n", item.Id, item.Accessed.Format("15:04:05.000"), item.BufferSize, bytes.Format(int64(item.BufferSize)), item.Completed, item.Hash)
+		}
+
 		msg += "\n"
 	}
 	return c.String(http.StatusOK, msg)

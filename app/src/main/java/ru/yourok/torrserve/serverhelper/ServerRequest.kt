@@ -217,7 +217,7 @@ object ServerRequest {
     fun serverRem(host: String, hash: String) {
         val url = joinUrl(host, "/torrent/rem")
         val req = getRequest("", hash)
-        requestTorr(true, url, req)
+        requestStr(true, url, req)
     }
 
     fun serverList(host: String): List<Torrent> {
@@ -289,5 +289,11 @@ object ServerRequest {
         js.put("ConnectionsLimit", sets.ConnectionsLimit)
 
         requestStr(true, url, js.toString(0))
+    }
+
+    fun serverPreload(host: String, hash: String, fileLink: String) {
+        val link = fileLink.replace("/torrent/view/", "/torrent/preload/")
+        val url = joinUrl(host, link)
+        requestStr(false, url, "")
     }
 }

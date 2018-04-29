@@ -115,25 +115,28 @@ class SettingsActivity : AppCompatActivity() {
         Preferences.setAutoStart(autoStart)
         val showWnd = checkBoxShowPreload.isChecked
         Preferences.setShowPreloadWnd(showWnd)
+        try {
+            val sets = ServerSettings(
+                    editTextCacheSize.text.toString().toInt(),
+                    editTextPreloadBufferSize.text.toString().toInt(),
+                    checkBoxDisableTCP.isChecked,
+                    checkBoxDisableUTP.isChecked,
+                    checkBoxDisableUPNP.isChecked,
+                    checkBoxDisableDHT.isChecked,
+                    checkBoxDisableUpload.isChecked,
+                    editTextEncryption.text.toString().toInt(),
+                    editTextDownloadRateLimit.text.toString().toInt(),
+                    editTextUploadRateLimit.text.toString().toInt(),
+                    editTextConnectionsLimit.text.toString().toInt())
 
-        val sets = ServerSettings(
-                editTextCacheSize.text.toString().toInt(),
-                editTextPreloadBufferSize.text.toString().toInt(),
-                checkBoxDisableTCP.isChecked,
-                checkBoxDisableUTP.isChecked,
-                checkBoxDisableUPNP.isChecked,
-                checkBoxDisableDHT.isChecked,
-                checkBoxDisableUpload.isChecked,
-                editTextEncryption.text.toString().toInt(),
-                editTextDownloadRateLimit.text.toString().toInt(),
-                editTextUploadRateLimit.text.toString().toInt(),
-                editTextConnectionsLimit.text.toString().toInt())
-        thread {
-            val err = ServerApi.writeSettings(sets)
-            if (err.isNotEmpty())
-                Handler(Looper.getMainLooper()).post {
-                    Toast.makeText(App.getContext(), R.string.error_sending_settings, Toast.LENGTH_SHORT).show()
-                }
+            thread {
+                val err = ServerApi.writeSettings(sets)
+                if (err.isNotEmpty())
+                    Handler(Looper.getMainLooper()).post {
+                        Toast.makeText(App.getContext(), R.string.error_sending_settings, Toast.LENGTH_SHORT).show()
+                    }
+            }
+        } catch (e: Exception) {
         }
     }
 

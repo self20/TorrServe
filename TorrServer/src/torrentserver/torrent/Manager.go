@@ -116,6 +116,9 @@ func Add(link string) (*db.Torrent, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	mag = utils.AddRetracker(mag)
+
 	tinfo, err := torrent.TorrentSpecFromMagnetURI(mag)
 	if err != nil {
 		return nil, err
@@ -178,6 +181,48 @@ func State(hashHex string) (*TorrentStat, error) {
 	defer mutex.Unlock()
 	hash := metainfo.NewHashFromHex(hashHex)
 	return handler.GetState(hash)
+}
+
+func Preload(hashHex string, fileName string) error {
+
+	tordb, err := Get(hashHex)
+	if err != nil {
+		return err
+	}
+
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	var file *db.File
+	for _, f := range tordb.Files {
+		if utils.FileToLink(f.Name) == fileName {
+			file = &f
+			break
+		}
+	}
+
+	if file == nil {
+		return fmt.Errorf("file not found: %v", fileName)
+	}
+
+	reader, err := handler.NewReader(tordb, file.Name)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		mhash := metainfo.NewHashFromHex(tordb.Hash)
+		hl := handler.GetHandle(mhash)
+		if hl != nil && hl.Preload != nil && hl.Preload.preload {
+			for hl.Preload.preload {
+				time.Sleep(time.Millisecond * 100)
+			}
+			hl.expired = time.Now().Add(time.Minute * 3)
+		}
+		reader.Close()
+	}()
+
+	return nil
 }
 
 func GetPreloadStat(hashHex string) *PreloadStat {

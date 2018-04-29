@@ -32,9 +32,9 @@ var (
 
 func init() {
 	sets = new(Settings)
-	sets.CacheSize = 200 * 1024 * 1024
-	sets.PreloadBufferSize = sets.CacheSize / 2
-	sets.ConnectionsLimit = 100
+	sets.CacheSize = 100 * 1024 * 1024
+	sets.PreloadBufferSize = sets.CacheSize
+	sets.ConnectionsLimit = 150
 	StartTime = time.Now()
 }
 

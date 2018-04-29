@@ -65,7 +65,9 @@ class FilesActivity : AppCompatActivity() {
                                 it.Files[i].Viewed = true
                                 adapter.notifyDataSetChanged()
                             }
-                            ServerApi.view(this, torr.Hash, file.Name, file.Link)
+                            thread {
+                                ServerApi.view(this, torr.Hash, file.Name, file.Link)
+                            }
                         }
                         listViewFiles.setOnItemLongClickListener { _, view, i, _ ->
                             showPopupMenu(view, torr.Files[i])

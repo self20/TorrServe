@@ -8,7 +8,6 @@ import (
 	"torrentserver/settings"
 	"torrentserver/utils"
 
-	"github.com/anacrolix/torrent/metainfo"
 	"github.com/labstack/echo"
 )
 
@@ -31,7 +30,7 @@ func Play(hash, fileLink string, c echo.Context) error {
 	}
 
 	if file == nil {
-		return c.String(http.StatusNotFound, "PreloadFile in torrent not found: "+hash+"/"+fileLink)
+		return c.String(http.StatusNotFound, "File in torrent not found: "+hash+"/"+fileLink)
 	}
 
 	go db.SetViewed(tordb.Hash, file.Name)
@@ -41,13 +40,14 @@ func Play(hash, fileLink string, c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	mhash := metainfo.NewHashFromHex(tordb.Hash)
-	hl := handler.GetHandle(mhash)
-	if hl != nil && hl.Preload != nil && hl.Preload.preload {
-		for hl.Preload.preload {
-			time.Sleep(time.Millisecond * 100)
-		}
-	}
+	//Preload
+	//mhash := metainfo.NewHashFromHex(tordb.Hash)
+	//hl := handler.GetHandle(mhash)
+	//if hl != nil && hl.Preload != nil && hl.Preload.preload {
+	//	for hl.Preload.preload {
+	//		time.Sleep(time.Millisecond * 100)
+	//	}
+	//}
 
 	tm := settings.StartTime
 	if tordb.Timestamp != 0 {

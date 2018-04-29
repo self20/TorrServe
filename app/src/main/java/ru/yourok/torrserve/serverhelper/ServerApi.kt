@@ -95,20 +95,53 @@ object ServerApi {
         }
     }
 
-    fun view(context: Context, hash: String, name: String, link: String) {
-        var addr = Preferences.getServerAddress()
-        addr += link
-        val browserIntent = Intent(Intent.ACTION_VIEW)
-        browserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        browserIntent.putExtra("title", name)
-        browserIntent.setDataAndType(Uri.parse(addr), Mime.getMimeType(link))
-        if (browserIntent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(browserIntent)
-        } else {
-            val intent = Intent.createChooser(browserIntent, "")
-            context.startActivity(intent)
+    fun preload(hash: String, fileLink: String): Boolean {
+        if (hash.isEmpty() || fileLink.isEmpty())
+            return false
+        try {
+            val addr = Preferences.getServerAddress()
+            ServerRequest.serverPreload(addr, hash, fileLink)
+            return true
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+        return false
+    }
+
+    fun view(context: Context, hash: String, name: String, link: String) {
         NotificationServer.Show(context, hash)
+
+        var addr = Preferences.getServerAddress()
+        if (preload(hash, link)) {
+            var err = 0
+            thread {
+                while (true) {
+                    if (err > 15) {
+                        return@thread
+                    }
+                    Thread.sleep(1000)
+
+                    val info = ServerApi.info(hash)
+                    if (info == null) {
+                        err++
+                        continue
+                    }
+                    if (!info?.IsPreload || info?.PreloadOffset >= info?.PreloadLength)
+                        break
+                }
+                addr += link
+                val browserIntent = Intent(Intent.ACTION_VIEW)
+                browserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                browserIntent.putExtra("title", name)
+                browserIntent.setDataAndType(Uri.parse(addr), Mime.getMimeType(link))
+                if (browserIntent.resolveActivity(context.packageManager) != null) {
+                    context.startActivity(browserIntent)
+                } else {
+                    val intent = Intent.createChooser(browserIntent, "")
+                    context.startActivity(intent)
+                }
+            }
+        }
     }
 
     fun echo(): Boolean {
@@ -125,16 +158,15 @@ object ServerApi {
     }
 
     fun readSettings(): ServerSettings? {
-        try {
-            var sets: ServerSettings? = null
-            thread {
+        var sets: ServerSettings? = null
+        thread {
+            try {
                 sets = ServerRequest.readSettings()
-            }.join()
-            return sets
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return null
-        }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }.join()
+        return sets
     }
 
     fun writeSettings(sets: ServerSettings): String {

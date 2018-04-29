@@ -5,13 +5,14 @@ import (
 )
 
 type CacheState struct {
-	Hash         string
-	Capacity     int
-	Filled       int
-	PiecesLength int
-	PiecesCount  int
-	CurrentRead  int
-	Pieces       []ItemState
+	Hash          string
+	Capacity      int
+	Filled        int
+	PiecesLength  int
+	PiecesCount   int
+	CurrentRead   int
+	PiecesForDel  []ItemState
+	PiecesInCache []ItemState
 }
 
 type ItemState struct {
@@ -23,7 +24,7 @@ type ItemState struct {
 }
 
 func (c CacheState) FindItemId(id int) *ItemState {
-	for _, itm := range c.Pieces {
+	for _, itm := range c.PiecesForDel {
 		if itm.Id == id {
 			return &itm
 		}

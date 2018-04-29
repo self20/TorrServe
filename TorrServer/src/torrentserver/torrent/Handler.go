@@ -91,6 +91,31 @@ func (h *Handler) NewReader(torrent *db.Torrent, filename string) (*Reader, erro
 	return nil, fmt.Errorf("PreloadFile in torrent not found: %v/%v", torr.InfoHash().HexString(), filename)
 }
 
+func (h *Handler) GetTorrent(torrent *db.Torrent) *Handle {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	tor, err := getTorrent(torrent)
+	if err != nil {
+		return nil
+	}
+
+	for _, h := range h.Handlers {
+		if h.Torrent == tor {
+			return h
+		}
+	}
+
+	handl := new(Handle)
+	handl.hash = tor.InfoHash()
+	handl.Torrent = tor
+	handl.Watcher = NewWatcher(tor.InfoHash())
+	handl.Preload = NewPreloader()
+
+	h.Handlers = append(h.Handlers, handl)
+	return handl
+}
+
 func (h *Handler) GetState(hash metainfo.Hash) (*TorrentStat, error) {
 	hl := h.GetHandle(hash)
 	if hl != nil {
@@ -134,8 +159,8 @@ func (h *Handler) addReader(tor *torrent.Torrent, reader *Reader) {
 	handl.Torrent = tor
 	handl.Readers = append(handl.Readers, reader)
 	handl.Watcher = NewWatcher(tor.InfoHash())
-	handl.Preload = NewPreloader(reader.file)
-	handl.Preload.Preload()
+	handl.Preload = NewPreloader()
+	handl.Preload.Preload(reader.file)
 
 	h.Handlers = append(h.Handlers, handl)
 	fmt.Println("Add reader:", tor.Name())
