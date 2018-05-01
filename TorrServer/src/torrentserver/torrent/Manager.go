@@ -34,7 +34,7 @@ var (
 )
 
 func configure() {
-	storage = memcache.NewStorage(settings.Get().CacheSize)
+	storage = memcache.NewStorage(int64(settings.Get().CacheSize))
 
 	blocklist, _ := iplist.MMapPackedFile(filepath.Join(settings.Get().SettingPath, "blocklist"))
 

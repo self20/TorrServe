@@ -52,8 +52,11 @@ func NewReader(t *torrent.Torrent, f *torrent.File) *Reader {
 	r.hash = t.InfoHash().HexString()
 	r.reader = reader
 	r.piecesLength = r.tor.Info().PieceLength
-
-	reader.SetReadahead(int64(float64(settings.Get().CacheSize) * 0.5))
+	if settings.Get().IsElementumCache {
+		reader.SetReadahead(int64(float64(settings.Get().CacheSize) * 0.33))
+	} else {
+		reader.SetReadahead(int64(float64(settings.Get().CacheSize) * 0.5))
+	}
 	return r
 }
 

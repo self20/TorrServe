@@ -16,6 +16,7 @@ type Piece struct {
 	Id     int
 	Hash   string
 	Length int64
+	Size   int64
 
 	complete bool
 	readed   bool
@@ -28,7 +29,8 @@ func (p *Piece) WriteAt(b []byte, off int64) (n int, err error) {
 		p.buffer = make([]byte, p.Length)
 	}
 	n = copy(p.buffer[off:], b[:])
-	p.accessed = time.Now().Add(time.Second * 5)
+	p.Size += int64(n)
+	p.accessed = time.Now()
 	return
 }
 
@@ -74,6 +76,7 @@ func (p *Piece) Completion() storage.Completion {
 
 func (p *Piece) Release() {
 	p.buffer = nil
+	p.Size = 0
 	p.complete = false
 }
 
@@ -83,7 +86,7 @@ func (p *Piece) Stat() state.ItemState {
 		Hash:       p.Hash,
 		Accessed:   p.accessed,
 		Completed:  p.complete,
-		BufferSize: len(p.buffer),
+		BufferSize: p.Size,
 	}
 	return itm
 }

@@ -17,11 +17,11 @@ type Storage struct {
 
 	caches   map[string]*Cache
 	elcaches map[string]*memory.Cache
-	capacity int
+	capacity int64
 	mu       sync.Mutex
 }
 
-func NewStorage(capacity int) *Storage {
+func NewStorage(capacity int64) *Storage {
 	stor := new(Storage)
 	stor.capacity = capacity
 	stor.caches = make(map[string]*Cache)

@@ -184,13 +184,13 @@ func (c *Cache) GetState() state.CacheState {
 	defer c.mu.Unlock()
 
 	cState := state.CacheState{}
-	cState.Capacity = int(c.capacity)
-	cState.PiecesLength = int(c.pieceLength)
+	cState.Capacity = c.capacity
+	cState.PiecesLength = c.pieceLength
 	cState.PiecesCount = c.pieceCount
 	cState.CurrentRead = c.currentPiece
 	cState.EndRead = c.endPiece
 	cState.Hash = c.id
-	cState.Filled = int(c.filled)
+	cState.Filled = c.filled
 
 	stats := make([]state.ItemState, 0)
 	for _, value := range c.pieces {
@@ -198,7 +198,7 @@ func (c *Cache) GetState() state.CacheState {
 			Id:         value.Index,
 			Hash:       value.Hash,
 			Completed:  value.Completed,
-			BufferSize: int(value.Size),
+			BufferSize: value.Size,
 			Accessed:   value.Accessed,
 		}
 		stat := ist
@@ -213,7 +213,7 @@ func (c *Cache) GetState() state.CacheState {
 		return id1 < id2
 	})
 	cState.PiecesInCache = stats
-	cState.Filled = int(c.filled)
+	cState.Filled = c.filled
 	return cState
 }
 

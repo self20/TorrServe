@@ -19,13 +19,14 @@ type Cache struct {
 
 	s *Storage
 
-	capacity int
-	filled   int
+	capacity int64
+	filled   int64
 	hash     string
 
 	pieceLength int64
 	pieceCount  int
 
+	muPiece  sync.RWMutex
 	muRemove sync.Mutex
 	isRemove bool
 
@@ -34,7 +35,7 @@ type Cache struct {
 	endPiece     int
 }
 
-func NewCache(capacity int, storage *Storage) *Cache {
+func NewCache(capacity int64, storage *Storage) *Cache {
 	ret := &Cache{
 		capacity: capacity,
 		filled:   0,
@@ -48,7 +49,7 @@ func NewCache(capacity int, storage *Storage) *Cache {
 func (c *Cache) Init(info *metainfo.Info, hash metainfo.Hash) {
 	fmt.Println("Create cache for:", info.Name)
 	//Min capacity of 10 pieces length
-	cap := int(info.PieceLength * 10)
+	cap := info.PieceLength * 10
 	if c.capacity < cap {
 		c.capacity = cap
 	}
@@ -67,6 +68,9 @@ func (c *Cache) Init(info *metainfo.Info, hash metainfo.Hash) {
 }
 
 func (c *Cache) Piece(m metainfo.Piece) storage.PieceImpl {
+	c.muPiece.RLock()
+	defer c.muPiece.RUnlock()
+
 	if m.Index() >= len(c.pieces) {
 		return nil
 	}
@@ -80,12 +84,11 @@ func (c *Cache) Piece(m metainfo.Piece) storage.PieceImpl {
 func (c *Cache) Close() error {
 	c.isRemove = false
 	fmt.Println("Close cache for:", c.hash)
-	c.pieces = nil
 	if _, ok := c.s.caches[c.hash]; ok {
 		delete(c.s.caches, c.hash)
 	}
 
-	releaseMemory()
+	c.Clean()
 	return nil
 }
 
@@ -98,14 +101,17 @@ func (c *Cache) Clean() {
 }
 
 func (c *Cache) GetState() state.CacheState {
+	c.muPiece.RLock()
+	defer c.muPiece.RUnlock()
+
 	cState := state.CacheState{}
 	cState.Capacity = c.capacity
-	cState.PiecesLength = int(c.pieceLength)
+	cState.PiecesLength = c.pieceLength
 	cState.PiecesCount = c.pieceCount
 	cState.CurrentRead = c.currentPiece
 	cState.EndRead = c.endPiece
 	cState.Hash = c.hash
-	cState.Filled = c.getFilled()
+	cState.Filled = c.filled
 
 	stats := make([]state.ItemState, 0)
 	for _, value := range c.pieces {
@@ -126,7 +132,7 @@ func (c *Cache) GetState() state.CacheState {
 
 func (c *Cache) CurrentRead(piece int) {
 	c.currentPiece = piece
-	c.endPiece = piece + (c.capacity / int(c.pieceLength))
+	c.endPiece = piece + int(c.capacity/c.pieceLength)
 	if c.endPiece > c.pieceCount {
 		c.endPiece = c.pieceCount
 	}
@@ -159,6 +165,8 @@ func (c *Cache) cleanPieces() {
 }
 
 func (c *Cache) removePiece(hash string) {
+	c.muPiece.Lock()
+	defer c.muPiece.Unlock()
 	if piece, ok := c.pieces[hash]; ok {
 		piece.Release()
 		st := fmt.Sprintf("%v\t%s\t%s\t%v", piece.Id, piece.accessed.Format("15:04:05.000"), piece.Hash, c.currentPiece)
@@ -168,6 +176,9 @@ func (c *Cache) removePiece(hash string) {
 }
 
 func (c *Cache) getRemoveItems() []state.ItemState {
+	c.muPiece.RLock()
+	defer c.muPiece.RUnlock()
+
 	removes := make([]state.ItemState, 0)
 	for _, pi := range c.pieces {
 		stat := pi.Stat()
@@ -188,7 +199,9 @@ func (c *Cache) getRemoveItems() []state.ItemState {
 	return removes
 }
 
-func (c *Cache) getFilled() int {
+func (c *Cache) getFilled() int64 {
+	c.muPiece.RLock()
+	defer c.muPiece.RUnlock()
 	c.filled = 0
 	for _, pi := range c.pieces {
 		stat := pi.Stat()
