@@ -66,9 +66,8 @@ class MainActivity : AppCompatActivity() {
                 return@setOnItemClickListener
             }
 
-            if ((torrAdapter.getItem(i) as Torrent).Files.size == 0) {
+            if ((torrAdapter.getItem(i) as Torrent).Files.isEmpty())
                 return@setOnItemClickListener
-            }
 
             val name = (torrAdapter.getItem(i) as Torrent).Name
             val hash = (torrAdapter.getItem(i) as Torrent).Hash
@@ -82,7 +81,6 @@ class MainActivity : AppCompatActivity() {
                     view.isEnabled = true
                 }
                 val intent = Intent(this, FilesActivity::class.java)
-                intent.putExtra("Name", name)
                 intent.putExtra("Hash", hash)
                 startActivity(intent)
             }

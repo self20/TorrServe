@@ -26,7 +26,7 @@ type Cache struct {
 	pieceLength int64
 	pieceCount  int
 
-	muPiece  sync.RWMutex
+	muPiece  sync.Mutex
 	muRemove sync.Mutex
 	isRemove bool
 
@@ -68,13 +68,12 @@ func (c *Cache) Init(info *metainfo.Info, hash metainfo.Hash) {
 }
 
 func (c *Cache) Piece(m metainfo.Piece) storage.PieceImpl {
-	c.muPiece.RLock()
-	defer c.muPiece.RUnlock()
-
 	if m.Index() >= len(c.pieces) {
 		return nil
 	}
 
+	c.muPiece.Lock()
+	defer c.muPiece.Unlock()
 	if val, ok := c.pieces[m.Hash().HexString()]; ok {
 		return val
 	}
@@ -101,9 +100,6 @@ func (c *Cache) Clean() {
 }
 
 func (c *Cache) GetState() state.CacheState {
-	c.muPiece.RLock()
-	defer c.muPiece.RUnlock()
-
 	cState := state.CacheState{}
 	cState.Capacity = c.capacity
 	cState.PiecesLength = c.pieceLength
@@ -114,12 +110,14 @@ func (c *Cache) GetState() state.CacheState {
 	cState.Filled = c.filled
 
 	stats := make([]state.ItemState, 0)
+	c.muPiece.Lock()
 	for _, value := range c.pieces {
 		stat := value.Stat()
 		if stat.BufferSize > 0 {
 			stats = append(stats, stat)
 		}
 	}
+	c.muPiece.Unlock()
 	sort.Slice(stats, func(i, j int) bool {
 		id1 := stats[i].Id
 		id2 := stats[j].Id
@@ -165,10 +163,10 @@ func (c *Cache) cleanPieces() {
 }
 
 func (c *Cache) removePiece(hash string) {
-	c.muPiece.Lock()
-	defer c.muPiece.Unlock()
 	if piece, ok := c.pieces[hash]; ok {
+		c.muPiece.Lock()
 		piece.Release()
+		c.muPiece.Unlock()
 		st := fmt.Sprintf("%v\t%s\t%s\t%v", piece.Id, piece.accessed.Format("15:04:05.000"), piece.Hash, c.currentPiece)
 		fmt.Println("Remove cache piece:", st)
 		releaseMemory()
@@ -176,9 +174,6 @@ func (c *Cache) removePiece(hash string) {
 }
 
 func (c *Cache) getRemoveItems() []state.ItemState {
-	c.muPiece.RLock()
-	defer c.muPiece.RUnlock()
-
 	removes := make([]state.ItemState, 0)
 	for _, pi := range c.pieces {
 		stat := pi.Stat()
@@ -200,8 +195,6 @@ func (c *Cache) getRemoveItems() []state.ItemState {
 }
 
 func (c *Cache) getFilled() int64 {
-	c.muPiece.RLock()
-	defer c.muPiece.RUnlock()
 	c.filled = 0
 	for _, pi := range c.pieces {
 		stat := pi.Stat()

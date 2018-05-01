@@ -129,6 +129,7 @@ class ViewActivity : AppCompatActivity() {
         if (fpList.size == 1) {
             finish()
             thread {
+                Thread.sleep(500)
                 ServerApi.view(this, tor.Hash, tor.Name, fpList.values.first())
             }
         } else if (fpList.size > 1) {
@@ -143,13 +144,16 @@ class ViewActivity : AppCompatActivity() {
                     link?.let {
                         finish()
                         thread {
+                            Thread.sleep(500)
                             ServerApi.view(this, tor.Hash, tor.Name, it)
                         }
                     }
                 }
             }
         } else {
-            startActivity(Intent(this, MainActivity::class.java))
+            val intent = Intent(this, FilesActivity::class.java)
+            intent.putExtra("Hash", tor.Hash)
+            startActivity(intent)
             finish()
         }
     }
