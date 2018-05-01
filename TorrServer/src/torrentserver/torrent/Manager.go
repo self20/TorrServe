@@ -11,6 +11,7 @@ import (
 	"torrentserver/db"
 	"torrentserver/settings"
 	"torrentserver/storage/memcache"
+	"torrentserver/storage/state"
 	"torrentserver/utils"
 
 	"github.com/anacrolix/dht"
@@ -237,7 +238,7 @@ func GetPreloadStat(hashHex string) *PreloadStat {
 	return nil
 }
 
-func CacheState() []memcache.CacheState {
+func CacheState() []state.CacheState {
 	if storage != nil {
 		return storage.GetStats()
 	}

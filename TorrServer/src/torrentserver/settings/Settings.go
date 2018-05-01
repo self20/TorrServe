@@ -11,6 +11,8 @@ type Settings struct {
 	CacheSize         int // in byte, def 200 mb
 	PreloadBufferSize int // buffer for readahead
 
+	IsElementumCache bool
+
 	//BT Config
 	DisableTCP        bool
 	DisableUTP        bool
@@ -32,8 +34,8 @@ var (
 
 func init() {
 	sets = new(Settings)
-	sets.CacheSize = 100 * 1024 * 1024
-	sets.PreloadBufferSize = sets.CacheSize
+	sets.CacheSize = 200 * 1024 * 1024
+	sets.PreloadBufferSize = sets.CacheSize / 2
 	sets.ConnectionsLimit = 150
 	StartTime = time.Now()
 }

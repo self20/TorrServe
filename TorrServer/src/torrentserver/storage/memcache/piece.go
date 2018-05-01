@@ -5,6 +5,8 @@ import (
 	"io"
 	"time"
 
+	"torrentserver/storage/state"
+
 	"github.com/anacrolix/torrent/storage"
 )
 
@@ -75,8 +77,8 @@ func (p *Piece) Release() {
 	p.complete = false
 }
 
-func (p *Piece) Stat() ItemState {
-	itm := ItemState{
+func (p *Piece) Stat() state.ItemState {
+	itm := state.ItemState{
 		Id:         p.Id,
 		Hash:       p.Hash,
 		Accessed:   p.accessed,

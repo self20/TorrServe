@@ -57,17 +57,23 @@ func (p *Preloader) Preload(file *torrent.File) {
 		fmt.Println("Starting preload peieces:", ps, "-", pe)
 
 		reader := file.NewReader()
-		reader.SetReadahead(int64(float64(settings.Get().PreloadBufferSize) * 0.33))
+		reader.SetReadahead(int64(float64(settings.Get().PreloadBufferSize)))
 		defer reader.Close()
 
 		buf := make([]byte, 65536)
+		update := 0
 		for p.offset < p.length && p.preload {
+			if update > 5*1024*1024 {
+				fmt.Println("Preloaded:", p.offset, "/", p.length)
+				update = 0
+			}
 			readed, err := reader.Read(buf)
 			if err != nil {
 				fmt.Println("Error read preload:", err)
 				return
 			}
 			p.offset += int64(readed)
+			update += readed
 		}
 	}()
 }

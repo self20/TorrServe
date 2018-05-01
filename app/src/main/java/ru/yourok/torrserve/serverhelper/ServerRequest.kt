@@ -60,6 +60,7 @@ data class Info(
 
 data class ServerSettings(var CacheSize: Int,
                           var PreloadBufferSize: Int,
+                          var IsElementumCache: Boolean,
                           var DisableTCP: Boolean,
                           var DisableUTP: Boolean,
                           var DisableUPNP: Boolean,
@@ -261,6 +262,7 @@ object ServerRequest {
         return ServerSettings(
                 js.getInt("CacheSize") / (1024 * 1024),
                 js.getInt("PreloadBufferSize") / (1024 * 1024),
+                js.getBoolean("IsElementumCache"),
                 js.getBoolean("DisableTCP"),
                 js.getBoolean("DisableUTP"),
                 js.getBoolean("DisableUPNP"),
@@ -278,6 +280,7 @@ object ServerRequest {
         val js = JSONObject()
         js.put("CacheSize", sets.CacheSize * (1024 * 1024))
         js.put("PreloadBufferSize", sets.PreloadBufferSize * (1024 * 1024))
+        js.put("IsElementumCache", sets.IsElementumCache)
         js.put("DisableTCP", sets.DisableTCP)
         js.put("DisableUTP", sets.DisableUTP)
         js.put("DisableUPNP", sets.DisableUPNP)

@@ -8,12 +8,16 @@ import (
 	"sync"
 	"time"
 
+	"torrentserver/storage/state"
+
 	"github.com/anacrolix/torrent/metainfo"
 	"github.com/anacrolix/torrent/storage"
 )
 
 type Cache struct {
 	storage.TorrentImpl
+
+	s *Storage
 
 	capacity int
 	filled   int
@@ -30,11 +34,12 @@ type Cache struct {
 	endPiece     int
 }
 
-func NewCache(capacity int) *Cache {
+func NewCache(capacity int, storage *Storage) *Cache {
 	ret := &Cache{
 		capacity: capacity,
 		filled:   0,
 		pieces:   make(map[string]*Piece),
+		s:        storage,
 	}
 
 	return ret
@@ -75,7 +80,12 @@ func (c *Cache) Piece(m metainfo.Piece) storage.PieceImpl {
 func (c *Cache) Close() error {
 	c.isRemove = false
 	fmt.Println("Close cache for:", c.hash)
-	c.Clean()
+	c.pieces = nil
+	if _, ok := c.s.caches[c.hash]; ok {
+		delete(c.s.caches, c.hash)
+	}
+
+	releaseMemory()
 	return nil
 }
 
@@ -87,19 +97,19 @@ func (c *Cache) Clean() {
 	}
 }
 
-func (c *Cache) GetState() CacheState {
-	cState := CacheState{}
+func (c *Cache) GetState() state.CacheState {
+	cState := state.CacheState{}
 	cState.Capacity = c.capacity
 	cState.PiecesLength = int(c.pieceLength)
 	cState.PiecesCount = c.pieceCount
 	cState.CurrentRead = c.currentPiece
+	cState.EndRead = c.endPiece
 	cState.Hash = c.hash
+	cState.Filled = c.getFilled()
 
-	stats := make([]ItemState, 0)
-	c.filled = 0
+	stats := make([]state.ItemState, 0)
 	for _, value := range c.pieces {
 		stat := value.Stat()
-		c.filled += stat.BufferSize
 		if stat.BufferSize > 0 {
 			stats = append(stats, stat)
 		}
@@ -111,7 +121,6 @@ func (c *Cache) GetState() CacheState {
 	})
 	cState.PiecesInCache = stats
 	cState.PiecesForDel = c.getRemoveItems()
-	cState.Filled = c.filled
 	return cState
 }
 
@@ -120,16 +129,6 @@ func (c *Cache) CurrentRead(piece int) {
 	c.endPiece = piece + (c.capacity / int(c.pieceLength))
 	if c.endPiece > c.pieceCount {
 		c.endPiece = c.pieceCount
-	}
-
-	c.filled = 0
-	for _, pi := range c.pieces {
-		stat := pi.Stat()
-		c.filled += stat.BufferSize
-	}
-
-	if c.filled < c.capacity {
-		return
 	}
 }
 
@@ -168,13 +167,10 @@ func (c *Cache) removePiece(hash string) {
 	}
 }
 
-func (c *Cache) getRemoveItems() []ItemState {
-	removes := make([]ItemState, 0)
-	c.filled = 0
+func (c *Cache) getRemoveItems() []state.ItemState {
+	removes := make([]state.ItemState, 0)
 	for _, pi := range c.pieces {
 		stat := pi.Stat()
-		c.filled += stat.BufferSize
-
 		if (pi.Id < c.currentPiece || pi.Id > c.endPiece) && pi.Id > 0 && len(pi.buffer) > 0 {
 			removes = append(removes, stat)
 		}

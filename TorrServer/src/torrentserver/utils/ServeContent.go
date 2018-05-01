@@ -34,7 +34,15 @@ func ServeContentTorrent(w ResponseWriter, r *Request, name string, modtime time
 	if !haveType {
 		ctype = mime.TypeByExtension(filepath.Ext(name))
 		if ctype == "" {
-			ctype = "*/*"
+			// read a chunk to decide between utf-8 text and binary
+			var buf [512]byte
+			n, _ := io.ReadFull(content, buf[:])
+			ctype = DetectContentType(buf[:n])
+			_, err := content.Seek(0, io.SeekStart) // rewind to output whole file
+			if err != nil {
+				Error(w, "seeker can't seek", StatusInternalServerError)
+				return
+			}
 		}
 		w.Header().Set("Content-Type", ctype)
 	} else if len(ctypes) > 0 {
@@ -68,7 +76,7 @@ func ServeContentTorrent(w ResponseWriter, r *Request, name string, modtime time
 			// single range, or to a request for a set of ranges
 			// that overlap without any holes), this content is
 			// transmitted with a Content-Range header, and a
-			// Content-PreloadLength header showing the number of bytes
+			// Content-Length header showing the number of bytes
 			// actually transferred.
 			// ...
 			// A response to a request for a single range MUST NOT
@@ -113,7 +121,7 @@ func ServeContentTorrent(w ResponseWriter, r *Request, name string, modtime time
 
 		w.Header().Set("Accept-Ranges", "bytes")
 		if w.Header().Get("Content-Encoding") == "" {
-			w.Header().Set("Content-PreloadLength", strconv.FormatInt(sendSize, 10))
+			w.Header().Set("Content-Length", strconv.FormatInt(sendSize, 10))
 		}
 	}
 

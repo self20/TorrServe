@@ -5,9 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"mime"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"sort"
+	"time"
 
 	"torrentserver/db"
 	"torrentserver/settings"
@@ -28,7 +31,7 @@ func initTorrent(e *echo.Echo) {
 	e.POST("/torrent/cleancache", torrentCleanCache)
 
 	e.GET("/torrent/view/:hash/:file", torrentView)
-	e.HEAD("/torrent/view/:hash/:file", torrentView)
+	e.HEAD("/torrent/view/:hash/:file", torrentViewHead)
 	e.GET("/torrent/preload/:hash/:file", torrentPreload)
 }
 
@@ -207,6 +210,59 @@ func torrentView(c echo.Context) error {
 	}
 
 	return torrent.Play(hash, fileLink, c)
+}
+
+func torrentViewHead(c echo.Context) error {
+	hash, err := url.PathUnescape(c.Param("hash"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	fileLink, err := url.PathUnescape(c.Param("file"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	tordb, err := torrent.Get(hash)
+	if err != nil {
+		return c.String(http.StatusNotFound, "Torrent not found:"+err.Error()+" "+hash+"/"+fileLink)
+	}
+
+	var file *db.File
+	for _, f := range tordb.Files {
+		if utils.FileToLink(f.Name) == fileLink {
+			file = &f
+			break
+		}
+	}
+	if file == nil {
+		return c.String(http.StatusNotFound, "File in torrent not found: "+hash+"/"+fileLink)
+	}
+
+	tm := settings.StartTime
+	if tordb.Timestamp != 0 {
+		tm = time.Unix(tordb.Timestamp, 0)
+	}
+
+	/*
+		Accept-Ranges: bytes
+		Content-Length: 16773172962
+		Content-Type: video/x-matroska
+		Date: Tue, 01 May 2018 13:29:16 GMT
+		Last-Modified: Tue, 01 May 2018 13:05:19 GMT
+	*/
+
+	ctype := mime.TypeByExtension(filepath.Ext(file.Name))
+	if ctype == "" {
+		ctype = utils.GetMimeType(file.Name)
+	}
+
+	c.Response().Header().Set("Accept-Ranges", "bytes")
+	c.Response().Header().Set("Content-Length", fmt.Sprint(file.Size))
+	c.Response().Header().Set("Content-Type", ctype)
+	c.Response().Header().Set("Date", time.Now().UTC().Format(http.TimeFormat))
+	c.Response().Header().Set("Last-Modified", tm.UTC().Format(http.TimeFormat))
+
+	return c.NoContent(http.StatusOK)
 }
 
 func getTorrentJS(tor *db.Torrent) (*TorrentJsonResponse, error) {

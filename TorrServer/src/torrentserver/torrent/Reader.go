@@ -53,7 +53,7 @@ func NewReader(t *torrent.Torrent, f *torrent.File) *Reader {
 	r.reader = reader
 	r.piecesLength = r.tor.Info().PieceLength
 
-	reader.SetReadahead(int64(float64(settings.Get().CacheSize)) - r.piecesLength*2)
+	reader.SetReadahead(int64(float64(settings.Get().CacheSize) * 0.5))
 	return r
 }
 
@@ -82,7 +82,11 @@ func (r *Reader) Read(p []byte) (n int, err error) {
 	readedPiece := r.GetCurrentPiece()
 	if readedPiece != r.pieceCurrent {
 		r.pieceCurrent = readedPiece
-		storage.GetCache(r.hash).CurrentRead(readedPiece)
+		if settings.Get().IsElementumCache {
+			storage.GetElCache(r.hash).CurrentRead(readedPiece)
+		} else {
+			storage.GetCache(r.hash).CurrentRead(readedPiece)
+		}
 		fmt.Println("Read", r.index, r.offset, ", piece:", r.pieceCurrent, "/", r.GetCountPieces())
 	}
 	return n, err

@@ -8,6 +8,7 @@ import (
 	"torrentserver/settings"
 	"torrentserver/utils"
 
+	"github.com/anacrolix/torrent/metainfo"
 	"github.com/labstack/echo"
 )
 
@@ -41,21 +42,20 @@ func Play(hash, fileLink string, c echo.Context) error {
 	}
 
 	//Preload
-	//mhash := metainfo.NewHashFromHex(tordb.Hash)
-	//hl := handler.GetHandle(mhash)
-	//if hl != nil && hl.Preload != nil && hl.Preload.preload {
-	//	for hl.Preload.preload {
-	//		time.Sleep(time.Millisecond * 100)
-	//	}
-	//}
+	mhash := metainfo.NewHashFromHex(tordb.Hash)
+	hl := handler.GetHandle(mhash)
+	if hl != nil && hl.Preload != nil && hl.Preload.preload {
+		for hl.Preload.preload {
+			time.Sleep(time.Millisecond * 100)
+		}
+	}
 
 	tm := settings.StartTime
 	if tordb.Timestamp != 0 {
 		tm = time.Unix(tordb.Timestamp, 0)
 	}
 
-	utils.ServeContentTorrent(c.Response(), c.Request(), tordb.Name, tm, file.Size, reader)
-
+	utils.ServeContentTorrent(c.Response(), c.Request(), file.Name, tm, file.Size, reader)
 	reader.Close()
 	return c.JSON(http.StatusOK, nil)
 }

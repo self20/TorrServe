@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"torrentserver/server/templates"
+	"torrentserver/settings"
 	"torrentserver/torrent"
 	"torrentserver/version"
 
@@ -101,13 +102,11 @@ func cachePage(c echo.Context) error {
 	msg := ""
 
 	for _, info := range infoStates {
-		if info.Filled == 0 {
-			continue
-		}
+		msg += fmt.Sprintf("Is elementum cache: %v\n", settings.Get().IsElementumCache)
 		msg += fmt.Sprintf("Hash: %v\n", info.Hash)
 		msg += fmt.Sprintf("Capacity: %d (%v)\n", info.Capacity, bytes.Format(int64(info.Capacity)))
 		msg += fmt.Sprintf("Current Size: %d (%v)\n", info.Filled, bytes.Format(int64(info.Filled)))
-		msg += fmt.Sprintf("Piece read: %d - %d of %d\n", info.CurrentRead, info.CurrentRead+(info.Capacity/info.PiecesLength), info.PiecesCount)
+		msg += fmt.Sprintf("Piece read: %d - %d of %d\n", info.CurrentRead, info.EndRead, info.PiecesCount)
 
 		msg += "Pieces for delete\n"
 		for _, item := range info.PiecesForDel {

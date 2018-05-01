@@ -1,12 +1,8 @@
 package ru.yourok.torrserve.activitys
 
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_settings.*
@@ -94,6 +90,8 @@ class SettingsActivity : AppCompatActivity() {
         editTextCacheSize.setText(sets.CacheSize.toString())
         editTextPreloadBufferSize.setText(sets.PreloadBufferSize.toString())
 
+        checkBoxIsElementumCache.setChecked(sets.IsElementumCache)
+
         checkBoxDisableTCP.setChecked(sets.DisableTCP)
         checkBoxDisableUTP.setChecked(sets.DisableUTP)
         checkBoxDisableUPNP.setChecked(sets.DisableUPNP)
@@ -119,6 +117,7 @@ class SettingsActivity : AppCompatActivity() {
             val sets = ServerSettings(
                     editTextCacheSize.text.toString().toInt(),
                     editTextPreloadBufferSize.text.toString().toInt(),
+                    checkBoxIsElementumCache.isChecked,
                     checkBoxDisableTCP.isChecked,
                     checkBoxDisableUTP.isChecked,
                     checkBoxDisableUPNP.isChecked,
@@ -138,20 +137,5 @@ class SettingsActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
         }
-    }
-
-    fun checkPermission(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
-                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:$packageName"))
-                if (intent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(intent)
-                    return true
-                }
-                return false
-            }
-        }
-        return true
     }
 }

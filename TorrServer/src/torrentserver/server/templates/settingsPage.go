@@ -35,6 +35,10 @@ var settingsPage = `
 				<input id="PreloadBufferSize" type="number" autocomplete="off">
 			</div>
 			<div class="ui-widget">
+				<label for="IsElementumCache">Elementum Cache</label>
+				<input id="IsElementumCache" type="checkbox" autocomplete="off">
+			</div>
+			<div class="ui-widget">
 				<label for="DisableTCP">Disable TCP</label>
 				<input id="DisableTCP" type="checkbox" autocomplete="off">
 			</div>
