@@ -68,7 +68,9 @@ object NavigationBar {
                         icon = R.drawable.ic_clean_cache_black_24dp
                         selectable = false
                         onClick { _ ->
-                            ServerApi.cleanCache()
+                            thread {
+                                ServerApi.cleanCache()
+                            }
                             false
                         }
                     }

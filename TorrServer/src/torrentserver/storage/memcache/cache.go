@@ -2,11 +2,8 @@ package memcache
 
 import (
 	"fmt"
-	"runtime"
-	"runtime/debug"
 	"sort"
 	"sync"
-	"time"
 
 	"torrentserver/storage/state"
 
@@ -48,8 +45,8 @@ func NewCache(capacity int64, storage *Storage) *Cache {
 
 func (c *Cache) Init(info *metainfo.Info, hash metainfo.Hash) {
 	fmt.Println("Create cache for:", info.Name)
-	//Min capacity of 10 pieces length
-	cap := info.PieceLength * 10
+	//Min capacity of 2 pieces length
+	cap := info.PieceLength * 2
 	if c.capacity < cap {
 		c.capacity = cap
 	}
@@ -62,9 +59,9 @@ func (c *Cache) Init(info *metainfo.Info, hash metainfo.Hash) {
 			Id:     i,
 			Length: info.Piece(i).Length(),
 			Hash:   info.Piece(i).Hash().HexString(),
+			cache:  c,
 		}
 	}
-	go c.cleanPieces()
 }
 
 func (c *Cache) Piece(m metainfo.Piece) storage.PieceImpl {
@@ -87,16 +84,14 @@ func (c *Cache) Close() error {
 		delete(c.s.caches, c.hash)
 	}
 
-	c.Clean()
+	c.pieces = nil
+	releaseMemory()
 	return nil
 }
 
 func (c *Cache) Clean() {
-	for key, val := range c.pieces {
-		if len(val.buffer) > 0 {
-			c.removePiece(key)
-		}
-	}
+	c.pieces = make(map[string]*Piece)
+	releaseMemory()
 }
 
 func (c *Cache) GetState() state.CacheState {
@@ -123,8 +118,7 @@ func (c *Cache) GetState() state.CacheState {
 		id2 := stats[j].Id
 		return id1 < id2
 	})
-	cState.PiecesInCache = stats
-	cState.PiecesForDel = c.getRemoveItems()
+	cState.Pieces = stats
 	return cState
 }
 
@@ -149,61 +143,63 @@ func (c *Cache) cleanPieces() {
 	defer func() { c.isRemove = false }()
 	c.muRemove.Unlock()
 
-	for c.isRemove {
-		if c.capacity > 0 {
-			removes := c.getRemoveItems()
-			pos := 0
-			for c.getFilled() > c.capacity && len(removes) > 0 && pos < len(removes) {
-				c.removePiece(removes[pos].Hash)
-				pos++
-			}
+	remPieces := c.getRemPieces()
+	if len(remPieces) > 0 && c.capacity < c.filled {
+		remCount := int((c.filled - c.capacity) / c.pieceLength)
+		if remCount < 1 {
+			remCount = 1
 		}
-		time.Sleep(time.Second)
+		if remCount > len(remPieces) {
+			remCount = len(remPieces)
+		}
+
+		remPieces = remPieces[:remCount]
+
+		for _, p := range remPieces {
+			c.removePiece(p)
+		}
 	}
 }
 
-func (c *Cache) removePiece(hash string) {
-	if piece, ok := c.pieces[hash]; ok {
-		c.muPiece.Lock()
-		piece.Release()
-		c.muPiece.Unlock()
-		st := fmt.Sprintf("%v\t%s\t%s\t%v", piece.Id, piece.accessed.Format("15:04:05.000"), piece.Hash, c.currentPiece)
-		fmt.Println("Remove cache piece:", st)
-		releaseMemory()
+func (c *Cache) getRemPieces() []*Piece {
+	if c.currentPiece == 0 && c.endPiece == 0 {
+		return nil
 	}
-}
 
-func (c *Cache) getRemoveItems() []state.ItemState {
-	removes := make([]state.ItemState, 0)
-	for _, pi := range c.pieces {
-		stat := pi.Stat()
-		if (pi.Id < c.currentPiece || pi.Id > c.endPiece) && pi.Id > 0 && len(pi.buffer) > 0 {
-			removes = append(removes, stat)
+	pieces := make([]*Piece, 0)
+	var curr *Piece
+	fill := int64(0)
+	for _, v := range c.pieces {
+		if v.Size > 0 {
+			pieces = append(pieces, v)
+			fill += v.Size
+		}
+		if v.Id == c.currentPiece {
+			curr = v
 		}
 	}
-	curr := c.currentPiece
-	sort.Slice(removes, func(i, j int) bool {
-		id1 := removes[i].Id
-		id2 := removes[j].Id
-
-		if id1 > curr && id2 > curr {
-			return id1 > id2
-		}
-		return id1 < id2
+	c.filled = fill
+	if curr == nil {
+		return nil
+	}
+	sort.Slice(pieces, func(i, j int) bool {
+		return pieces[i].accessed.Before(pieces[j].accessed)
 	})
-	return removes
-}
-
-func (c *Cache) getFilled() int64 {
-	c.filled = 0
-	for _, pi := range c.pieces {
-		stat := pi.Stat()
-		c.filled += stat.BufferSize
+	pos := 0
+	for i, v := range pieces {
+		if v.accessed.UnixNano() >= curr.accessed.UnixNano() {
+			pos = i
+			break
+		}
 	}
-	return c.filled
+	return pieces[:pos]
 }
 
-func releaseMemory() {
-	runtime.GC()
-	debug.FreeOSMemory()
+func (c *Cache) removePiece(piece *Piece) {
+	c.muPiece.Lock()
+	defer c.muPiece.Unlock()
+	piece.Release()
+	st := fmt.Sprintf("%v\t%s\t%s\t%v", piece.Id, piece.accessed.Format("15:04:05.000"), piece.Hash, c.currentPiece)
+	fmt.Println("Remove cache piece:", st)
+	releaseMemory()
 }

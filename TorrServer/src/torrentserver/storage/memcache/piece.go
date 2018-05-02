@@ -3,6 +3,7 @@ package memcache
 import (
 	"errors"
 	"io"
+	"sync"
 	"time"
 
 	"torrentserver/storage/state"
@@ -22,21 +23,31 @@ type Piece struct {
 	readed   bool
 	accessed time.Time
 	buffer   []byte
+
+	mu    sync.RWMutex
+	cache *Cache
 }
 
 func (p *Piece) WriteAt(b []byte, off int64) (n int, err error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
 	if p.buffer == nil {
 		p.buffer = make([]byte, p.Length)
 	}
 	n = copy(p.buffer[off:], b[:])
 	p.Size += int64(n)
 	p.accessed = time.Now()
+
+	p.cache.cleanPieces()
 	return
 }
 
 func (p *Piece) ReadAt(b []byte, off int64) (n int, err error) {
-	size := len(b)
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 
+	size := len(b)
 	if size+int(off) > len(p.buffer) {
 		size = len(p.buffer) - int(off)
 		if size < 0 {
@@ -51,6 +62,8 @@ func (p *Piece) ReadAt(b []byte, off int64) (n int, err error) {
 	if int(off)+size >= len(p.buffer) {
 		p.readed = true
 	}
+
+	p.cache.cleanPieces()
 	return n, nil
 }
 

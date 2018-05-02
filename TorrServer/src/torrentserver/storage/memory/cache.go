@@ -212,7 +212,7 @@ func (c *Cache) GetState() state.CacheState {
 		id2 := stats[j].Id
 		return id1 < id2
 	})
-	cState.PiecesInCache = stats
+	cState.Pieces = stats
 	cState.Filled = c.filled
 	return cState
 }
@@ -302,14 +302,10 @@ func (c *Cache) updateItem(k key, u func(*ItemState, bool) bool) {
 	c.trimToCapacity()
 }
 
-// TrimToCapacity ...
-func (c *Cache) TrimToCapacity() {
+func (c *Cache) trimToCapacity() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.trimToCapacity()
-}
 
-func (c *Cache) trimToCapacity() {
 	if c.capacity < 0 {
 		return
 	}

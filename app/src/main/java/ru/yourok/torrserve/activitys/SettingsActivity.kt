@@ -22,7 +22,7 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
-        loadSettings()
+        loadSettings(false)
 
         buttonOk.setOnClickListener {
             saveSettings()
@@ -34,7 +34,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         buttonRetrieveSettings.setOnClickListener {
-            loadSettings()
+            loadSettings(true)
         }
 
         textViewVersion.setText("YouROK " + getText(R.string.app_name) + " ${BuildConfig.FLAVOR} ${BuildConfig.VERSION_NAME}")
@@ -71,15 +71,17 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    fun loadSettings(): Boolean {
-        val addr = Preferences.getServerAddress()
-        editTextServerAddr.setText(addr)
+    fun loadSettings(load: Boolean): Boolean {
+        if (!load) {
+            val addr = Preferences.getServerAddress()
+            editTextServerAddr.setText(addr)
 
-        val autoStart = Preferences.isAutoStart()
-        checkBoxStartOnBoot.isChecked = autoStart
+            val autoStart = Preferences.isAutoStart()
+            checkBoxStartOnBoot.isChecked = autoStart
 
-        val showWnd = Preferences.isShowPreloadWnd()
-        checkBoxShowPreload.isChecked = showWnd
+            val showWnd = Preferences.isShowPreloadWnd()
+            checkBoxShowPreload.isChecked = showWnd
+        }
 
         val sets = ServerApi.readSettings()
         if (sets == null) {

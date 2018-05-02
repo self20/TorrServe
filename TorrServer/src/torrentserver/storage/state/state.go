@@ -5,15 +5,14 @@ import (
 )
 
 type CacheState struct {
-	Hash          string
-	Capacity      int64
-	Filled        int64
-	PiecesLength  int64
-	PiecesCount   int
-	CurrentRead   int
-	EndRead       int
-	PiecesForDel  []ItemState
-	PiecesInCache []ItemState
+	Hash         string
+	Capacity     int64
+	Filled       int64
+	PiecesLength int64
+	PiecesCount  int
+	CurrentRead  int
+	EndRead      int
+	Pieces       []ItemState
 }
 
 type ItemState struct {
@@ -22,13 +21,4 @@ type ItemState struct {
 	BufferSize int64
 	Completed  bool
 	Hash       string
-}
-
-func (c CacheState) FindItemId(id int) *ItemState {
-	for _, itm := range c.PiecesForDel {
-		if itm.Id == id {
-			return &itm
-		}
-	}
-	return nil
 }
