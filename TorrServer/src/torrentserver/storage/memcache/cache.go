@@ -114,9 +114,7 @@ func (c *Cache) GetState() state.CacheState {
 	}
 	c.muPiece.Unlock()
 	sort.Slice(stats, func(i, j int) bool {
-		id1 := stats[i].Id
-		id2 := stats[j].Id
-		return id1 < id2
+		return stats[i].Accessed.Before(stats[j].Accessed)
 	})
 	cState.Pieces = stats
 	return cState
@@ -169,6 +167,7 @@ func (c *Cache) getRemPieces() []*Piece {
 	pieces := make([]*Piece, 0)
 	var curr *Piece
 	fill := int64(0)
+
 	for _, v := range c.pieces {
 		if v.Size > 0 {
 			pieces = append(pieces, v)
@@ -192,6 +191,7 @@ func (c *Cache) getRemPieces() []*Piece {
 			break
 		}
 	}
+
 	return pieces[:pos]
 }
 

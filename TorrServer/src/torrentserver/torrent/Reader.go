@@ -55,7 +55,7 @@ func NewReader(t *torrent.Torrent, f *torrent.File) *Reader {
 	if settings.Get().IsElementumCache {
 		reader.SetReadahead(int64(float64(settings.Get().CacheSize) * 0.33))
 	} else {
-		reader.SetReadahead(int64(float64(settings.Get().CacheSize) * 0.5))
+		reader.SetReadahead(int64(float64(settings.Get().CacheSize) * 0.33))
 	}
 	return r
 }

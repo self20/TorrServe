@@ -208,9 +208,7 @@ func (c *Cache) GetState() state.CacheState {
 		}
 	}
 	sort.Slice(stats, func(i, j int) bool {
-		id1 := stats[i].Id
-		id2 := stats[j].Id
-		return id1 < id2
+		return stats[i].Accessed.Before(stats[j].Accessed)
 	})
 	cState.Pieces = stats
 	cState.Filled = c.filled
@@ -302,10 +300,14 @@ func (c *Cache) updateItem(k key, u func(*ItemState, bool) bool) {
 	c.trimToCapacity()
 }
 
-func (c *Cache) trimToCapacity() {
+// TrimToCapacity ...
+func (c *Cache) TrimToCapacity() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	c.trimToCapacity()
+}
 
+func (c *Cache) trimToCapacity() {
 	if c.capacity < 0 {
 		return
 	}

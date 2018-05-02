@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.app.AppCompatActivity
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_settings.*
 import ru.yourok.torrserve.App
@@ -12,17 +13,15 @@ import ru.yourok.torrserve.R
 import ru.yourok.torrserve.serverhelper.Preferences
 import ru.yourok.torrserve.serverhelper.ServerApi
 import ru.yourok.torrserve.serverhelper.ServerSettings
+import ru.yourok.torrserve.utils.Player
+import ru.yourok.torrserve.utils.Players
 import kotlin.concurrent.thread
 
 
 class SettingsActivity : AppCompatActivity() {
-
-    private val serverAddr = "http://localhost:8090"
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
-        loadSettings(false)
 
         buttonOk.setOnClickListener {
             saveSettings()
@@ -37,7 +36,16 @@ class SettingsActivity : AppCompatActivity() {
             loadSettings(true)
         }
 
+        val plist = Players.getList()
+        plist.add(0, Player("Default", ""))
+
+        val adp1 = ArrayAdapter<Player>(this, android.R.layout.simple_list_item_1, plist)
+        adp1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerPlayer.setAdapter(adp1)
+
         textViewVersion.setText("YouROK " + getText(R.string.app_name) + " ${BuildConfig.FLAVOR} ${BuildConfig.VERSION_NAME}")
+
+        loadSettings(false)
     }
 
     override fun onResume() {
@@ -81,6 +89,14 @@ class SettingsActivity : AppCompatActivity() {
 
             val showWnd = Preferences.isShowPreloadWnd()
             checkBoxShowPreload.isChecked = showWnd
+
+            val player = Preferences.getPlayer()
+            if (player.isEmpty())
+                spinnerPlayer.setSelection(0)
+            else {
+                val ind = Players.getList().indexOfFirst { it.Package == player }
+                spinnerPlayer.setSelection(ind + 1)
+            }
         }
 
         val sets = ServerApi.readSettings()
@@ -115,6 +131,9 @@ class SettingsActivity : AppCompatActivity() {
         Preferences.setAutoStart(autoStart)
         val showWnd = checkBoxShowPreload.isChecked
         Preferences.setShowPreloadWnd(showWnd)
+        val player = spinnerPlayer.selectedItem as Player
+        Preferences.setPlayer(player.Package)
+
         try {
             val sets = ServerSettings(
                     editTextCacheSize.text.toString().toInt(),

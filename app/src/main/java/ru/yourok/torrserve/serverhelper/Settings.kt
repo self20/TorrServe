@@ -10,6 +10,14 @@ import ru.yourok.torrserve.App
 
 object Preferences {
 
+    fun getPlayer(): String {
+        return get("Player", "") as String
+    }
+
+    fun setPlayer(pkg: String) {
+        set("Player", pkg)
+    }
+
     fun isShowPreloadWnd(): Boolean {
         return get("ShowPreload", true) as Boolean
     }

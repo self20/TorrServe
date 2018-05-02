@@ -66,7 +66,7 @@ class FilesActivity : AppCompatActivity() {
                                 adapter.notifyDataSetChanged()
                             }
                             thread {
-                                ServerApi.view(this, torr.Hash, file.Name, file.Link)
+                                ProgressActivity.show(torr, file)
                             }
                         }
                         listViewFiles.setOnItemLongClickListener { _, view, i, _ ->
@@ -95,10 +95,6 @@ class FilesActivity : AppCompatActivity() {
                         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val clip = ClipData.newPlainText(file.Name, addr)
                         clipboard.primaryClip = clip
-                        return true
-                    }
-                    R.id.itemOpen -> {
-                        ServerApi.view(this@FilesActivity, torrent!!.Hash, file.Name, file.Link)
                         return true
                     }
                     else -> return false

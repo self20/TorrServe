@@ -3,6 +3,7 @@ package torrent
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"torrentserver/settings"
 
@@ -57,15 +58,16 @@ func (p *Preloader) Preload(file *torrent.File) {
 		fmt.Println("Starting preload peieces:", ps, "-", pe)
 
 		reader := file.NewReader()
-		reader.SetReadahead(int64(float64(settings.Get().PreloadBufferSize)))
 		defer reader.Close()
+		reader.SetReadahead(p.length - p.offset)
 
 		buf := make([]byte, 65536)
-		update := 0
+		update := int64(0)
 		for p.offset < p.length && p.preload {
-			if update > 5*1024*1024 {
+			if update > pieceLength {
 				fmt.Println("Preloaded:", p.offset, "/", p.length)
 				update = 0
+				reader.SetReadahead(p.length - p.offset)
 			}
 			readed, err := reader.Read(buf)
 			if err != nil {
@@ -73,9 +75,10 @@ func (p *Preloader) Preload(file *torrent.File) {
 				return
 			}
 			p.offset += int64(readed)
-			update += readed
+			update += int64(readed)
 		}
 	}()
+	time.Sleep(time.Millisecond * 500)
 }
 
 func (p *Preloader) Stat() PreloadStat {

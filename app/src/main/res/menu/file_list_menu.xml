@@ -3,7 +3,4 @@
     <item
         android:id="@+id/itemCopyUrl"
         android:title="@android:string/copyUrl" />
-    <item
-        android:id="@+id/itemOpen"
-        android:title="@string/open" />
 </menu>
