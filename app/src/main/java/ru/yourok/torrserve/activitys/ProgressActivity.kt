@@ -20,6 +20,8 @@ import kotlin.concurrent.thread
 
 class ProgressActivity : AppCompatActivity() {
 
+    private var isClosed = false
+
     companion object {
         private var torrent: Torrent? = null
         private var file: File? = null
@@ -43,17 +45,27 @@ class ProgressActivity : AppCompatActivity() {
         }
         setMessage(getText(R.string.buffering_torrent).toString(), 0)
         thread {
+            isClosed = false
             torrent?.let {
                 NotificationServer.Show(this, it.Hash)
             }
 
-            preload()
-            if (Preferences.isShowPreloadWnd()) {
+            if (!isClosed)
+                preload()
+            if (!isClosed && Preferences.isShowPreloadWnd())
                 waitPreload()
-            }
-            play()
+            if (!isClosed)
+                play()
             finish()
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        torrent?.let {
+            ServerApi.cleanCache(it.Hash)
+        }
+        isClosed = true
     }
 
     private fun waitPreload() {
@@ -72,6 +84,7 @@ class ProgressActivity : AppCompatActivity() {
 
                 if (!info.IsPreload)
                     return
+
                 if (info.PreloadLength > 0) {
                     var msg = ""
                     val prc = (info.PreloadOffset * 100 / info.PreloadLength).toInt()
@@ -118,7 +131,14 @@ class ProgressActivity : AppCompatActivity() {
                     intent.setDataAndType(Uri.parse(addr), Mime.getMimeType(file.Name))
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     intent.putExtra("title", file.Name)
-                    if (pkg.isNotEmpty()) {
+
+                    if (pkg.isEmpty() or pkg.equals("0")) {
+                        if (intent.resolveActivity(packageManager) != null) {
+                            startActivity(intent)
+                            return@thread
+                        }
+                    }
+                    if (pkg.isNotEmpty() and !pkg.equals("0") and !pkg.equals("1")) {
                         intent.`package` = pkg
                         if (intent.resolveActivity(packageManager) != null) {
                             startActivity(intent)

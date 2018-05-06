@@ -161,11 +161,11 @@ class MainActivity : AppCompatActivity() {
                 }
             //Donate
                 KeyEvent.KEYCODE_3, KeyEvent.KEYCODE_NUMPAD_3, KeyEvent.KEYCODE_BUTTON_3 -> {
-                    ServerApi.cleanCache()
+                    Donate.donateDialog(this)
                 }
             //Clear cache
                 KeyEvent.KEYCODE_4, KeyEvent.KEYCODE_NUMPAD_4, KeyEvent.KEYCODE_BUTTON_4 -> {
-                    ServerApi.cleanCache()
+                    ServerApi.cleanCache("")
                 }
             //Exit
                 KeyEvent.KEYCODE_5, KeyEvent.KEYCODE_NUMPAD_5, KeyEvent.KEYCODE_BUTTON_5 -> {

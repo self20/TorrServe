@@ -82,12 +82,14 @@ object ServerApi {
         return null
     }
 
-    fun cleanCache() {
-        try {
-            val addr = Preferences.getServerAddress()
-            ServerRequest.serverCleanCache(addr)
-        } catch (e: Exception) {
-            e.printStackTrace()
+    fun cleanCache(hash: String) {
+        thread {
+            try {
+                val addr = Preferences.getServerAddress()
+                ServerRequest.serverCleanCache(addr, hash)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

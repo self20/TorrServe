@@ -52,6 +52,9 @@
     <string name="download_rate_limit">Download rate limit (KBytes, 0-infinite)</string>
     <string name="upload_rate_limit">Upload rate limit (KBytes, 0-infinite)</string>
 
+    <string name="default_player">Default player</string>
+    <string name="choose_player">Choose player</string>
+
     <string name="retrieve_settings">Retrieve settings from server</string>
 
     <string name="permission_storage_msg">Storage permission is needed to write config file</string>

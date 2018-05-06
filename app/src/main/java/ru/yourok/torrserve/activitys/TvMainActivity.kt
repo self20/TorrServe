@@ -83,7 +83,7 @@ class TvMainActivity : AppCompatActivity() {
         }
 
         buttonClearCache.setOnClickListener {
-            ServerApi.cleanCache()
+            ServerApi.cleanCache("")
         }
 
         buttonExit.setOnClickListener {

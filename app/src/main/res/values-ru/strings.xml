@@ -50,6 +50,9 @@
     <string name="download_rate_limit">Ограничение скорости загрузки (Килобайты, 0-неограниченно)</string>
     <string name="upload_rate_limit">Ограничение скорости отдачи (Килобайты, 0-неограниченно)</string>
 
+    <string name="default_player">Плеер по умолчанию</string>
+    <string name="choose_player">Выбор плеера</string>
+
     <string name="retrieve_settings">Получить настройки с сервера</string>
 
     <string name="permission_storage_msg">Доступ к памяти требуется для записи настроек в файл</string>

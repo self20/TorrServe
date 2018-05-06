@@ -245,8 +245,13 @@ func CacheState() []state.CacheState {
 	return nil
 }
 
-func CleanCache() {
-	if storage != nil {
+func CleanCache(hashHex string) {
+	if storage != nil && hashHex == "" {
 		storage.CleanCache()
+	} else if client != nil && hashHex != "" {
+		hash := metainfo.NewHashFromHex(hashHex)
+		if tor, ok := client.Torrent(hash); ok {
+			tor.Drop()
+		}
 	}
 }

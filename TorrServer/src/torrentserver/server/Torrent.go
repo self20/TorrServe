@@ -191,11 +191,12 @@ func torrentPreload(c echo.Context) error {
 }
 
 func torrentCleanCache(c echo.Context) error {
-	if err := torrent.Connect(); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Torrent server not started: "+err.Error())
+	jreq, err := getJsReq(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+	torrent.CleanCache(jreq.Hash)
 
-	torrent.CleanCache()
 	return c.JSON(http.StatusOK, nil)
 }
 

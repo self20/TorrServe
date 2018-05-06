@@ -6,10 +6,12 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"runtime"
 	"sort"
 	"strconv"
 
+	"torrentserver/db"
 	"torrentserver/server/templates"
 	"torrentserver/settings"
 	"torrentserver/torrent"
@@ -57,6 +59,7 @@ func Start() {
 	server.GET("/echo", echoPage)
 	server.GET("/cache", cachePage)
 	server.GET("/stat", statePage)
+	server.POST("/shutdown", shutdownPage)
 
 	go func() {
 
@@ -93,7 +96,7 @@ func mainPage(c echo.Context) error {
 }
 
 func echoPage(c echo.Context) error {
-	return c.String(http.StatusOK, "Ok")
+	return c.String(http.StatusOK, version.Version)
 }
 
 func cachePage(c echo.Context) error {
@@ -173,6 +176,13 @@ func statePage(c echo.Context) error {
 		msg = "No connected torrents"
 	}
 	return c.HTML(http.StatusOK, msg)
+}
+
+func shutdownPage(c echo.Context) error {
+	Stop()
+	db.CloseDB()
+	os.Exit(0)
+	return c.NoContent(http.StatusOK)
 }
 
 func HTTPErrorHandler(err error, c echo.Context) {

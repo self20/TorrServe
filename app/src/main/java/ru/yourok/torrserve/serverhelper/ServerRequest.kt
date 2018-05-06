@@ -242,9 +242,10 @@ object ServerRequest {
         return js2Info(str)
     }
 
-    fun serverCleanCache(host: String) {
+    fun serverCleanCache(host: String, hash: String) {
         val url = joinUrl(host, "/torrent/cleancache")
-        requestStr(true, url, "")
+        val req = getRequest("", hash)
+        requestStr(true, url, req)
     }
 
     fun serverEcho(host: String) {

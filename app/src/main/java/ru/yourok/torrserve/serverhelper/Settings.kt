@@ -11,7 +11,7 @@ import ru.yourok.torrserve.App
 object Preferences {
 
     fun getPlayer(): String {
-        return get("Player", "") as String
+        return get("Player", "0") as String
     }
 
     fun setPlayer(pkg: String) {

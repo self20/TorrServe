@@ -36,6 +36,11 @@ var mainPage = `
 		<h3>Torrents: </h3>
 		<div id="torrents"></div>
 		<hr>
+
+		<div class="ui-grid-a">
+			<div class="ui-block-a"><button id="buttonShutdown" data-icon="power" onclick="shutdown()">Shutdown</button></div>
+			<div class="ui-block-b"><a href="/settings" class="ui-btn ui-shadow ui-corner-all" id="buttonSettings">Settings</a></div>
+		</div>
 	</div>
 
 	<div data-role="footer">
@@ -57,6 +62,10 @@ var mainPage = `
 				alert(data.responseJSON.message);
 			});
 		}
+	}
+	
+	function shutdown(){
+		$.post('/shutdown');
 	}
 
 	function removeTorrent(id){

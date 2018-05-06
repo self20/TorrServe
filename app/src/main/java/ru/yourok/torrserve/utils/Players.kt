@@ -2,7 +2,6 @@ package ru.yourok.torrserve.utils
 
 import android.content.Intent
 import android.net.Uri
-import android.provider.MediaStore
 import ru.yourok.torrserve.App
 
 class Player(var Name: String, var Package: String) {
@@ -20,9 +19,7 @@ object Players {
     }
 
     private fun getList(mime: String): List<Player> {
-        val intent = Intent(Intent.ACTION_VIEW)
-        val uri = Uri.withAppendedPath(MediaStore.Audio.Media.INTERNAL_CONTENT_URI, "1")
-        intent.data = uri
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://localhost/torrent/file.avi"))
         intent.type = mime
         val apps = App.getContext().getPackageManager().queryIntentActivities(intent, 0)
         val list = mutableListOf<Player>()

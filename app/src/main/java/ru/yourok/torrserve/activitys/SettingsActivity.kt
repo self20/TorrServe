@@ -37,7 +37,8 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         val plist = Players.getList()
-        plist.add(0, Player("Default", ""))
+        plist.add(0, Player(getString(R.string.default_player), "0"))
+        plist.add(1, Player(getString(R.string.choose_player), "1"))
 
         val adp1 = ArrayAdapter<Player>(this, android.R.layout.simple_list_item_1, plist)
         adp1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -91,11 +92,13 @@ class SettingsActivity : AppCompatActivity() {
             checkBoxShowPreload.isChecked = showWnd
 
             val player = Preferences.getPlayer()
-            if (player.isEmpty())
+            if (player.isEmpty() || player == "0")
                 spinnerPlayer.setSelection(0)
+            if (player == "1")
+                spinnerPlayer.setSelection(1)
             else {
                 val ind = Players.getList().indexOfFirst { it.Package == player }
-                spinnerPlayer.setSelection(ind + 1)
+                spinnerPlayer.setSelection(ind + 2)
             }
         }
 
