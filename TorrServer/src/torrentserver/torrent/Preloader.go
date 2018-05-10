@@ -69,13 +69,20 @@ func (p *Preloader) Preload(file *torrent.File) {
 				update = 0
 				reader.SetReadahead(p.length - p.offset)
 			}
-			readed, err := reader.Read(buf)
-			if err != nil {
-				fmt.Println("Error read preload:", err)
-				return
+			select {
+			case <-file.Torrent().Closed():
+				p.preload = false
+			default:
 			}
-			p.offset += int64(readed)
-			update += int64(readed)
+			if p.preload {
+				readed, err := reader.Read(buf)
+				if err != nil {
+					fmt.Println("Error read preload:", err)
+					return
+				}
+				p.offset += int64(readed)
+				update += int64(readed)
+			}
 		}
 	}()
 	time.Sleep(time.Millisecond * 500)

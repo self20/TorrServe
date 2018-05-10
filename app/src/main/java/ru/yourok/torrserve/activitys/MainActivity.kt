@@ -24,6 +24,7 @@ import ru.yourok.torrserve.menu.TorrentListSelectionMenu
 import ru.yourok.torrserve.navigationBar.NavigationBar
 import ru.yourok.torrserve.serverhelper.ServerApi
 import ru.yourok.torrserve.serverhelper.Torrent
+import ru.yourok.torrserve.serverloader.ServerLoader
 import ru.yourok.torrserve.services.TorrService
 import java.util.*
 import kotlin.concurrent.schedule
@@ -36,6 +37,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+//        ServerLoader.copy()
+//        ServerLoader.run()
+
         var isAndroidTV = false
         val uiModeManager = getSystemService(UI_MODE_SERVICE) as UiModeManager
         if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)

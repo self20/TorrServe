@@ -68,6 +68,7 @@ func configure() {
 		HTTPUserAgent: userAgent,
 
 		EstablishedConnsPerTorrent: settings.Get().ConnectionsLimit,
+		//DisableIPv6:                true,
 	}
 
 	if settings.Get().DownloadRateLimit > 0 {
@@ -250,8 +251,9 @@ func CleanCache(hashHex string) {
 		storage.CleanCache()
 	} else if client != nil && hashHex != "" {
 		hash := metainfo.NewHashFromHex(hashHex)
-		if tor, ok := client.Torrent(hash); ok {
-			tor.Drop()
+		if handl := handler.GetHandle(hash); handl != nil {
+			handl.Preload.Stop()
+			handl.Torrent.Drop()
 		}
 	}
 }

@@ -198,8 +198,8 @@ func (c *Cache) GetState() state.CacheState {
 			Id:         value.Index,
 			Hash:       value.Hash,
 			Completed:  value.Completed,
-			BufferSize: value.Size,
-			Accessed:   value.Accessed,
+			BufferSize: c.items[value.Key].Size,
+			Accessed:   c.items[value.Key].Accessed,
 		}
 		stat := ist
 

@@ -29,6 +29,7 @@ func initTorrent(e *echo.Echo) {
 	e.POST("/torrent/stat", torrentStat)
 
 	e.POST("/torrent/cleancache", torrentCleanCache)
+	e.GET("/torrent/restart", torrentRestart)
 
 	e.GET("/torrent/view/:hash/:file", torrentView)
 	e.HEAD("/torrent/view/:hash/:file", torrentViewHead)
@@ -74,6 +75,7 @@ func torrentAdd(c echo.Context) error {
 
 	js, err := getTorrentJS(torr)
 	if err != nil {
+		fmt.Println("Error add torrent:", torr.Hash, err)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
@@ -89,12 +91,13 @@ func torrentGet(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Hash must be non-empty")
 	}
 
-	tor, err := torrent.Get(jreq.Hash)
+	torr, err := torrent.Get(jreq.Hash)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	js, err := getTorrentJS(tor)
+	js, err := getTorrentJS(torr)
 	if err != nil {
+		fmt.Println("Error add torrent:", torr.Hash, err)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
@@ -193,11 +196,21 @@ func torrentPreload(c echo.Context) error {
 func torrentCleanCache(c echo.Context) error {
 	jreq, err := getJsReq(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		torrent.CleanCache("")
+		return c.JSON(http.StatusOK, nil)
 	}
 	torrent.CleanCache(jreq.Hash)
-
 	return c.JSON(http.StatusOK, nil)
+}
+
+func torrentRestart(c echo.Context) error {
+	fmt.Println("Restart torrent engine")
+	torrent.Disconnect()
+	err = torrent.Connect()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.String(http.StatusOK, "Ok")
 }
 
 func torrentView(c echo.Context) error {

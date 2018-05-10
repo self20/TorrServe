@@ -4,6 +4,7 @@ import (
 	"encoding/base32"
 	"math/rand"
 	"regexp"
+	"runtime/debug"
 	"strings"
 )
 
@@ -23,6 +24,10 @@ func getToken(length int) string {
 		panic(err)
 	}
 	return base32.StdEncoding.EncodeToString(randomBytes)[:length]
+}
+
+func ReleaseMemory() {
+	debug.FreeOSMemory()
 }
 
 var treckers = []string{

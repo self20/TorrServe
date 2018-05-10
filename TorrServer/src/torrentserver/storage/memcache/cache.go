@@ -2,10 +2,12 @@ package memcache
 
 import (
 	"fmt"
+	"runtime"
 	"sort"
 	"sync"
 
 	"torrentserver/storage/state"
+	"torrentserver/utils"
 
 	"github.com/anacrolix/torrent/metainfo"
 	"github.com/anacrolix/torrent/storage"
@@ -27,7 +29,8 @@ type Cache struct {
 	muRemove sync.Mutex
 	isRemove bool
 
-	pieces       map[string]*Piece
+	pieces       map[int]*Piece
+	bufferPull   *BufferPool
 	currentPiece int
 	endPiece     int
 }
@@ -36,7 +39,7 @@ func NewCache(capacity int64, storage *Storage) *Cache {
 	ret := &Cache{
 		capacity: capacity,
 		filled:   0,
-		pieces:   make(map[string]*Piece),
+		pieces:   make(map[int]*Piece),
 		s:        storage,
 	}
 
@@ -53,9 +56,10 @@ func (c *Cache) Init(info *metainfo.Info, hash metainfo.Hash) {
 	c.pieceLength = info.PieceLength
 	c.pieceCount = info.NumPieces()
 	c.hash = hash.HexString()
+	c.bufferPull = NewBufferPool(c.pieceLength, c.capacity)
 
 	for i := 0; i < c.pieceCount; i++ {
-		c.pieces[info.Piece(i).Hash().HexString()] = &Piece{
+		c.pieces[i] = &Piece{
 			Id:     i,
 			Length: info.Piece(i).Length(),
 			Hash:   info.Piece(i).Hash().HexString(),
@@ -71,7 +75,7 @@ func (c *Cache) Piece(m metainfo.Piece) storage.PieceImpl {
 
 	c.muPiece.Lock()
 	defer c.muPiece.Unlock()
-	if val, ok := c.pieces[m.Hash().HexString()]; ok {
+	if val, ok := c.pieces[m.Index()]; ok {
 		return val
 	}
 	return nil
@@ -85,13 +89,17 @@ func (c *Cache) Close() error {
 	}
 
 	c.pieces = nil
-	releaseMemory()
+	c.bufferPull = nil
+	runtime.GC()
+	utils.ReleaseMemory()
 	return nil
 }
 
 func (c *Cache) Clean() {
-	c.pieces = make(map[string]*Piece)
-	releaseMemory()
+	c.pieces = make(map[int]*Piece)
+	c.bufferPull = NewBufferPool(c.pieceLength, c.capacity)
+	runtime.GC()
+	utils.ReleaseMemory()
 }
 
 func (c *Cache) GetState() state.CacheState {
@@ -199,7 +207,9 @@ func (c *Cache) removePiece(piece *Piece) {
 	c.muPiece.Lock()
 	defer c.muPiece.Unlock()
 	piece.Release()
-	st := fmt.Sprintf("%v\t%s\t%s\t%v", piece.Id, piece.accessed.Format("15:04:05.000"), piece.Hash, c.currentPiece)
-	fmt.Println("Remove cache piece:", st)
-	releaseMemory()
+	if piece.Id%20 == 0 {
+		st := fmt.Sprintf("%v\t%s\t%s\t%v", piece.Id, piece.accessed.Format("15:04:05.000"), piece.Hash, c.currentPiece)
+		fmt.Println("Clean memory:", st)
+		utils.ReleaseMemory()
+	}
 }

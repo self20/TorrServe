@@ -33,7 +33,7 @@ func (p *Piece) WriteAt(b []byte, off int64) (n int, err error) {
 	defer p.mu.Unlock()
 
 	if p.buffer == nil {
-		p.buffer = make([]byte, p.Length)
+		p.buffer = p.cache.bufferPull.GetBuffer()
 	}
 	n = copy(p.buffer[off:], b[:])
 	p.Size += int64(n)
@@ -88,6 +88,7 @@ func (p *Piece) Completion() storage.Completion {
 }
 
 func (p *Piece) Release() {
+	p.cache.bufferPull.PutBuffer(p.buffer)
 	p.buffer = nil
 	p.Size = 0
 	p.complete = false

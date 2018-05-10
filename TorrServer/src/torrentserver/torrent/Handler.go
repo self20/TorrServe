@@ -190,6 +190,12 @@ func (h *Handler) removeReader(handle *Handle, readerIndex int) bool {
 func getTorrent(tordb *db.Torrent) (*torrent.Torrent, error) {
 	hash := metainfo.NewHashFromHex(tordb.Hash)
 	if tor, ok := client.Torrent(hash); ok {
+		if len(tor.Files()) == 0 {
+			err := GotInfo(tor)
+			if err != nil {
+				return nil, err
+			}
+		}
 		return tor, nil
 	}
 	tor, err := client.AddMagnet(tordb.Magnet)
