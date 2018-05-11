@@ -64,17 +64,19 @@ func (p *Preloader) Preload(file *torrent.File) {
 		buf := make([]byte, 65536)
 		update := int64(0)
 		for p.offset < p.length && p.preload {
-			if update > pieceLength {
-				fmt.Println("Preloaded:", p.offset, "/", p.length)
-				update = 0
-				reader.SetReadahead(p.length - p.offset)
-			}
 			select {
 			case <-file.Torrent().Closed():
 				p.preload = false
 			default:
 			}
 			if p.preload {
+
+				if update > pieceLength {
+					fmt.Println("Preloaded:", p.offset, "/", p.length)
+					update = 0
+					reader.SetReadahead(p.length - p.offset)
+				}
+
 				readed, err := reader.Read(buf)
 				if err != nil {
 					fmt.Println("Error read preload:", err)

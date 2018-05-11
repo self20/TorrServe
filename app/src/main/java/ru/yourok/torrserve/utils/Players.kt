@@ -1,8 +1,10 @@
 package ru.yourok.torrserve.utils
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import ru.yourok.torrserve.App
+
 
 class Player(var Name: String, var Package: String) {
     override fun toString(): String {
@@ -15,7 +17,8 @@ object Players {
         val list = mutableListOf<Player>()
         list.addAll(getList("video/*"))
         list.addAll(getList("audio/*"))
-        return list.distinctBy { it.Package }.toMutableList()
+        list.addAll(getFixedList())
+        return list.distinctBy { it.Package }.sortedBy { it.Name }.toMutableList()
     }
 
     private fun getList(mime: String): List<Player> {
@@ -26,6 +29,23 @@ object Players {
         for (a in apps) {
             var name = a.loadLabel(App.getContext().packageManager)?.toString() ?: a.activityInfo.packageName
             list.add(Player(name, a.activityInfo.packageName))
+        }
+        return list
+    }
+
+    private fun getFixedList(): List<Player> {
+        val pm = App.getContext().getPackageManager()
+        val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
+        val filtred = packages.filter {
+            it.packageName == "org.xbmc.kodi" ||
+                    it.packageName == "com.android.gallery3d"
+        }
+
+        val list = mutableListOf<Player>()
+        filtred.forEach {
+            var name = it.name ?: it.loadLabel(App.getContext().packageManager)?.toString() ?: it.packageName
+            var pkg = it.packageName
+            list.add(Player(name, pkg))
         }
         return list
     }

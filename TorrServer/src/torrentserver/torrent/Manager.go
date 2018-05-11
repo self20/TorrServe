@@ -59,8 +59,9 @@ func configure() {
 
 		IPBlocklist: blocklist,
 
+		DefaultStorage: storage,
+
 		DhtStartingNodes: dht.GlobalBootstrapAddrs,
-		DefaultStorage:   storage,
 		ListenHost:       func(string) string { return "" },
 
 		Bep20:         peerID,
@@ -68,7 +69,11 @@ func configure() {
 		HTTPUserAgent: userAgent,
 
 		EstablishedConnsPerTorrent: settings.Get().ConnectionsLimit,
-		//DisableIPv6:                true,
+		HalfOpenConnsPerTorrent:    settings.Get().ConnectionsLimit,
+		TorrentPeersLowWater:       50,
+		TorrentPeersHighWater:      500,
+
+		DisableIPv6: true,
 	}
 
 	if settings.Get().DownloadRateLimit > 0 {
