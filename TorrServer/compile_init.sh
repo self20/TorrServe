@@ -6,4 +6,4 @@ export ANDROID_HOME=$HOME'/Android/Sdk'
 go get golang.org/x/mobile/cmd/gomobile
 ./bin/gomobile init -v -ndk /home/yourok/Android/Ndk/android-ndk/
 go env
-./bin/gomobile bind -v torrentserver
+./bin/gomobile bind -v server

@@ -111,8 +111,6 @@ class SettingsActivity : AppCompatActivity() {
         editTextCacheSize.setText(sets.CacheSize.toString())
         editTextPreloadBufferSize.setText(sets.PreloadBufferSize.toString())
 
-        checkBoxIsElementumCache.setChecked(sets.IsElementumCache)
-
         checkBoxDisableTCP.setChecked(sets.DisableTCP)
         checkBoxDisableUTP.setChecked(sets.DisableUTP)
         checkBoxDisableUPNP.setChecked(sets.DisableUPNP)
@@ -141,7 +139,6 @@ class SettingsActivity : AppCompatActivity() {
             val sets = ServerSettings(
                     editTextCacheSize.text.toString().toInt(),
                     editTextPreloadBufferSize.text.toString().toInt(),
-                    checkBoxIsElementumCache.isChecked,
                     checkBoxDisableTCP.isChecked,
                     checkBoxDisableUTP.isChecked,
                     checkBoxDisableUPNP.isChecked,

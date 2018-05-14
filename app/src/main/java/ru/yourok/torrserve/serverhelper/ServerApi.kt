@@ -93,17 +93,17 @@ object ServerApi {
         }
     }
 
-    fun preload(hash: String, fileLink: String): Boolean {
+    fun preload(hash: String, fileLink: String) {
         if (hash.isEmpty() || fileLink.isEmpty())
-            return false
-        try {
-            val addr = Preferences.getServerAddress()
-            ServerRequest.serverPreload(addr, hash, fileLink)
-            return true
-        } catch (e: Exception) {
-            e.printStackTrace()
+            return
+        thread {
+            try {
+                val addr = Preferences.getServerAddress()
+                ServerRequest.serverPreload(addr, fileLink)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
-        return false
     }
 
     fun echo(): Boolean {

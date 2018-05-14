@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"torrentserver"
-	"torrentserver/settings"
+	"server"
+	"server/settings"
 )
 
 func main() {
@@ -14,8 +14,8 @@ func main() {
 		path = os.Args[1]
 	}
 
-	torrentserver.Start(path)
-	settings.SaveFile()
+	server.Start(path)
+	settings.SaveSettings()
 
-	fmt.Println(torrentserver.WaitServer())
+	fmt.Println(server.WaitServer())
 }

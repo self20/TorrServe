@@ -2,9 +2,9 @@
 {
 	"update": {
 		"app_id": "ru.yourok.torrserve.lite lite",
-		"version_code": "41",
-		"version_name": "1.0.41",
-		"build_date": "11.05.2018",
+		"version_code": "42",
+		"version_name": "1.0.42",
+		"build_date": "14.05.2018",
 		"link_github": "not implemented"
 	}
 }

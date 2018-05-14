@@ -52,11 +52,11 @@ class TorrentListFileAdapter(val activity: Activity, val torrId: String) : BaseA
         return vi
     }
 
-    override fun getItem(p0: Int): Any {
+    override fun getItem(p0: Int): Any? {
         torrent?.let {
             return it.Files[p0]
         }
-        return ""
+        return null
     }
 
     override fun getItemId(p0: Int): Long {

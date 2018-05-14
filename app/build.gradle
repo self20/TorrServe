@@ -20,8 +20,8 @@ android {
         applicationId "ru.yourok.torrserve"
         minSdkVersion 15
         targetSdkVersion 26
-        versionCode 41
-        versionName "1.0.41"
+        versionCode 42
+        versionName "1.0.42"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
@@ -69,8 +69,8 @@ dependencies {
     implementation 'co.zsmb:materialdrawer-kt:1.3.4'
     implementation 'com.squareup.okhttp:okhttp:2.5.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'
-    freeImplementation project(':torrentserver')
-    payImplementation project(':torrentserver')
+    freeImplementation project(':server')
+    payImplementation project(':server')
 }
 
 project.afterEvaluate {

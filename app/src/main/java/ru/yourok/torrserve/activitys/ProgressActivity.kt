@@ -82,13 +82,13 @@ class ProgressActivity : AppCompatActivity() {
                     continue
                 }
 
-                if (!info.IsPreload)
+                if (!info.IsPreload || info.PreloadSize >= info.PreloadLength)
                     return
 
                 if (info.PreloadLength > 0) {
                     var msg = ""
-                    val prc = (info.PreloadOffset * 100 / info.PreloadLength).toInt()
-                    msg += getString(R.string.buffer) + ": " + (prc).toString() + "% " + Utils.byteFmt(info.PreloadOffset) + "/" + Utils.byteFmt(info.PreloadLength) + "\n"
+                    val prc = (info.PreloadSize * 100 / info.PreloadLength).toInt()
+                    msg += getString(R.string.buffer) + ": " + (prc).toString() + "% " + Utils.byteFmt(info.PreloadSize) + "/" + Utils.byteFmt(info.PreloadLength) + "\n"
                     msg += getString(R.string.peers) + ": " + info.ConnectedSeeders.toString() + "/" + info.TotalPeers.toString() + "\n"
                     msg += getString(R.string.download_speed) + ": " + Utils.byteFmt(info.DownloadSpeed) + "/Sec"
                     setMessage(msg, prc)

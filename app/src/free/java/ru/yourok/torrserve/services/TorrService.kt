@@ -48,7 +48,7 @@ class TorrService : Service() {
 
     private fun startServer() {
         if (!ServerApi.echo()) {
-            torrentserver.Torrentserver.start(Utils.getAppPath())
+            server.Server.start(Utils.getAppPath())
             NotificationServer.Show(this, "")
         }
     }
@@ -57,8 +57,8 @@ class TorrService : Service() {
         NotificationServer.Close(this)
         thread {
             if (ServerApi.echo()) {
-                torrentserver.Torrentserver.stop()
-                torrentserver.Torrentserver.waitServer()
+                server.Server.stop()
+                server.Server.waitServer()
                 Handler(this.getMainLooper()).post(Runnable {
                     Toast.makeText(this, R.string.server_stoped, Toast.LENGTH_LONG).show()
                 })
@@ -68,9 +68,9 @@ class TorrService : Service() {
     }
 
     private fun restartServer() {
-        torrentserver.Torrentserver.stop()
-        torrentserver.Torrentserver.waitServer()
-        torrentserver.Torrentserver.start(Utils.getAppPath())
+        server.Server.stop()
+        server.Server.waitServer()
+        server.Server.start(Utils.getAppPath())
         Handler(this.getMainLooper()).post(Runnable {
             Toast.makeText(this, R.string.stat_server_is_running, Toast.LENGTH_SHORT).show()
         })

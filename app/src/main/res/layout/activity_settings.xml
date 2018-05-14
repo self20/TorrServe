@@ -64,12 +64,6 @@
                 android:inputType="numberSigned" />
 
             <CheckBox
-                android:text="Use elementum cache"
-                android:id="@+id/checkBoxIsElementumCache"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <CheckBox
                 android:text="@string/disable_tcp"
                 android:id="@+id/checkBoxDisableTCP"
                 android:layout_width="match_parent"

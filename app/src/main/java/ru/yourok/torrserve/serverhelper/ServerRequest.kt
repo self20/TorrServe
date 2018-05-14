@@ -53,14 +53,13 @@ data class Info(
         var HalfOpenPeers: Int,
 
         var IsPreload: Boolean,
-        var PreloadOffset: Long,
+        var PreloadSize: Long,
         var PreloadLength: Long
 )
 
 
 data class ServerSettings(var CacheSize: Int,
                           var PreloadBufferSize: Int,
-                          var IsElementumCache: Boolean,
                           var DisableTCP: Boolean,
                           var DisableUTP: Boolean,
                           var DisableUPNP: Boolean,
@@ -141,7 +140,7 @@ fun js2Info(js: JSONObject): Info {
             js.getInt("HalfOpenPeers"),
 
             js.getBoolean("IsPreload"),
-            js.getLong("PreloadOffset"),
+            js.getLong("PreloadSize"),
             js.getLong("PreloadLength")
     )
 }
@@ -263,7 +262,6 @@ object ServerRequest {
         return ServerSettings(
                 js.getInt("CacheSize") / (1024 * 1024),
                 js.getInt("PreloadBufferSize") / (1024 * 1024),
-                js.getBoolean("IsElementumCache"),
                 js.getBoolean("DisableTCP"),
                 js.getBoolean("DisableUTP"),
                 js.getBoolean("DisableUPNP"),
@@ -281,7 +279,6 @@ object ServerRequest {
         val js = JSONObject()
         js.put("CacheSize", sets.CacheSize * (1024 * 1024))
         js.put("PreloadBufferSize", sets.PreloadBufferSize * (1024 * 1024))
-        js.put("IsElementumCache", sets.IsElementumCache)
         js.put("DisableTCP", sets.DisableTCP)
         js.put("DisableUTP", sets.DisableUTP)
         js.put("DisableUPNP", sets.DisableUPNP)
@@ -295,7 +292,7 @@ object ServerRequest {
         requestStr(true, url, js.toString(0))
     }
 
-    fun serverPreload(host: String, hash: String, fileLink: String) {
+    fun serverPreload(host: String, fileLink: String) {
         val link = fileLink.replace("/torrent/view/", "/torrent/preload/")
         val url = joinUrl(host, link)
         requestStr(false, url, "")

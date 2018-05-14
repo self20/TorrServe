@@ -41,6 +41,7 @@ object Mime {
             "nsv",
             "ogg",
             "ogv",
+            "ts",
             "qt",
             "rm",
             "rmvb",

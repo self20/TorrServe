@@ -86,7 +86,7 @@ object NotificationServer {
                         msg += "\n" + context.getString(R.string.upload_speed) + ": " + Utils.byteFmt(it.UploadSpeed)
 
                     if (info.IsPreload && !isShow && info.PreloadLength > 0) {
-                        msg += "\n" + context.getString(R.string.buffer) + ": " + (info.PreloadOffset * 100 / info.PreloadLength).toString() + "% " + Utils.byteFmt(info.PreloadOffset) + "/" + Utils.byteFmt(info.PreloadLength)
+                        msg += "\n" + context.getString(R.string.buffer) + ": " + (info.PreloadSize * 100 / info.PreloadLength).toString() + "% " + Utils.byteFmt(info.PreloadSize) + "/" + Utils.byteFmt(info.PreloadLength)
                         if (Preferences.isShowPreloadWnd()) {
                             val intent = Intent(App.getContext(), ViewActivity::class.java)
                             intent.putExtra("Preload", this.hash)

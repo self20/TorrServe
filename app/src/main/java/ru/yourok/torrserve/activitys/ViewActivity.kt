@@ -107,7 +107,7 @@ class ViewActivity : AppCompatActivity() {
                 val listViewFiles = findViewById<ListView>(R.id.listViewTorrentFiles)
                 listViewFiles.adapter = adapter
                 listViewFiles.setOnItemClickListener { _, _, i, _ ->
-                    val file = fpList[i]
+                    val file = adapter.getItem(i) as File?
                     file?.let {
                         finish()
                         thread {
