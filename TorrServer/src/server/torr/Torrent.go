@@ -114,7 +114,6 @@ func (bt *BTServer) getTorrent(torrDB *settings.Torrent) (*TorrentState, error) 
 	state.CacheState = bt.storage.GetStats(hash)
 	state.expiredTime = time.Now().Add(time.Minute * 5)
 	bt.states[hash] = state
-	go bt.watcher()
 
 	return state, nil
 }

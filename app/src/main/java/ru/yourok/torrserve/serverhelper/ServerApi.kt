@@ -96,13 +96,11 @@ object ServerApi {
     fun preload(hash: String, fileLink: String) {
         if (hash.isEmpty() || fileLink.isEmpty())
             return
-        thread {
-            try {
-                val addr = Preferences.getServerAddress()
-                ServerRequest.serverPreload(addr, fileLink)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+        try {
+            val addr = Preferences.getServerAddress()
+            ServerRequest.serverPreload(addr, fileLink)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

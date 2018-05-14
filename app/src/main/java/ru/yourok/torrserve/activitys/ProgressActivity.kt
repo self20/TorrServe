@@ -50,8 +50,6 @@ class ProgressActivity : AppCompatActivity() {
                 NotificationServer.Show(this, it.Hash)
             }
 
-            if (!isClosed)
-                preload()
             if (!isClosed && Preferences.isShowPreloadWnd())
                 waitPreload()
             if (!isClosed)
@@ -68,27 +66,36 @@ class ProgressActivity : AppCompatActivity() {
         isClosed = true
     }
 
+
     private fun waitPreload() {
         var err = 0
-        torrent?.let {
-            while (true) {
-                if (err > 15) {
-                    return
+        torrent?.let { torrent ->
+            file?.let { file ->
+                var isPreload = true
+                thread {
+                    ServerApi.preload(torrent.Hash, file.Link)
+                    isPreload = false
                 }
-                Thread.sleep(1000)
-                val info = ServerApi.info(it.Hash)
-                if (info == null) {
-                    err++
-                    continue
-                }
+                while (isPreload) {
+                    if (err > 15) {
+                        return
+                    }
+                    Thread.sleep(1000)
+                    val info = ServerApi.info(torrent.Hash)
+                    if (info == null) {
+                        err++
+                        continue
+                    }
 
-                if (!info.IsPreload || info.PreloadSize >= info.PreloadLength)
-                    return
+                    if (!info.IsPreload || info.PreloadSize >= info.PreloadLength)
+                        return
 
-                if (info.PreloadLength > 0) {
                     var msg = ""
-                    val prc = (info.PreloadSize * 100 / info.PreloadLength).toInt()
-                    msg += getString(R.string.buffer) + ": " + (prc).toString() + "% " + Utils.byteFmt(info.PreloadSize) + "/" + Utils.byteFmt(info.PreloadLength) + "\n"
+                    var prc = 0
+                    if (info.PreloadLength > 0) {
+                        prc = (info.PreloadSize * 100 / info.PreloadLength).toInt()
+                        msg += getString(R.string.buffer) + ": " + (prc).toString() + "% " + Utils.byteFmt(info.PreloadSize) + "/" + Utils.byteFmt(info.PreloadLength) + "\n"
+                    }
                     msg += getString(R.string.peers) + ": " + info.ConnectedSeeders.toString() + "/" + info.TotalPeers.toString() + "\n"
                     msg += getString(R.string.download_speed) + ": " + Utils.byteFmt(info.DownloadSpeed) + "/Sec"
                     setMessage(msg, prc)
@@ -108,14 +115,6 @@ class ProgressActivity : AppCompatActivity() {
 
                 findViewById<TextView>(R.id.textViewStatus).visibility = View.VISIBLE
                 findViewById<TextView>(R.id.textViewStatus).setText(msg)
-            }
-        }
-    }
-
-    private fun preload() {
-        torrent?.let { torrent ->
-            file?.let { file ->
-                ServerApi.preload(torrent.Hash, file.Link)
             }
         }
     }

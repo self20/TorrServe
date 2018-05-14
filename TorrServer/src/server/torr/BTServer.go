@@ -45,6 +45,7 @@ func (bt *BTServer) Connect() error {
 	var err error
 	bt.configure()
 	bt.client, err = torrent.NewClient(bt.config)
+	bt.states = make(map[metainfo.Hash]*TorrentState)
 	return err
 }
 
@@ -226,6 +227,7 @@ func (bt *BTServer) Preload(hashHex string, fileLink string) error {
 		if ep > 0 {
 			state.PreloadLength = ep * state.PiecesLength
 			state.torrent.DownloadPieces(0, int(ep))
+			go bt.watcher()
 			for {
 				select {
 				case <-state.torrent.Closed():
