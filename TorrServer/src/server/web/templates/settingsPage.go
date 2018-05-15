@@ -72,6 +72,11 @@ var settingsPage = `
 				<label for="UploadRateLimit">Upload Rate Limit</label>
 				<input id="UploadRateLimit" type="number" autocomplete="off">
 			</div>
+			<h4>0 - Do nothing; 1 - Add retrackers; 2 - Remove retrackers</h4>
+			<div class="ui-widget">
+				<label for="RetrackersMode">Retrackers Mode</label>
+				<input id="RetrackersMode" type="number" autocomplete="off">
+			</div>
 		</form>
 
 		<br>

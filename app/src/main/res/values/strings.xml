@@ -70,4 +70,11 @@
     <string name="error_sending_settings">Error sending settings</string>
 
     <string name="error_remove_torrent">Error remove torrent</string>
+
+    <string name="retrackers">Retrackers</string>
+    <string-array name="retracker_mode">
+        <item>Do nothing</item>
+        <item>Add retrackers</item>
+        <item>Remove retrackers</item>
+    </string-array>
 </resources>

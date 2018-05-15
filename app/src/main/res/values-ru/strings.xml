@@ -68,4 +68,11 @@
     <string name="error_sending_settings">Ошибка при отправке настроек</string>
 
     <string name="error_remove_torrent">Ошибка удаления торрента</string>
+
+    <string name="retrackers">Ретрекеры</string>
+    <string-array name="retracker_mode">
+        <item>Ничего не делать</item>
+        <item>Добовлять ретрекеры</item>
+        <item>Удалять ретрекеры</item>
+    </string-array>
 </resources>

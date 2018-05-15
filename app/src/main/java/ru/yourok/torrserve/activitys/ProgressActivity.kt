@@ -96,7 +96,7 @@ class ProgressActivity : AppCompatActivity() {
                         prc = (info.PreloadSize * 100 / info.PreloadLength).toInt()
                         msg += getString(R.string.buffer) + ": " + (prc).toString() + "% " + Utils.byteFmt(info.PreloadSize) + "/" + Utils.byteFmt(info.PreloadLength) + "\n"
                     }
-                    msg += getString(R.string.peers) + ": " + info.ConnectedSeeders.toString() + "/" + info.TotalPeers.toString() + "\n"
+                    msg += getString(R.string.peers) + ": " + info.ConnectedSeeders.toString() + ", " + info.ActivePeers.toString() + "/" + info.TotalPeers.toString() + "\n"
                     msg += getString(R.string.download_speed) + ": " + Utils.byteFmt(info.DownloadSpeed) + "/Sec"
                     setMessage(msg, prc)
                 }

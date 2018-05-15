@@ -36,6 +36,7 @@ func (bt *BTServer) Play(hash, fileLink string, c echo.Context) error {
 	}
 
 	go settings.SetViewed(tordb.Hash, file.Name)
+	go bt.watcher()
 
 	var reader torrent.Reader
 	for _, f := range state.torrent.Files() {
@@ -43,6 +44,9 @@ func (bt *BTServer) Play(hash, fileLink string, c echo.Context) error {
 			reader = f.NewReader()
 			break
 		}
+	}
+	if reader == nil {
+		return c.String(http.StatusNotFound, "file not found: "+fileLink)
 	}
 
 	readahead := int64(float64(settings.Get().CacheSize) * 0.33)
@@ -66,7 +70,6 @@ func (bt *BTServer) Play(hash, fileLink string, c echo.Context) error {
 
 	if state.readers == 0 {
 		state.expiredTime = time.Now().Add(time.Second * 20)
-		go bt.watcher()
 	}
 
 	return c.NoContent(http.StatusOK)

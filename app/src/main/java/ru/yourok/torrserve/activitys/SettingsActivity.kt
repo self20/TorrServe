@@ -44,6 +44,10 @@ class SettingsActivity : AppCompatActivity() {
         adp1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerPlayer.setAdapter(adp1)
 
+        val adp2 = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.retracker_mode))
+        adp2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerRetracker.setAdapter(adp2)
+
         textViewVersion.setText("YouROK " + getText(R.string.app_name) + " ${BuildConfig.FLAVOR} ${BuildConfig.VERSION_NAME}")
 
         loadSettings(false)
@@ -110,6 +114,7 @@ class SettingsActivity : AppCompatActivity() {
 
         editTextCacheSize.setText(sets.CacheSize.toString())
         editTextPreloadBufferSize.setText(sets.PreloadBufferSize.toString())
+        spinnerRetracker.setSelection(sets.RetrackersMode)
 
         checkBoxDisableTCP.setChecked(sets.DisableTCP)
         checkBoxDisableUTP.setChecked(sets.DisableUTP)
@@ -139,6 +144,7 @@ class SettingsActivity : AppCompatActivity() {
             val sets = ServerSettings(
                     editTextCacheSize.text.toString().toInt(),
                     editTextPreloadBufferSize.text.toString().toInt(),
+                    spinnerRetracker.selectedItemPosition,
                     checkBoxDisableTCP.isChecked,
                     checkBoxDisableUTP.isChecked,
                     checkBoxDisableUPNP.isChecked,

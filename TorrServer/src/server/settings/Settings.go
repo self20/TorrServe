@@ -25,7 +25,8 @@ type Settings struct {
 	CacheSize         int64 // in byte, def 200 mb
 	PreloadBufferSize int64 // in byte, buffer for readahead
 
-	Cache int
+	Cache          int
+	RetrackersMode int //0 - don`t add, 1 - add retrackers, 2 - remove retrackers
 
 	//BT Config
 	DisableTCP        bool
