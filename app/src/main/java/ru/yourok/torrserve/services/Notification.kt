@@ -80,7 +80,7 @@ object NotificationServer {
             while (update) {
                 val info = ServerApi.info(this.hash)
                 info?.let {
-                    var msg = context.getString(R.string.peers) + ": " + it.ConnectedSeeders.toString() + " / " + it.TotalPeers.toString() + "\n" +
+                    var msg = context.getString(R.string.peers) + ": " + it.ConnectedSeeders.toString() + ", " + it.ActivePeers.toString() + " / " + it.TotalPeers.toString() + "\n" +
                             context.getString(R.string.download_speed) + ": " + Utils.byteFmt(it.DownloadSpeed)
                     if (it.UploadSpeed > 0)
                         msg += "\n" + context.getString(R.string.upload_speed) + ": " + Utils.byteFmt(it.UploadSpeed)

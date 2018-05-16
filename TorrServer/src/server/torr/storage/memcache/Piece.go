@@ -88,6 +88,8 @@ func (p *Piece) Completion() storage.Completion {
 }
 
 func (p *Piece) Release() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	p.cache.bufferPull.PutBuffer(p.buffer)
 	p.buffer = nil
 	p.Size = 0

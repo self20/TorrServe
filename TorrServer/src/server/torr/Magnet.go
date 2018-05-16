@@ -8,9 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"server/settings"
-	"server/utils"
-
 	"github.com/anacrolix/torrent/metainfo"
 )
 
@@ -31,13 +28,6 @@ func GetMagnet(link string) (string, error) {
 	}
 	if err != nil {
 		return "", err
-	}
-
-	switch settings.Get().RetrackersMode {
-	case 1:
-		mag = utils.AddRetracker(mag)
-	case 2:
-		mag = utils.RemoveRetracker(mag)
 	}
 
 	return mag, nil

@@ -116,7 +116,7 @@ func GotInfo(t *torrent.Torrent) error {
 	select {
 	case <-t.GotInfo():
 		return nil
-	case <-time.Tick(time.Second * 20):
+	case <-time.Tick(time.Second * 120):
 		return errors.New("timeout load torrent info")
 	}
 }

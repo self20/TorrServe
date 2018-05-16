@@ -20,8 +20,8 @@ android {
         applicationId "ru.yourok.torrserve"
         minSdkVersion 15
         targetSdkVersion 26
-        versionCode 44
-        versionName "1.0.44"
+        versionCode 45
+        versionName "1.0.45"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {

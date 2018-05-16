@@ -98,7 +98,16 @@ func (bt *BTServer) getTorrent(torrDB *settings.Torrent) (*TorrentState, error) 
 		return st, nil
 	}
 
-	tor, err := bt.client.AddMagnet(torrDB.Magnet)
+	mag := torrDB.Magnet
+
+	switch settings.Get().RetrackersMode {
+	case 1:
+		mag = utils.AddRetracker(mag)
+	case 2:
+		mag = utils.RemoveRetracker(mag)
+	}
+
+	tor, err := bt.client.AddMagnet(mag)
 	if err != nil {
 		return nil, err
 	}
