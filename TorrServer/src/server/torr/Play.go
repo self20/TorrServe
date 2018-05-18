@@ -54,8 +54,14 @@ func (bt *BTServer) Play(hash, fileLink string, c echo.Context) error {
 		readahead = 5 * 1024 * 1024
 	}
 	reader.SetReadahead(readahead)
+
 	state.readers++
-	defer func() { state.readers-- }()
+	defer func() {
+		state.readers--
+		state.expiredTime = time.Now().Add(time.Second * 20)
+		go bt.watcher()
+	}()
+
 	fmt.Println("Connect reader:", state.readers)
 
 	tm := settings.StartTime
@@ -67,10 +73,6 @@ func (bt *BTServer) Play(hash, fileLink string, c echo.Context) error {
 	reader.Close()
 
 	fmt.Println("Disconnect reader:", state.readers)
-
-	if state.readers == 0 {
-		state.expiredTime = time.Now().Add(time.Second * 20)
-	}
 
 	return c.NoContent(http.StatusOK)
 }

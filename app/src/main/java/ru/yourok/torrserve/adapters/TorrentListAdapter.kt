@@ -32,6 +32,16 @@ class TorrentListAdapter(val activity: Activity) : BaseAdapter() {
         }
     }
 
+    fun checkList() {
+        val tmpList = ServerApi.list()
+        if (tmpList != torrList) {
+            torrList = tmpList
+            activity.runOnUiThread {
+                notifyDataSetChanged()
+            }
+        }
+    }
+
     override fun getView(index: Int, convertView: View?, viewGroup: ViewGroup): View {
         val vi: View = convertView ?: (activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.adapter_torrent_list, null)
         if (index in 0 until torrList.size) {

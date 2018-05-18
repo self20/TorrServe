@@ -9,9 +9,6 @@ import android.os.Environment
 import android.os.StatFs
 import android.util.Log
 import ru.yourok.torrserve.activitys.ACRActivity
-import ru.yourok.torrserve.serverhelper.Preferences
-import ru.yourok.torrserve.serverhelper.ServerApi
-import ru.yourok.torrserve.utils.Utils
 import java.io.*
 import java.util.*
 
@@ -83,7 +80,7 @@ class ACR private constructor(private val application: Application) : Thread.Unc
         }
 
     private// Try to create the files folder if it doesn't exist
-            // Filter for ".stacktrace" files
+    // Filter for ".stacktrace" files
     val errorFileList: Array<String>
         get() {
             val dir = File(filePath!! + "/")
@@ -219,28 +216,6 @@ class ACR private constructor(private val application: Application) : Thread.Unc
         return infoStringBuffer.toString()
     }
 
-    private fun createAppInfoString(): String {
-        val sBuilder = StringBuilder()
-        val sets = ServerApi.readSettings()
-
-        sBuilder.append("\nServer address: ${Preferences.getServerAddress()}\n")
-        sets?.let {
-            sBuilder.append("\n$sets\n")
-        } ?: let {
-            sBuilder.append("\nServer not running\n")
-        }
-
-        sBuilder.append("\nTorrents :")
-
-        val ff = File(Utils.getAppPath(), "torrents.cfg")
-        if (ff.canRead()) {
-            val torr = ff.readText()
-            sBuilder.append("\n$torr\n")
-        }
-
-        return sBuilder.toString()
-    }
-
     override fun uncaughtException(t: Thread, e: Throwable) {
         showLog("====uncaughtException")
 
@@ -270,10 +245,6 @@ class ACR private constructor(private val application: Application) : Thread.Unc
             cause = cause.cause
         }
         printWriter.close()
-
-        reportStringBuffer.append("\nApp Info :\n==============\n")
-        reportStringBuffer.append(createAppInfoString())
-
 
         reportStringBuffer.append("\n\n**** End of current Report ***")
         showLog("====uncaughtException \n Report: " + reportStringBuffer.toString())

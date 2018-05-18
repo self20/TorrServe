@@ -24,7 +24,6 @@ import ru.yourok.torrserve.menu.TorrentListSelectionMenu
 import ru.yourok.torrserve.navigationBar.NavigationBar
 import ru.yourok.torrserve.serverhelper.ServerApi
 import ru.yourok.torrserve.serverhelper.Torrent
-import ru.yourok.torrserve.serverloader.ServerLoader
 import ru.yourok.torrserve.services.TorrService
 import java.util.*
 import kotlin.concurrent.schedule
@@ -37,9 +36,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-//        ServerLoader.copy()
-//        ServerLoader.run()
 
         var isAndroidTV = false
         val uiModeManager = getSystemService(UI_MODE_SERVICE) as UiModeManager
@@ -73,7 +69,6 @@ class MainActivity : AppCompatActivity() {
             if ((torrAdapter.getItem(i) as Torrent).Files.isEmpty())
                 return@setOnItemClickListener
 
-            val name = (torrAdapter.getItem(i) as Torrent).Name
             val hash = (torrAdapter.getItem(i) as Torrent).Hash
             val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
             progressBar.visibility = View.VISIBLE
@@ -101,6 +96,28 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         startServer()
         torrAdapter.updateList()
+        autoUpdateList()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isUpdate = false
+    }
+
+    private var isUpdate = false
+    private fun autoUpdateList() {
+        thread {
+            synchronized(isUpdate) {
+                if (isUpdate)
+                    return@thread
+                isUpdate = true
+            }
+
+            while (isUpdate) {
+                torrAdapter?.checkList()
+                Thread.sleep(1000)
+            }
+        }
     }
 
     private fun startServer() {

@@ -25,7 +25,7 @@ type Cache struct {
 	pieceCount  int
 	piecesBuff  int
 
-	//muPiece  sync.Mutex
+	muPiece  sync.Mutex
 	muRemove sync.Mutex
 	isRemove bool
 
@@ -70,8 +70,8 @@ func (c *Cache) Init(info *metainfo.Info, hash metainfo.Hash) {
 }
 
 func (c *Cache) Piece(m metainfo.Piece) storage.PieceImpl {
-	//c.muPiece.Lock()
-	//defer c.muPiece.Unlock()
+	c.muPiece.Lock()
+	defer c.muPiece.Unlock()
 	if val, ok := c.pieces[m.Index()]; ok {
 		return val
 	}
@@ -105,14 +105,14 @@ func (c *Cache) GetState() state.CacheState {
 	cState.Filled = c.filled
 
 	stats := make([]state.ItemState, 0)
-	//c.muPiece.Lock()
+	c.muPiece.Lock()
 	for _, value := range c.pieces {
 		stat := value.Stat()
 		if stat.BufferSize > 0 {
 			stats = append(stats, stat)
 		}
 	}
-	//c.muPiece.Unlock()
+	c.muPiece.Unlock()
 	sort.Slice(stats, func(i, j int) bool {
 		return stats[i].Accessed.Before(stats[j].Accessed)
 	})
@@ -120,7 +120,7 @@ func (c *Cache) GetState() state.CacheState {
 	return cState
 }
 
-func (c *Cache) cleanPieces() {
+func (c *Cache) cleanPieces(force bool) {
 	if c.isRemove {
 		return
 	}
@@ -134,7 +134,7 @@ func (c *Cache) cleanPieces() {
 	c.muRemove.Unlock()
 
 	remPieces := c.getRemPieces()
-	if len(remPieces) > 0 && c.capacity < c.filled {
+	if len(remPieces) > 0 && (c.capacity < c.filled || force) {
 		remCount := int((c.filled - c.capacity) / c.pieceLength)
 		if remCount < 1 {
 			remCount = 1
@@ -157,7 +157,9 @@ func (c *Cache) getRemPieces() []*Piece {
 	loading := 0
 	for _, v := range c.pieces {
 		if v.Size > 0 {
-			pieces = append(pieces, v)
+			if v.Id > 0 {
+				pieces = append(pieces, v)
+			}
 			fill += v.Size
 			if !v.complete {
 				loading++
@@ -174,8 +176,8 @@ func (c *Cache) getRemPieces() []*Piece {
 }
 
 func (c *Cache) removePiece(piece *Piece) {
-	//c.muPiece.Lock()
-	//defer c.muPiece.Unlock()
+	c.muPiece.Lock()
+	defer c.muPiece.Unlock()
 	piece.Release()
 
 	st := fmt.Sprintf("%v%% %v\t%s\t%s", c.prcLoaded, piece.Id, piece.accessed.Format("15:04:05.000"), piece.Hash)

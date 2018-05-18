@@ -96,7 +96,7 @@ class ProgressActivity : AppCompatActivity() {
                         prc = (info.PreloadSize * 100 / info.PreloadLength).toInt()
                         msg += getString(R.string.buffer) + ": " + (prc).toString() + "% " + Utils.byteFmt(info.PreloadSize) + "/" + Utils.byteFmt(info.PreloadLength) + "\n"
                     }
-                    msg += getString(R.string.peers) + ": " + info.ConnectedSeeders.toString() + ", " + info.ActivePeers.toString() + "/" + info.TotalPeers.toString() + "\n"
+                    msg += getString(R.string.peers) + ": [" + info.ConnectedSeeders.toString() + "] " + info.ActivePeers.toString() + "/" + info.TotalPeers.toString() + "\n"
                     msg += getString(R.string.download_speed) + ": " + Utils.byteFmt(info.DownloadSpeed) + "/Sec"
                     setMessage(msg, prc)
                 }
@@ -126,8 +126,9 @@ class ProgressActivity : AppCompatActivity() {
                     val addr = Preferences.getServerAddress() + file.Link
                     val pkg = Preferences.getPlayer()
 
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.setDataAndType(Uri.parse(addr), Mime.getMimeType(file.Name))
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(addr))
+                    val mime = Mime.getMimeType(file.Name)
+                    intent.setDataAndType(Uri.parse(addr), mime)
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     intent.putExtra("title", file.Name)
 

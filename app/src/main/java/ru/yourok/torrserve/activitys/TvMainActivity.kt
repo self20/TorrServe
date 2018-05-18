@@ -99,6 +99,28 @@ class TvMainActivity : AppCompatActivity() {
         super.onResume()
         startServer()
         torrAdapter.updateList()
+        autoUpdateList()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isUpdate = false
+    }
+
+    private var isUpdate = false
+    private fun autoUpdateList() {
+        thread {
+            synchronized(isUpdate) {
+                if (isUpdate)
+                    return@thread
+                isUpdate = true
+            }
+
+            while (isUpdate) {
+                torrAdapter?.checkList()
+                Thread.sleep(1000)
+            }
+        }
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {

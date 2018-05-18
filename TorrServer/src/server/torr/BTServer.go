@@ -104,7 +104,7 @@ func (bt *BTServer) configure() {
 		//TorrentPeersLowWater: 50,
 		//TorrentPeersHighWater: 500,
 
-		DisableIPv6: true,
+		//DisableIPv6: true,
 	}
 
 	if settings.Get().DownloadRateLimit > 0 {
