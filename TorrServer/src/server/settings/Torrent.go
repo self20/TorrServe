@@ -202,6 +202,7 @@ func LoadTorrentDB(hash string) (*Torrent, error) {
 				file.Viewed = len(tmp) > 0 && tmp[0] == 1
 				torr.Files = append(torr.Files, file)
 			}
+			SortFiles(torr.Files)
 		}
 		return nil
 	})
@@ -271,6 +272,7 @@ func LoadTorrentsDB() ([]*Torrent, error) {
 					file.Viewed = len(tmp) > 0 && tmp[0] == 1
 					torr.Files = append(torr.Files, file)
 				}
+				SortFiles(torr.Files)
 				torrs = append(torrs, torr)
 			}
 		}

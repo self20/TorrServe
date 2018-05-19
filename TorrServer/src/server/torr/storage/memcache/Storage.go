@@ -34,16 +34,7 @@ func (s *Storage) OpenTorrent(info *metainfo.Info, infoHash metainfo.Hash) (stor
 	return ch, nil
 }
 
-func (s *Storage) GetStats(hash metainfo.Hash) state.CacheState {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if c, ok := s.caches[hash]; ok {
-		return c.GetState()
-	}
-	return state.CacheState{}
-}
-
-func (s *Storage) GetStatsHash(hash metainfo.Hash) *state.CacheState {
+func (s *Storage) GetStats(hash metainfo.Hash) *state.CacheState {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if c, ok := s.caches[hash]; ok {

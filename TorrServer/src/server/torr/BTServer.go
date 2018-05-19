@@ -10,6 +10,7 @@ import (
 	"server/settings"
 	"server/torr/storage"
 	"server/torr/storage/memcache"
+	"server/torr/storage/state"
 	"server/utils"
 
 	"github.com/anacrolix/dht"
@@ -73,8 +74,6 @@ func (bt *BTServer) configure() {
 	peerID := "-UT3490-"
 
 	bt.config = &torrent.Config{
-		//Debug: true,
-
 		DisableTCP:              settings.Get().DisableTCP,
 		DisableUTP:              settings.Get().DisableUTP,
 		NoDefaultPortForwarding: settings.Get().DisableUPNP,
@@ -105,13 +104,15 @@ func (bt *BTServer) configure() {
 		//TorrentPeersHighWater: 500,
 
 		//DisableIPv6: true,
+
+		//Debug: true,
 	}
 
 	if settings.Get().DownloadRateLimit > 0 {
-		bt.config.DownloadRateLimiter = rate.NewLimiter(rate.Inf, settings.Get().DownloadRateLimit)
+		bt.config.DownloadRateLimiter = rate.NewLimiter(rate.Limit(settings.Get().DownloadRateLimit*1024), 256<<10)
 	}
 	if settings.Get().UploadRateLimit > 0 {
-		bt.config.UploadRateLimiter = rate.NewLimiter(rate.Inf, settings.Get().UploadRateLimit)
+		bt.config.UploadRateLimiter = rate.NewLimiter(rate.Limit(settings.Get().UploadRateLimit*1024), 1<<20)
 	}
 }
 
@@ -180,6 +181,15 @@ func (bt *BTServer) TorrentState(hashHex string) *TorrentState {
 	return nil
 }
 
+func (bt *BTServer) CacheState(hashHex string) *state.CacheState {
+	bt.mu.Lock()
+	defer bt.mu.Unlock()
+
+	hash := metainfo.NewHashFromHex(hashHex)
+	state := bt.storage.GetStats(hash)
+	return state
+}
+
 func (bt *BTServer) Clean(hashHex string) {
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
@@ -220,12 +230,15 @@ func (bt *BTServer) Preload(hashHex string, fileLink string) error {
 	if err != nil {
 		return err
 	}
+	hash := metainfo.NewHashFromHex(hashHex)
+	cState := bt.storage.GetStats(hash)
+
 	if !state.IsPreload {
 		state.IsPreload = true
 		pr := settings.Get().PreloadBufferSize
-		ep := pr / state.PiecesLength
+		ep := pr / cState.PiecesLength
 		if ep > 0 {
-			state.PreloadLength = ep * state.PiecesLength
+			state.PreloadLength = ep * cState.PiecesLength
 			state.torrent.DownloadPieces(0, int(ep))
 			go bt.watcher()
 			for {
@@ -235,7 +248,7 @@ func (bt *BTServer) Preload(hashHex string, fileLink string) error {
 				default:
 				}
 				state.expiredTime = time.Now().Add(time.Minute)
-				state.PreloadSize = state.Filled
+				state.PreloadSize = state.LoadedSize
 				fmt.Println("Preload:", bytes.Format(state.PreloadSize), "/", bytes.Format(state.PreloadLength), "Speed:", utils.Format(state.DownloadSpeed), "Peers:", state.ConnectedSeeders, "/", state.ActivePeers, ",", state.TotalPeers)
 				if state.PreloadSize >= state.PreloadLength {
 					return nil

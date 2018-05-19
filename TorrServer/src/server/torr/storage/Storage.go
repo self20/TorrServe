@@ -10,8 +10,7 @@ import (
 type Storage interface {
 	storage.ClientImpl
 
-	GetStats(hash metainfo.Hash) state.CacheState
-	GetStatsHash(hash metainfo.Hash) *state.CacheState
+	GetStats(hash metainfo.Hash) *state.CacheState
 	CloseHash(hash metainfo.Hash)
 	Clean()
 }

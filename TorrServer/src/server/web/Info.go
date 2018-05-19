@@ -61,15 +61,17 @@ func statePage(c echo.Context) error {
 		msg += fmt.Sprintf("\t&emsp;Download Speed: %v/Sec<br>\n", utils.Format(st.DownloadSpeed))
 		msg += fmt.Sprintf("\t&emsp;Upload Speed:   %v/Sec<br>\n", utils.Format(st.UploadSpeed))
 
-		msg += fmt.Sprintf("Cache:<br>\n")
-		msg += fmt.Sprintf("Capacity: %v<br>\n", bytes.Format(st.CacheState.Capacity))
-		msg += fmt.Sprintf("Filled: %v<br>\n", bytes.Format(st.CacheState.Filled))
-		msg += fmt.Sprintf("PiecesLength: %v<br>\n", bytes.Format(st.CacheState.PiecesLength))
-		msg += fmt.Sprintf("PiecesCount: %v<br>\n", st.CacheState.PiecesCount)
-		for _, p := range st.CacheState.Pieces {
-			msg += fmt.Sprintf("\t&emsp;Piece: %v\t&emsp; Access: %s\t&emsp; Buffer size: %d(%s)\t&emsp; Complete: %v\t&emsp; Hash: %s\n<br>", p.Id, p.Accessed.Format("15:04:05.000"), p.BufferSize, bytes.Format(int64(p.BufferSize)), p.Completed, p.Hash)
+		cState := bts.CacheState(st.Hash)
+		if cState != nil {
+			msg += fmt.Sprintf("Cache:<br>\n")
+			msg += fmt.Sprintf("Capacity: %v<br>\n", bytes.Format(cState.Capacity))
+			msg += fmt.Sprintf("Filled: %v<br>\n", bytes.Format(cState.Filled))
+			msg += fmt.Sprintf("PiecesLength: %v<br>\n", bytes.Format(cState.PiecesLength))
+			msg += fmt.Sprintf("PiecesCount: %v<br>\n", cState.PiecesCount)
+			for _, p := range cState.Pieces {
+				msg += fmt.Sprintf("\t&emsp;Piece: %v\t&emsp; Access: %s\t&emsp; Buffer size: %d(%s)\t&emsp; Complete: %v\t&emsp; Hash: %s\n<br>", p.Id, p.Accessed.Format("15:04:05.000"), p.BufferSize, bytes.Format(int64(p.BufferSize)), p.Completed, p.Hash)
+			}
 		}
-
 		msg += "<hr><br><br>\n\n"
 	}
 	return c.HTML(http.StatusOK, msg)

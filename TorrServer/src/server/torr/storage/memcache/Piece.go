@@ -2,7 +2,6 @@ package memcache
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"sync"
 	"time"
@@ -24,6 +23,7 @@ type Piece struct {
 	readed   bool
 	accessed time.Time
 	buffer   []byte
+	bufIndex int
 
 	mu    sync.RWMutex
 	cache *Cache
@@ -34,16 +34,15 @@ func (p *Piece) WriteAt(b []byte, off int64) (n int, err error) {
 	defer p.mu.Unlock()
 
 	if p.buffer == nil {
-		if p.cache.bufferPull.Len() < 3 {
-			fmt.Println("Force clean")
-			go p.cache.cleanPieces(true)
+		go p.cache.cleanPieces()
+		p.buffer, p.bufIndex = p.cache.bufferPull.GetBuffer(p)
+		if p.buffer == nil {
+			return 0, errors.New("Can't get buffer write")
 		}
-		p.buffer = p.cache.bufferPull.GetBuffer()
 	}
 	n = copy(p.buffer[off:], b[:])
 	p.Size += int64(n)
 	p.accessed = time.Now()
-	go p.cache.cleanPieces(false)
 	return
 }
 
@@ -66,8 +65,9 @@ func (p *Piece) ReadAt(b []byte, off int64) (n int, err error) {
 	if int(off)+size >= len(p.buffer) {
 		p.readed = true
 	}
-
-	go p.cache.cleanPieces(false)
+	if int64(len(b))+off >= p.Size {
+		go p.cache.cleanPieces()
+	}
 	return n, nil
 }
 
@@ -94,8 +94,11 @@ func (p *Piece) Completion() storage.Completion {
 func (p *Piece) Release() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	p.cache.bufferPull.PutBuffer(p.buffer)
-	p.buffer = nil
+	if p.buffer != nil {
+		p.buffer = nil
+		p.cache.bufferPull.ReleaseBuffer(p.bufIndex)
+		p.bufIndex = -1
+	}
 	p.Size = 0
 	p.complete = false
 }

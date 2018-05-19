@@ -2,7 +2,6 @@ package torr
 
 import (
 	"fmt"
-	"sort"
 	"time"
 
 	"server/settings"
@@ -36,9 +35,6 @@ func (bt *BTServer) add(magnet string) (*settings.Torrent, error) {
 	torDb.Magnet = magnet
 	torDb.Timestamp = time.Now().Unix()
 	files := tor.Files()
-	sort.Slice(files, func(i, j int) bool {
-		return files[i].Path() < files[j].Path()
-	})
 	for _, f := range files {
 		ff := settings.File{
 			f.Path(),
@@ -67,7 +63,6 @@ func (bt *BTServer) watcher() {
 					bt.removeState(hash)
 				} else {
 					st.updateTorrentState()
-					st.updateCacheState(bt.storage.GetStats(st.torrent.InfoHash()))
 				}
 			}
 
@@ -120,7 +115,6 @@ func (bt *BTServer) getTorrent(torrDB *settings.Torrent) (*TorrentState, error) 
 	state := new(TorrentState)
 	state.torrent = tor
 	state.TorrentStats = tor.Stats()
-	state.CacheState = bt.storage.GetStats(hash)
 	state.expiredTime = time.Now().Add(time.Minute * 5)
 	bt.states[hash] = state
 

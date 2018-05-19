@@ -102,17 +102,20 @@ func (c *Cache) GetState() state.CacheState {
 	cState.PiecesLength = c.pieceLength
 	cState.PiecesCount = c.pieceCount
 	cState.Hash = c.hash.HexString()
-	cState.Filled = c.filled
 
 	stats := make([]state.ItemState, 0)
 	c.muPiece.Lock()
+	var fill int64 = 0
 	for _, value := range c.pieces {
 		stat := value.Stat()
 		if stat.BufferSize > 0 {
+			fill += stat.BufferSize
 			stats = append(stats, stat)
 		}
 	}
+	c.filled = fill
 	c.muPiece.Unlock()
+	cState.Filled = c.filled
 	sort.Slice(stats, func(i, j int) bool {
 		return stats[i].Accessed.Before(stats[j].Accessed)
 	})
@@ -120,7 +123,7 @@ func (c *Cache) GetState() state.CacheState {
 	return cState
 }
 
-func (c *Cache) cleanPieces(force bool) {
+func (c *Cache) cleanPieces() {
 	if c.isRemove {
 		return
 	}
@@ -134,7 +137,7 @@ func (c *Cache) cleanPieces(force bool) {
 	c.muRemove.Unlock()
 
 	remPieces := c.getRemPieces()
-	if len(remPieces) > 0 && (c.capacity < c.filled || force) {
+	if len(remPieces) > 0 && (c.capacity < c.filled || c.bufferPull.Len() <= 1) {
 		remCount := int((c.filled - c.capacity) / c.pieceLength)
 		if remCount < 1 {
 			remCount = 1
@@ -155,7 +158,14 @@ func (c *Cache) getRemPieces() []*Piece {
 	pieces := make([]*Piece, 0)
 	fill := int64(0)
 	loading := 0
-	for _, v := range c.pieces {
+	used := make(map[int]struct{})
+	for _, b := range c.bufferPull.buffs {
+		if b.used {
+			used[b.pieceId] = struct{}{}
+		}
+	}
+	for u := range used {
+		v := c.pieces[u]
 		if v.Size > 0 {
 			if v.Id > 0 {
 				pieces = append(pieces, v)

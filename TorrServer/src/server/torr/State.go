@@ -3,8 +3,6 @@ package torr
 import (
 	"time"
 
-	"server/torr/storage/state"
-
 	"github.com/anacrolix/dht"
 	"github.com/anacrolix/torrent"
 )
@@ -19,12 +17,13 @@ type BTState struct {
 }
 
 type TorrentState struct {
-	state.CacheState
 	torrent.TorrentStats
 
 	Name string
+	Hash string
 
 	IsPreload     bool
+	LoadedSize    int64
 	PreloadSize   int64
 	PreloadLength int64
 
@@ -55,9 +54,7 @@ func (ts *TorrentState) updateTorrentState() {
 	ts.UploadSpeed = float64(deltaUpBytes) / deltaTime
 	ts.TorrentStats = state
 	ts.Name = ts.torrent.Name()
+	ts.Hash = ts.torrent.InfoHash().HexString()
+	ts.LoadedSize = ts.torrent.BytesCompleted()
 	ts.lastTimeSpeed = time.Now()
-}
-
-func (ts *TorrentState) updateCacheState(state state.CacheState) {
-	ts.CacheState = state
 }
