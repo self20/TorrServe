@@ -145,6 +145,7 @@ class ProgressActivity : AppCompatActivity() {
                             return@thread
                         }
                     }
+
                     val intentC = Intent.createChooser(intent, "")
                     startActivity(intentC)
                 }

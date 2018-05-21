@@ -17,6 +17,7 @@ import android.widget.ListView
 import android.widget.ProgressBar
 import com.mikepenz.materialdrawer.Drawer
 import kotlinx.android.synthetic.main.activity_main.*
+import ru.yourok.torrserve.BuildConfig
 import ru.yourok.torrserve.Donate
 import ru.yourok.torrserve.R
 import ru.yourok.torrserve.adapters.TorrentListAdapter
@@ -24,6 +25,7 @@ import ru.yourok.torrserve.menu.TorrentListSelectionMenu
 import ru.yourok.torrserve.navigationBar.NavigationBar
 import ru.yourok.torrserve.serverhelper.ServerApi
 import ru.yourok.torrserve.serverhelper.Torrent
+import ru.yourok.torrserve.serverloader.ServerLoader
 import ru.yourok.torrserve.services.TorrService
 import java.util.*
 import kotlin.concurrent.schedule
@@ -36,6 +38,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+//        if (BuildConfig.FLAVOR == "lite") {
+//            ServerLoader.copy()
+//            ServerLoader.run()
+//        }
 
         var isAndroidTV = false
         val uiModeManager = getSystemService(UI_MODE_SERVICE) as UiModeManager

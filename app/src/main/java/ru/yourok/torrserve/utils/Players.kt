@@ -38,7 +38,8 @@ object Players {
         val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
         val filtred = packages.filter {
             it.packageName == "org.xbmc.kodi" ||
-                    it.packageName == "com.android.gallery3d"
+                    it.packageName == "com.android.gallery3d" ||
+                    it.packageName == "com.niklabs.pp"
         }
 
         val list = mutableListOf<Player>()

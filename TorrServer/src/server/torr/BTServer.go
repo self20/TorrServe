@@ -92,18 +92,18 @@ func (bt *BTServer) configure() {
 		DefaultStorage: bt.storage,
 
 		DhtStartingNodes: dht.GlobalBootstrapAddrs,
-		ListenHost:       func(string) string { return "" },
+		ListenHost:       func(network string) string { return "" },
 
 		Bep20:         peerID,
 		PeerID:        utils.PeerIDRandom(peerID),
 		HTTPUserAgent: userAgent,
 
 		EstablishedConnsPerTorrent: settings.Get().ConnectionsLimit,
-		HalfOpenConnsPerTorrent:    int(float64(settings.Get().ConnectionsLimit) * 0.6),
+		HalfOpenConnsPerTorrent:    int(float64(settings.Get().ConnectionsLimit) * 0.65),
 		//TorrentPeersLowWater: 50,
 		//TorrentPeersHighWater: 500,
 
-		//DisableIPv6: true,
+		DisableIPv6: true,
 
 		//Debug: true,
 	}

@@ -12,7 +12,15 @@ import (
 )
 
 func (bt *BTServer) add(magnet string) (*settings.Torrent, error) {
-	tinfo, err := torrent.TorrentSpecFromMagnetURI(magnet)
+	mag := magnet
+	switch settings.Get().RetrackersMode {
+	case 1:
+		mag = utils.AddRetracker(mag)
+	case 2:
+		mag = utils.RemoveRetracker(mag)
+	}
+
+	tinfo, err := torrent.TorrentSpecFromMagnetURI(mag)
 	if err != nil {
 		return nil, err
 	}
