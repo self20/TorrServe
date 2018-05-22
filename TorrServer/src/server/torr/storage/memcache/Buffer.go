@@ -48,7 +48,7 @@ func (b *BufferPool) GetBuffer(p *Piece) (buff []byte, index int) {
 			buff = buf.buf
 			index = id
 			b.frees--
-			fmt.Printf("Get buffer: %v %v %v %p\n", id, p.Id, b.frees, buff)
+			//fmt.Printf("Get buffer: %v %v %v %p\n", id, p.Id, b.frees, buff)
 			return
 		}
 	}
@@ -67,7 +67,7 @@ func (b *BufferPool) ReleaseBuffer(index int) {
 		buff.used = false
 		buff.pieceId = -1
 		b.frees++
-		fmt.Println("Release buffer:", index, b.frees)
+		//fmt.Println("Release buffer:", index, b.frees)
 	} else {
 		utils.FreeOSMem()
 	}

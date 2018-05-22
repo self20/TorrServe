@@ -32,14 +32,15 @@ var mainPage = `
 		<input id="magnet" autocomplete="off">
 		<button id="buttonAdd" data-icon="plus" onclick="addTorrent()">Add</button>
 		<br>
-
+		<a href="/torrent/playlist.m3u" rel="external" data-role="button" data-icon="bullets">Playlist</a>
+		<br>
 		<h3>Torrents: </h3>
 		<div id="torrents"></div>
 		<hr>
 
 		<div class="ui-grid-a">
 			<div class="ui-block-a"><button id="buttonShutdown" data-icon="power" onclick="shutdown()">Shutdown</button></div>
-			<div class="ui-block-b"><a href="/settings" rel="external" class="ui-btn ui-shadow ui-corner-all" id="buttonSettings">Settings</a></div>
+			<div class="ui-block-b"><a href="/settings" rel="external" data-role="button" data-icon="gear" id="buttonSettings">Settings</a></div>
 		</div>
 	</div>
 
@@ -95,6 +96,7 @@ var mainPage = `
 					$("<hr>").appendTo(torrents);
 					var divColl = $('<div id="'+tor.Hash+'" data-role="collapsible"></div>')
 					$("<h3>"+tor.Name+" "+humanizeSize(tor.Size)+"</h3>").appendTo(divColl);
+					$('<a data-role="button" data-icon="bullets" target="_blank" href="'+tor.Playlist+'">Playlist</a>').appendTo(divColl);
 					$('<button data-icon="delete" onclick="removeTorrent(\''+tor.Hash+'\');">Remove ['+tor.Name+']</button>').appendTo(divColl);
 					$("<br>").appendTo(divColl);
 					for(var i in tor.Files){

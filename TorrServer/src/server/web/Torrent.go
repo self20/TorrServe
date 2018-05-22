@@ -28,6 +28,9 @@ func initTorrent(e *echo.Echo) {
 	e.POST("/torrent/cleancache", torrentCleanCache)
 	e.GET("/torrent/restart", torrentRestart)
 
+	e.GET("/torrent/playlist/:hash/*", torrentPlayList)
+	e.GET("/torrent/playlist.m3u", torrentPlayListAll)
+
 	e.GET("/torrent/view/:hash/:file", torrentView)
 	e.HEAD("/torrent/view/:hash/:file", torrentViewHead)
 	e.GET("/torrent/preload/:hash/:file", torrentPreload)
@@ -39,20 +42,22 @@ type TorrentJsonRequest struct {
 }
 
 type TorrentJsonResponse struct {
-	Name    string    `json:",omitempty"`
-	Magnet  string    `json:",omitempty"`
-	Hash    string    `json:",omitempty"`
-	Length  int64     `json:",omitempty"`
-	AddTime int64     `json:",omitempty"`
-	Size    int64     `json:",omitempty"`
-	Files   []TorFile `json:",omitempty"`
+	Name     string    `json:",omitempty"`
+	Magnet   string    `json:",omitempty"`
+	Hash     string    `json:",omitempty"`
+	Length   int64     `json:",omitempty"`
+	AddTime  int64     `json:",omitempty"`
+	Size     int64     `json:",omitempty"`
+	Playlist string    `json:",omitempty"`
+	Files    []TorFile `json:",omitempty"`
 }
 
 type TorFile struct {
-	Name   string
-	Link   string
-	Size   int64
-	Viewed bool
+	Name     string
+	Link     string
+	Playlist string
+	Size     int64
+	Viewed   bool
 }
 
 func torrentAdd(c echo.Context) error {
@@ -198,6 +203,49 @@ func torrentRestart(c echo.Context) error {
 	return c.String(http.StatusOK, "Ok")
 }
 
+func torrentPlayList(c echo.Context) error {
+	hash, err := url.PathUnescape(c.Param("hash"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	torr, err := bts.Get(hash)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	m3u := "#EXTM3U\n"
+	m3u += "#EXT-X-PLAYLIST-TYPE:VOD\n"
+	m3u += "#EXT-X-VERSION:3\n"
+
+	for _, f := range torr.Files {
+		m3u += "#EXTINF:-1," + f.Name + "\n"
+		m3u += c.Scheme() + "://" + c.Request().Host + "/torrent/view/" + hash + "/" + utils.FileToLink(f.Name) + "\n\n"
+	}
+
+	http.ServeContent(c.Response(), c.Request(), torr.Name+".m3u", time.Now(), bytes.NewReader([]byte(m3u)))
+	return c.NoContent(http.StatusOK)
+}
+
+func torrentPlayListAll(c echo.Context) error {
+	list, err := bts.List()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	m3u := "#EXTM3U\n"
+	m3u += "#EXT-X-PLAYLIST-TYPE:VOD\n"
+	m3u += "#EXT-X-VERSION:3\n"
+
+	for _, t := range list {
+		m3u += "#EXTINF:0," + t.Name + "\n"
+		m3u += c.Scheme() + "://" + c.Request().Host + "/torrent/playlist/" + t.Hash + "/" + utils.FileToLink(t.Name) + ".m3u" + "\n\n"
+	}
+
+	http.ServeContent(c.Response(), c.Request(), "playlist.m3u", time.Now(), bytes.NewReader([]byte(m3u)))
+	return c.NoContent(http.StatusOK)
+}
+
 func torrentView(c echo.Context) error {
 	hash, err := url.PathUnescape(c.Param("hash"))
 	if err != nil {
@@ -263,6 +311,7 @@ func getTorrentJS(tor *settings.Torrent) (*TorrentJsonResponse, error) {
 	js.Hash = tor.Hash
 	js.AddTime = tor.Timestamp
 	js.Size = tor.Size
+	js.Playlist = "/torrent/playlist/" + tor.Hash + "/" + utils.FileToLink(tor.Name) + ".m3u"
 	var size int64 = 0
 	for _, f := range tor.Files {
 		size += f.Size
