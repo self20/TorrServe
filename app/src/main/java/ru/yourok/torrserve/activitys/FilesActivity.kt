@@ -37,6 +37,13 @@ class FilesActivity : AppCompatActivity() {
             finish()
             return
         }
+
+        buttonPlaylist.setOnClickListener {
+            torrent?.let {
+                ServerApi.openPlayList(it)
+            }
+        }
+
         torrId = intent.getStringExtra("Hash")
         progressBar.visibility = View.VISIBLE
 
@@ -52,6 +59,7 @@ class FilesActivity : AppCompatActivity() {
                     runOnUiThread {
                         findViewById<TextView>(R.id.textViewTorrFileName).setText(torr.Name)
                         textViewTorrSize.visibility = View.VISIBLE
+                        buttonPlaylist.visibility = View.VISIBLE
                         textViewTorrSize.setText(Utils.byteFmt(torr.Length))
                     }
 

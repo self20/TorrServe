@@ -53,6 +53,19 @@ object NavigationBar {
                 }
 
                 divider {}
+                primaryItem(R.string.playlist) {
+                    icon = R.drawable.ic_list_black_24dp
+                    selectable = false
+                    onClick { _ ->
+                        thread {
+                            if (ServerApi.list().isNotEmpty())
+                                ServerApi.openPlayList()
+                        }
+                        false
+                    }
+                }
+
+                divider {}
                 primaryItem(R.string.donate) {
                     icon = R.drawable.ic_donate_black
                     selectable = false

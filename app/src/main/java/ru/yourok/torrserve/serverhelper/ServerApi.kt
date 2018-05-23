@@ -1,5 +1,6 @@
 package ru.yourok.torrserve.serverhelper
 
+import android.content.Intent
 import android.net.Uri
 import ru.yourok.torrserve.App
 import java.io.File
@@ -140,6 +141,29 @@ object ServerApi {
             }
         }.join()
         return err
+    }
+
+    fun openPlayList(torrent: Torrent) {
+        if (torrent.Playlist.isEmpty()) {
+            return
+        }
+        val addr = Preferences.getServerAddress()
+        val intent = Intent(Intent.ACTION_VIEW)
+        val url = Uri.parse(ServerRequest.joinUrl(addr, torrent.Playlist))
+        intent.setDataAndType(url, "application/vnd.apple.mpegurl")
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.putExtra("title", torrent.Name)
+        App.getContext().startActivity(intent)
+    }
+
+    fun openPlayList() {
+        val addr = Preferences.getServerAddress()
+        val intent = Intent(Intent.ACTION_VIEW)
+        val url = Uri.parse(ServerRequest.joinUrl(addr, "/torrent/playlist.m3u"))
+        intent.setDataAndType(url, "application/vnd.apple.mpegurl")
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.putExtra("title", "TorrServePlaylist")
+        App.getContext().startActivity(intent)
     }
 }
 

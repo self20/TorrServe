@@ -40,6 +40,15 @@
 
         <Button
             android:textSize="24sp"
+            android:id="@+id/buttonPlaylist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/playlist"
+            android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackground" />
+
+        <Button
+            android:textSize="24sp"
             android:id="@+id/buttonDonate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

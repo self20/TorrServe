@@ -43,6 +43,17 @@
 
         <Button
             android:textSize="24sp"
+            android:id="@+id/buttonPlaylist"
+            android:focusable="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/playlist"
+            android:drawableLeft="@drawable/ic_list_black_24dp"
+            android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackground" />
+
+        <Button
+            android:textSize="24sp"
             android:id="@+id/buttonDonate"
             android:focusable="true"
             android:layout_width="match_parent"

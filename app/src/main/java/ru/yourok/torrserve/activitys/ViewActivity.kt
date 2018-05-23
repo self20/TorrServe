@@ -4,10 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.widget.ListView
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import ru.yourok.torrserve.R
 import ru.yourok.torrserve.adapters.TorrentListFileAdapter
 import ru.yourok.torrserve.serverhelper.File
@@ -103,6 +100,11 @@ class ViewActivity : AppCompatActivity() {
             runOnUiThread {
                 findViewById<TextView>(R.id.textViewStatus).visibility = View.GONE
                 findViewById<ProgressBar>(R.id.progressBar).visibility = View.GONE
+                findViewById<Button>(R.id.buttonPlaylist).visibility = View.VISIBLE
+                findViewById<Button>(R.id.buttonPlaylist).setOnClickListener {
+                    ServerApi.openPlayList(tor)
+                    finish()
+                }
                 val adapter = TorrentListFileAdapter(this, tor.Hash)
                 val listViewFiles = findViewById<ListView>(R.id.listViewTorrentFiles)
                 listViewFiles.adapter = adapter

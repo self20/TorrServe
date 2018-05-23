@@ -78,6 +78,10 @@ class TvMainActivity : AppCompatActivity() {
             }
         }
 
+        buttonPlaylist.setOnClickListener {
+            ServerApi.openPlayList()
+        }
+
         buttonDonate.setOnClickListener {
             Donate.donateDialog(this)
         }
@@ -134,20 +138,24 @@ class TvMainActivity : AppCompatActivity() {
                 KeyEvent.KEYCODE_2, KeyEvent.KEYCODE_NUMPAD_2, KeyEvent.KEYCODE_BUTTON_2 -> {
                     buttonRemoveAll.performClick()
                 }
-            //Donate
+            //Playlist
                 KeyEvent.KEYCODE_3, KeyEvent.KEYCODE_NUMPAD_3, KeyEvent.KEYCODE_BUTTON_3 -> {
+                    buttonPlaylist.performClick()
+                }
+            //Donate
+                KeyEvent.KEYCODE_4, KeyEvent.KEYCODE_NUMPAD_4, KeyEvent.KEYCODE_BUTTON_4 -> {
                     buttonDonate.performClick()
                 }
             //Clear Cache
-                KeyEvent.KEYCODE_4, KeyEvent.KEYCODE_NUMPAD_4, KeyEvent.KEYCODE_BUTTON_4 -> {
+                KeyEvent.KEYCODE_5, KeyEvent.KEYCODE_NUMPAD_5, KeyEvent.KEYCODE_BUTTON_5 -> {
                     buttonClearCache.performClick()
                 }
-            //Settings
-                KeyEvent.KEYCODE_5, KeyEvent.KEYCODE_NUMPAD_5, KeyEvent.KEYCODE_BUTTON_5 -> {
+            //Exit
+                KeyEvent.KEYCODE_6, KeyEvent.KEYCODE_NUMPAD_6, KeyEvent.KEYCODE_BUTTON_6 -> {
                     buttonExit.performClick()
                 }
             //Settings
-                KeyEvent.KEYCODE_6, KeyEvent.KEYCODE_NUMPAD_6, KeyEvent.KEYCODE_BUTTON_6 -> {
+                KeyEvent.KEYCODE_7, KeyEvent.KEYCODE_NUMPAD_7, KeyEvent.KEYCODE_BUTTON_7 -> {
                     buttonSettings.performClick()
                 }
                 else -> return super.onKeyUp(keyCode, event)

@@ -9,6 +9,7 @@
     <string name="clear_cache">Clear cache</string>
     <string name="settings">Settings</string>
     <string name="donate">Donate</string>
+    <string name="playlist">Playlist</string>
 
     <string name="donate_msg">Your donation helps me to develop further, improve the program and create new ones</string>
     <string name="paypal" translatable="false">PayPal</string>

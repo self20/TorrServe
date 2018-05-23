@@ -16,6 +16,7 @@ data class Torrent(
         var Length: Long,
         var AddTime: Long,
         var Size: Long,
+        var Playlist: String,
         var Files: List<File>
 )
 
@@ -103,6 +104,7 @@ fun getTorrent(js: JSONObject): Torrent {
             js.getLong("Length"),
             js.getLong("AddTime"),
             js.getLong("Size"),
+            js.getString("Playlist"),
             fileList.toList()
     )
     return ret
@@ -147,7 +149,7 @@ fun js2Info(js: JSONObject): Info {
 }
 
 object ServerRequest {
-    private fun joinUrl(url: String, path: String): String {
+    fun joinUrl(url: String, path: String): String {
         if (url.last() == '/')
             return url + path.substring(1)
         else

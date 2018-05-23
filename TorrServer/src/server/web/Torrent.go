@@ -215,12 +215,12 @@ func torrentPlayList(c echo.Context) error {
 	}
 
 	m3u := "#EXTM3U\n"
-	m3u += "#EXT-X-PLAYLIST-TYPE:VOD\n"
-	m3u += "#EXT-X-VERSION:3\n"
 
 	for _, f := range torr.Files {
-		m3u += "#EXTINF:-1," + f.Name + "\n"
-		m3u += c.Scheme() + "://" + c.Request().Host + "/torrent/view/" + hash + "/" + utils.FileToLink(f.Name) + "\n\n"
+		if utils.GetMimeType(f.Name) != "*/*" {
+			m3u += "#EXTINF:-1," + f.Name + "\n"
+			m3u += c.Scheme() + "://" + c.Request().Host + "/torrent/view/" + hash + "/" + utils.FileToLink(f.Name) + "\n\n"
+		}
 	}
 
 	http.ServeContent(c.Response(), c.Request(), torr.Name+".m3u", time.Now(), bytes.NewReader([]byte(m3u)))
@@ -234,8 +234,6 @@ func torrentPlayListAll(c echo.Context) error {
 	}
 
 	m3u := "#EXTM3U\n"
-	m3u += "#EXT-X-PLAYLIST-TYPE:VOD\n"
-	m3u += "#EXT-X-VERSION:3\n"
 
 	for _, t := range list {
 		m3u += "#EXTINF:0," + t.Name + "\n"

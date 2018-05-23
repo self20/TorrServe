@@ -9,6 +9,7 @@
     <string name="clear_cache">Очистить кэш</string>
     <string name="settings">Настройки</string>
     <string name="donate">Пожертвование</string>
+    <string name="playlist">Плейлист</string>
 
     <string name="donate_msg">Ваше пожертвование помогает мне развиваться дальше, улучшать программу и создавать новые</string>
 
