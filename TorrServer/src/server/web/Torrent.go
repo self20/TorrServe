@@ -223,6 +223,7 @@ func torrentPlayList(c echo.Context) error {
 		}
 	}
 
+	c.Response().Header().Set("Content-Type", "audio/x-mpegurl")
 	http.ServeContent(c.Response(), c.Request(), torr.Name+".m3u", time.Now(), bytes.NewReader([]byte(m3u)))
 	return c.NoContent(http.StatusOK)
 }
@@ -240,6 +241,7 @@ func torrentPlayListAll(c echo.Context) error {
 		m3u += c.Scheme() + "://" + c.Request().Host + "/torrent/playlist/" + t.Hash + "/" + utils.FileToLink(t.Name) + ".m3u" + "\n\n"
 	}
 
+	c.Response().Header().Set("Content-Type", "audio/x-mpegurl")
 	http.ServeContent(c.Response(), c.Request(), "playlist.m3u", time.Now(), bytes.NewReader([]byte(m3u)))
 	return c.NoContent(http.StatusOK)
 }

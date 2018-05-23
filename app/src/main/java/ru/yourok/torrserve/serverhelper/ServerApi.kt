@@ -150,9 +150,10 @@ object ServerApi {
         val addr = Preferences.getServerAddress()
         val intent = Intent(Intent.ACTION_VIEW)
         val url = Uri.parse(ServerRequest.joinUrl(addr, torrent.Playlist))
-        intent.setDataAndType(url, "application/vnd.apple.mpegurl")
+        intent.setDataAndType(url, "audio/x-mpegurl")
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         intent.putExtra("title", torrent.Name)
+        intent.putExtra("name", torrent.Name)
         App.getContext().startActivity(intent)
     }
 
@@ -160,9 +161,10 @@ object ServerApi {
         val addr = Preferences.getServerAddress()
         val intent = Intent(Intent.ACTION_VIEW)
         val url = Uri.parse(ServerRequest.joinUrl(addr, "/torrent/playlist.m3u"))
-        intent.setDataAndType(url, "application/vnd.apple.mpegurl")
+        intent.setDataAndType(url, "audio/x-mpegurl")
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         intent.putExtra("title", "TorrServePlaylist")
+        intent.putExtra("name", "TorrServePlaylist")
         App.getContext().startActivity(intent)
     }
 }
