@@ -8,6 +8,7 @@ import (
 	"os"
 	"runtime"
 
+	"server/fdb"
 	"server/settings"
 	"server/torr"
 	"server/version"
@@ -38,6 +39,7 @@ func Start() {
 		fmt.Println("Error start torrent client:", err)
 		return
 	}
+	go fdb.Init()
 
 	mutex.Lock()
 	server = echo.New()
@@ -51,7 +53,9 @@ func Start() {
 	templates.InitTemplate(server)
 	initTorrent(server)
 	initSettings(server)
+	initSearch(server)
 	initInfo(server)
+	initAbout(server)
 
 	server.GET("/", mainPage)
 	server.GET("/echo", echoPage)

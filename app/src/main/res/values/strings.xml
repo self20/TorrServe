@@ -11,6 +11,10 @@
     <string name="donate">Donate</string>
     <string name="playlist">Playlist</string>
 
+    <string name="page">Page</string>
+    <string name="ascend">Ascend</string>
+    <string name="descend">Descend</string>
+
     <string name="donate_msg">Your donation helps me to develop further, improve the program and create new ones</string>
     <string name="paypal" translatable="false">PayPal</string>
     <string name="yandex_money" translatable="false">Yandex Money</string>
@@ -77,5 +81,13 @@
         <item>Do nothing</item>
         <item>Add retrackers</item>
         <item>Remove retrackers</item>
+    </string-array>
+
+    <string name="search">Search</string>
+    <string name="search_type">Search type</string>
+    <string-array name="search_types">
+        <item>Search by name</item>
+        <item>Search now watching</item>
+        <item>Search by filter</item>
     </string-array>
 </resources>

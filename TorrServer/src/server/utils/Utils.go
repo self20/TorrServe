@@ -63,3 +63,13 @@ func Format(b float64) string {
 
 	return fmt.Sprintf("%.2f%s", value, multiple)
 }
+
+func GetNNil(args ...interface{}) interface{} {
+	for _, i := range args {
+		if i == nil {
+			continue
+		}
+		return i
+	}
+	return nil
+}

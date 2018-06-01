@@ -2,30 +2,22 @@ package torr
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"server/settings"
 	"server/utils"
 
-	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/metainfo"
 )
 
 func (bt *BTServer) add(magnet string) (*settings.Torrent, error) {
 	mag := magnet
-	switch settings.Get().RetrackersMode {
-	case 1:
-		mag = utils.AddRetracker(mag)
-	case 2:
-		mag = utils.RemoveRetracker(mag)
+	if !strings.Contains(magnet, "&tr=") {
+		mag = utils.AddRetracker(magnet)
 	}
 
-	tinfo, err := torrent.TorrentSpecFromMagnetURI(mag)
-	if err != nil {
-		return nil, err
-	}
-
-	tor, _, err := bt.client.AddTorrentSpec(tinfo)
+	tor, err := bt.client.AddMagnet(mag)
 	if err != nil {
 		return nil, err
 	}

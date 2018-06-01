@@ -43,7 +43,7 @@ class TorrentListAdapter(val activity: Activity) : BaseAdapter() {
     }
 
     override fun getView(index: Int, convertView: View?, viewGroup: ViewGroup): View {
-        val vi: View = convertView ?: (activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.adapter_torrent_list, null)
+        val vi: View = convertView ?: (activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.adapter_torrent_item, null)
         if (index in 0 until torrList.size) {
             vi.findViewById<TextView>(R.id.textViewTorrName).text = torrList[index].Name
             vi.findViewById<TextView>(R.id.textViewTorrSize).text = Utils.byteFmt(torrList[index].Length)

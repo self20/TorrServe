@@ -39,7 +39,7 @@ class TorrentListFileAdapter(val activity: Activity, val torrId: String) : BaseA
     }
 
     override fun getView(index: Int, convertView: View?, viewGroup: ViewGroup): View {
-        val vi: View = convertView ?: (activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.adapter_torrent_list_files, null)
+        val vi: View = convertView ?: (activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.adapter_torrent_item_files, null)
         torrent?.let {
             val file = it.Files[index]
             vi.findViewById<TextView>(R.id.textViewFileName).text = file.Name

@@ -59,7 +59,6 @@
         <activity android:name=".activitys.AddActivity" />
         <activity android:name=".activitys.InfoActivity" />
         <activity android:name=".activitys.SettingsActivity" />
-
         <activity
             android:name=".activitys.ProgressActivity"
             android:configChanges="mcc|mnc|locale|orientation|screenLayout|screenSize|layoutDirection|fontScale"
@@ -67,7 +66,6 @@
             android:launchMode="singleInstance"
             android:noHistory="true"
             android:theme="@style/MyDialog" />
-
         <activity
             android:name=".activitys.ViewActivity"
             android:configChanges="mcc|mnc|locale|orientation|screenLayout|screenSize|layoutDirection|fontScale"
@@ -213,6 +211,7 @@
                 <data android:pathPattern=".*..*..*..*..*..*..*..*..*..*..*..*..*..*..*.torrent.*" />
             </intent-filter>
         </activity>
+        <activity android:name=".activitys.SearchActivity"></activity>
     </application>
 
 </manifest>

@@ -109,10 +109,10 @@ func (bt *BTServer) configure() {
 	}
 
 	if settings.Get().DownloadRateLimit > 0 {
-		bt.config.DownloadRateLimiter = rate.NewLimiter(rate.Limit(settings.Get().DownloadRateLimit*1024), 256<<10)
+		bt.config.DownloadRateLimiter = rate.NewLimiter(rate.Limit(settings.Get().DownloadRateLimit*1024), 1024)
 	}
 	if settings.Get().UploadRateLimit > 0 {
-		bt.config.UploadRateLimiter = rate.NewLimiter(rate.Limit(settings.Get().UploadRateLimit*1024), 1<<20)
+		bt.config.UploadRateLimiter = rate.NewLimiter(rate.Limit(settings.Get().UploadRateLimit*1024), 1024)
 	}
 }
 

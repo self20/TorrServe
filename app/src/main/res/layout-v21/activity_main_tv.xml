@@ -76,12 +76,12 @@
 
         <Button
             android:textSize="24sp"
-            android:id="@+id/buttonExit"
+            android:id="@+id/buttonSearch"
             android:focusable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/exit"
-            android:drawableLeft="@drawable/ic_cancel_black_24dp"
+            android:text="@string/search"
+            android:drawableLeft="@drawable/ic_search_black_24dp"
             android:layout_weight="1"
             android:background="?android:attr/selectableItemBackground" />
 
@@ -93,6 +93,17 @@
             android:layout_height="wrap_content"
             android:text="@string/settings"
             android:drawableLeft="@drawable/ic_settings_black_24dp"
+            android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackground" />
+
+        <Button
+            android:textSize="24sp"
+            android:id="@+id/buttonExit"
+            android:focusable="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/exit"
+            android:drawableLeft="@drawable/ic_cancel_black_24dp"
             android:layout_weight="1"
             android:background="?android:attr/selectableItemBackground" />
     </LinearLayout>

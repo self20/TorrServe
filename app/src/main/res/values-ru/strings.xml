@@ -11,6 +11,10 @@
     <string name="donate">Пожертвование</string>
     <string name="playlist">Плейлист</string>
 
+    <string name="page">Страница</string>
+    <string name="ascend">По возрастанию</string>
+    <string name="descend">По убыванию</string>
+
     <string name="donate_msg">Ваше пожертвование помогает мне развиваться дальше, улучшать программу и создавать новые</string>
 
     <string name="open">Открыть</string>
@@ -75,5 +79,13 @@
         <item>Ничего не делать</item>
         <item>Добовлять ретрекеры</item>
         <item>Удалять ретрекеры</item>
+    </string-array>
+
+    <string name="search">Поиск</string>
+    <string name="search_type">Тип поиска</string>
+    <string-array name="search_types">
+        <item>Искать по имени</item>
+        <item>Сейчас смотрят</item>
+        <item>Искать по фильтру</item>
     </string-array>
 </resources>

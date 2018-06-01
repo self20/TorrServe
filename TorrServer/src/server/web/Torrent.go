@@ -61,7 +61,7 @@ type TorFile struct {
 }
 
 func torrentAdd(c echo.Context) error {
-	jreq, err := getJsReq(c)
+	jreq, err := getJsReqTorr(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -72,6 +72,7 @@ func torrentAdd(c echo.Context) error {
 
 	torr, err := bts.Add(jreq.Link)
 	if err != nil {
+		fmt.Println("Error add torrent:", jreq.Hash, err)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
@@ -85,7 +86,7 @@ func torrentAdd(c echo.Context) error {
 }
 
 func torrentGet(c echo.Context) error {
-	jreq, err := getJsReq(c)
+	jreq, err := getJsReqTorr(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -95,11 +96,12 @@ func torrentGet(c echo.Context) error {
 
 	torr, err := bts.Get(jreq.Hash)
 	if err != nil {
+		fmt.Println("Error get torrent:", jreq.Hash, err)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	js, err := getTorrentJS(torr)
 	if err != nil {
-		fmt.Println("Error add torrent:", torr.Hash, err)
+		fmt.Println("Error get torrent:", torr.Hash, err)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
@@ -107,7 +109,7 @@ func torrentGet(c echo.Context) error {
 }
 
 func torrentRem(c echo.Context) error {
-	jreq, err := getJsReq(c)
+	jreq, err := getJsReqTorr(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -141,7 +143,7 @@ func torrentList(c echo.Context) error {
 }
 
 func torrentStat(c echo.Context) error {
-	jreq, err := getJsReq(c)
+	jreq, err := getJsReqTorr(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -185,7 +187,7 @@ func torrentPreload(c echo.Context) error {
 }
 
 func torrentCleanCache(c echo.Context) error {
-	jreq, err := getJsReq(c)
+	jreq, err := getJsReqTorr(c)
 	if err != nil {
 		bts.Clean("")
 		return c.JSON(http.StatusOK, nil)
@@ -327,7 +329,7 @@ func getTorrentJS(tor *settings.Torrent) (*TorrentJsonResponse, error) {
 	return js, nil
 }
 
-func getJsReq(c echo.Context) (*TorrentJsonRequest, error) {
+func getJsReqTorr(c echo.Context) (*TorrentJsonRequest, error) {
 	buf, _ := ioutil.ReadAll(c.Request().Body)
 	jsstr := string(buf)
 	decoder := json.NewDecoder(bytes.NewBufferString(jsstr))

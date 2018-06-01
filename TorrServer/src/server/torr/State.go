@@ -46,7 +46,7 @@ func (ts *TorrentState) updateTorrentState() {
 	}
 	state := ts.torrent.Stats()
 
-	deltaDlBytes := state.BytesReadData - ts.TorrentStats.BytesReadData
+	deltaDlBytes := state.BytesReadUsefulData - ts.TorrentStats.BytesReadUsefulData
 	deltaUpBytes := state.BytesWrittenData - ts.TorrentStats.BytesWrittenData
 	deltaTime := time.Since(ts.lastTimeSpeed).Seconds()
 

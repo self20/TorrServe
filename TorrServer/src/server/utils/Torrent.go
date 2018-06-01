@@ -13,6 +13,7 @@ import (
 )
 
 var trackers = []string{
+	"udp://zer0day.ch:1337",
 	"udp://tracker.zer0day.to:1337/announce",
 	"udp://tracker.trackerfix.com:83/announce",
 	"udp://tracker.thepiratebay.org:80/announce",
@@ -32,6 +33,7 @@ var trackers = []string{
 	"udp://ipv6.leechers-paradise.org:6969",
 	"udp://explodie.org:6969/announce",
 	"udp://explodie.org:6969",
+	"udp://exodus.desync.com:6969",
 	"udp://eddie4.nl:6969/announce",
 	"udp://denis.stalker.h3q.com:6969/announce",
 	"udp://bt.rutor.org:2710",

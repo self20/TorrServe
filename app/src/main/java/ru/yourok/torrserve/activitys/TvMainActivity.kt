@@ -90,6 +90,10 @@ class TvMainActivity : AppCompatActivity() {
             ServerApi.cleanCache("")
         }
 
+        buttonSearch.setOnClickListener {
+            startActivity(Intent(this, SearchActivity::class.java))
+        }
+
         buttonExit.setOnClickListener {
             TorrService.stopAndExit()
         }

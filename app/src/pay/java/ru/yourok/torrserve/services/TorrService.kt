@@ -26,7 +26,8 @@ class TorrService : Service() {
                     when (it.action) {
                         "ru.yourok.torrserve.notifications.action_exit" -> {
                             stopSelf()
-                            stopAndExit()
+                            Thread.sleep(1000)
+                            System.exit(0)
                         }
                         "ru.yourok.torrserve.notifications.action_restart" -> restartServer()
                     }
@@ -103,8 +104,6 @@ class TorrService : Service() {
         fun stopAndExit() {
             thread {
                 TorrService.stop()
-                Thread.sleep(1000)
-                System.exit(0)
             }
         }
 

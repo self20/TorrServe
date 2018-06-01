@@ -32,17 +32,16 @@ object Donate {
                     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://money.yandex.ru/to/410013733697114/100"))
                     startActivity(context, browserIntent, null)
                     Preferences.setLastViewDonate(-1L)
-                })
-                .setNeutralButton(R.string.google_play, { _, _ ->
-                    val appPackageName = "ru.yourok.torrserve"
-                    try {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName")))
-                    } catch (anfe: android.content.ActivityNotFoundException) {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")))
-                    }
-                    Preferences.setLastViewDonate(-1L)
-                })
-                .show()
+                }).show()
+//                .setNeutralButton(R.string.google_play, { _, _ ->
+//                    val appPackageName = "ru.yourok.torrserve"
+//                    try {
+//                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName")))
+//                    } catch (anfe: android.content.ActivityNotFoundException) {
+//                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")))
+//                    }
+//                    Preferences.setLastViewDonate(-1L)
+//                }).show()
     }
 
     @Volatile
