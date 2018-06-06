@@ -4,59 +4,43 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
-	"regexp"
 	"strings"
 	"time"
 
 	"github.com/anacrolix/torrent/metainfo"
 )
 
-func GetMagnet(link string) (string, error) {
+func GetMagnet(link string) (*metainfo.Magnet, error) {
 	url, err := url.Parse(link)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	mag := ""
+	var mag *metainfo.Magnet
 	switch strings.ToLower(url.Scheme) {
 	case "magnet":
-		mag, err = checkMagnet(url)
+		mag, err = getMag(url)
 	case "http", "https":
 		mag, err = getMagFromHttp(url.String())
 	default:
 		mag, err = getMagFromFile(url.Path)
 	}
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	return mag, nil
 }
 
-func checkMagnet(link *url.URL) (string, error) {
-	hashs := link.Query()["xt"]
-	for _, hs := range hashs {
-		if strings.Contains(strings.ToLower(hs), "urn:btih:") {
-			hash := strings.TrimPrefix(strings.ToLower(hs), "urn:btih:")
-			if len(hash) != 40 {
-				return "", errors.New("Wrong magnet link, size of hash not 40: " + link.String())
-			}
-			match, err := regexp.MatchString("^[0-9a-fA-F]+$", hash)
-			if err != nil {
-				return "", err
-			}
-			if !match {
-				return "", errors.New("Wrong magnet link")
-			}
-		}
-	}
-	return link.String(), nil
+func getMag(link *url.URL) (*metainfo.Magnet, error) {
+	mag, err := metainfo.ParseMagnetURI(link.String())
+	return &mag, err
 }
 
-func getMagFromHttp(url string) (string, error) {
+func getMagFromHttp(url string) (*metainfo.Magnet, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	client := new(http.Client)
@@ -65,32 +49,34 @@ func getMagFromHttp(url string) (string, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		return "", errors.New(resp.Status)
+		return nil, errors.New(resp.Status)
 	}
 
 	minfo, err := metainfo.Load(resp.Body)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	info, err := minfo.UnmarshalInfo()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return minfo.Magnet(info.Name, minfo.HashInfoBytes()).String(), nil
+	mag := minfo.Magnet(info.Name, minfo.HashInfoBytes())
+	return &mag, nil
 }
 
-func getMagFromFile(path string) (string, error) {
+func getMagFromFile(path string) (*metainfo.Magnet, error) {
 	minfo, err := metainfo.LoadFromFile(path)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	info, err := minfo.UnmarshalInfo()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return minfo.Magnet(info.Name, minfo.HashInfoBytes()).String(), nil
+	mag := minfo.Magnet(info.Name, minfo.HashInfoBytes())
+	return &mag, nil
 }

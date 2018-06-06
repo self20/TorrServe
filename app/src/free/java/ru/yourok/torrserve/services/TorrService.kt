@@ -48,7 +48,7 @@ class TorrService : Service() {
 
     private fun startServer() {
         if (!ServerApi.echo()) {
-            server.Server.start(Utils.getAppPath())
+            server.Server.start(Utils.getAppPath(), "8090")
             NotificationServer.Show(this, "")
         }
     }
@@ -70,7 +70,7 @@ class TorrService : Service() {
     private fun restartServer() {
         server.Server.stop()
         server.Server.waitServer()
-        server.Server.start(Utils.getAppPath())
+        server.Server.start(Utils.getAppPath(), "8090")
         Handler(this.getMainLooper()).post(Runnable {
             Toast.makeText(this, R.string.stat_server_is_running, Toast.LENGTH_SHORT).show()
         })

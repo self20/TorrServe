@@ -21,6 +21,11 @@ type Movie struct {
 	Torrents    []*provider.Torrent
 }
 
+type SearchResponce struct {
+	Movies []*Movie
+	Pages  int
+}
+
 var (
 	providers []provider.Provider
 )
@@ -28,6 +33,7 @@ var (
 func Init() {
 	//providers = append(providers, provider.NewRutor(provider.Options{}))
 	providers = append(providers, provider.NewYHH(provider.Options{}))
+	//providers = append(providers, provider.NewTParser(provider.Options{}))
 
 	var wa sync.WaitGroup
 	wa.Add(len(providers))
@@ -47,8 +53,9 @@ func GetGenres() []struct {
 	return tmdb.GetGenres()
 }
 
-func SearchByName(page int, name string) ([]*Movie, error) {
+func SearchByName(page int, name string) (*SearchResponce, error) {
 	var err error
+	resp := new(SearchResponce)
 	list := make([]*Movie, 0)
 	fmt.Println("Search movies")
 	{
@@ -56,8 +63,9 @@ func SearchByName(page int, name string) ([]*Movie, error) {
 		if err != nil {
 			err = er
 		} else {
+			resp.Pages = res.TotalPages
 			for _, m := range res.Results {
-				if m.Title == m.OriginalTitle {
+				if m.Title == m.OriginalTitle && !utils.IsCyrillic(m.OriginalTitle) {
 					continue
 				}
 				mov := new(Movie)
@@ -78,6 +86,9 @@ func SearchByName(page int, name string) ([]*Movie, error) {
 		if err != nil {
 			err = er
 		} else {
+			if res.TotalPages > resp.Pages {
+				resp.Pages = res.TotalPages
+			}
 			for _, m := range res.Results {
 				if m.Name == m.OriginalName {
 					continue
@@ -99,12 +110,13 @@ func SearchByName(page int, name string) ([]*Movie, error) {
 	if len(list) > 0 {
 		findTorrents(list)
 	}
-
-	return list, err
+	resp.Movies = list
+	return resp, err
 }
 
-func NowWatching(page int) ([]*Movie, error) {
+func NowWatching(page int) (*SearchResponce, error) {
 	var err error
+	resp := new(SearchResponce)
 	list := make([]*Movie, 0)
 	fmt.Println("Search now watching movies")
 	{
@@ -112,6 +124,7 @@ func NowWatching(page int) ([]*Movie, error) {
 		if err != nil {
 			err = er
 		} else {
+			resp.Pages = res.TotalPages
 			for _, m := range res.Results {
 				if m.Title == m.OriginalTitle {
 					continue
@@ -134,6 +147,9 @@ func NowWatching(page int) ([]*Movie, error) {
 		if err != nil {
 			err = er
 		} else {
+			if res.TotalPages > resp.Pages {
+				resp.Pages = res.TotalPages
+			}
 			for _, m := range res.Results {
 				if m.Name == m.OriginalName {
 					continue
@@ -155,12 +171,13 @@ func NowWatching(page int) ([]*Movie, error) {
 	if len(list) > 0 {
 		findTorrents(list)
 	}
-
-	return list, err
+	resp.Movies = list
+	return resp, err
 }
 
-func SearchByFilter(page int, filter *tmdb.Filter) ([]*Movie, error) {
+func SearchByFilter(page int, filter *tmdb.Filter) (*SearchResponce, error) {
 	var err error
+	resp := new(SearchResponce)
 	list := make([]*Movie, 0)
 	fmt.Println("Search filter movies")
 	{
@@ -168,6 +185,7 @@ func SearchByFilter(page int, filter *tmdb.Filter) ([]*Movie, error) {
 		if err != nil {
 			err = er
 		} else {
+			resp.Pages = res.TotalPages
 			for _, m := range res.Results {
 				if m.Title == m.OriginalTitle {
 					continue
@@ -190,6 +208,9 @@ func SearchByFilter(page int, filter *tmdb.Filter) ([]*Movie, error) {
 		if err != nil {
 			err = er
 		} else {
+			if res.TotalPages > resp.Pages {
+				resp.Pages = res.TotalPages
+			}
 			for _, m := range res.Results {
 				if m.Name == m.OriginalName {
 					continue
@@ -210,7 +231,8 @@ func SearchByFilter(page int, filter *tmdb.Filter) ([]*Movie, error) {
 	if len(list) > 0 {
 		findTorrents(list)
 	}
-	return list, err
+	resp.Movies = list
+	return resp, err
 }
 
 func findTorrents(movies []*Movie) {

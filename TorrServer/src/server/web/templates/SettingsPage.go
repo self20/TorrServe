@@ -33,6 +33,7 @@ var settingsPage = `
 				<label for="CacheSize">Cache Size</label>
 				<input id="CacheSize" type="number" autocomplete="off">
 			</div>
+	
 			<div class="ui-widget">
 				<label for="PreloadBufferSize">Preload Buffer Size</label>
 				<input id="PreloadBufferSize" type="number" autocomplete="off">

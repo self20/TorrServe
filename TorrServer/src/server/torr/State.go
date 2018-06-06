@@ -27,6 +27,8 @@ type TorrentState struct {
 	PreloadSize   int64
 	PreloadLength int64
 
+	TorrentSize int64
+
 	lastTimeSpeed time.Time
 	DownloadSpeed float64
 	UploadSpeed   float64

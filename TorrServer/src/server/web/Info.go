@@ -13,6 +13,12 @@ import (
 
 func initInfo(e *echo.Echo) {
 	server.GET("/stat", statePage)
+	server.GET("/btstat", btStatePage)
+}
+
+func btStatePage(c echo.Context) error {
+	bts.ClientState(c.Response())
+	return c.NoContent(http.StatusOK)
 }
 
 func statePage(c echo.Context) error {
@@ -40,6 +46,7 @@ func statePage(c echo.Context) error {
 	for _, st := range state.Torrents {
 		msg += fmt.Sprintf("Name: %v<br>\n", st.Name)
 		msg += fmt.Sprintf("Hash: %v<br>\n", st.Hash)
+		msg += fmt.Sprintf("Size: %v<br>\n", bytes.Format(st.TorrentSize))
 
 		msg += fmt.Sprintf("\t&emsp;TotalPeers:   	 %v<br>\n", st.TotalPeers)
 		msg += fmt.Sprintf("\t&emsp;PendingPeers: 	 %v<br>\n", st.PendingPeers)
@@ -63,7 +70,7 @@ func statePage(c echo.Context) error {
 
 		cState := bts.CacheState(st.Hash)
 		if cState != nil {
-			msg += fmt.Sprintf("Cache:<br>\n")
+			msg += fmt.Sprintf("CacheType:<br>\n")
 			msg += fmt.Sprintf("Capacity: %v<br>\n", bytes.Format(cState.Capacity))
 			msg += fmt.Sprintf("Filled: %v<br>\n", bytes.Format(cState.Filled))
 			msg += fmt.Sprintf("PiecesLength: %v<br>\n", bytes.Format(cState.PiecesLength))

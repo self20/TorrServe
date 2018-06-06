@@ -2,37 +2,41 @@ package torr
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"server/settings"
 	"server/utils"
 
+	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/metainfo"
 )
 
-func (bt *BTServer) add(magnet string) (*settings.Torrent, error) {
-	mag := magnet
-	if !strings.Contains(magnet, "&tr=") {
-		mag = utils.AddRetracker(magnet)
+func (bt *BTServer) add(magnet *metainfo.Magnet) (*settings.Torrent, error) {
+	if len(magnet.Trackers) == 0 {
+		magnet.Trackers = append(magnet.Trackers, utils.GetDefTrackers()...)
 	}
 
-	tor, err := bt.client.AddMagnet(mag)
+	tor, _, err := bt.client.AddTorrentSpec(&torrent.TorrentSpec{
+		Trackers:    [][]string{magnet.Trackers},
+		DisplayName: magnet.DisplayName,
+		InfoHash:    magnet.InfoHash,
+	})
+
 	if err != nil {
 		return nil, err
 	}
 
 	fmt.Println("Adding", tor.Name())
-	err = utils.GotInfo(tor)
+	err = utils.GotInfo(tor, 20)
 	if err != nil {
 		return nil, err
 	}
-
+	go tor.Drop()
 	torDb := new(settings.Torrent)
 	torDb.Name = tor.Name()
 	torDb.Hash = tor.InfoHash().HexString()
 	torDb.Size = tor.Length()
-	torDb.Magnet = magnet
+	torDb.Magnet = magnet.String()
 	torDb.Timestamp = time.Now().Unix()
 	files := tor.Files()
 	for _, f := range files {
@@ -93,27 +97,37 @@ func (bt *BTServer) getTorrent(torrDB *settings.Torrent) (*TorrentState, error) 
 		return st, nil
 	}
 
-	mag := torrDB.Magnet
-
-	switch settings.Get().RetrackersMode {
-	case 1:
-		mag = utils.AddRetracker(mag)
-	case 2:
-		mag = utils.RemoveRetracker(mag)
-	}
-
-	tor, err := bt.client.AddMagnet(mag)
+	magnet, err := metainfo.ParseMagnetURI(torrDB.Magnet)
 	if err != nil {
 		return nil, err
 	}
+
+	switch settings.Get().RetrackersMode {
+	case 1:
+		magnet.Trackers = append(magnet.Trackers, utils.GetDefTrackers()...)
+	case 2:
+		magnet.Trackers = nil
+	}
+
+	tor, _, err := bt.client.AddTorrentSpec(&torrent.TorrentSpec{
+		Trackers:    [][]string{magnet.Trackers},
+		DisplayName: magnet.DisplayName,
+		InfoHash:    magnet.InfoHash,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	tor.SetMaxEstablishedConns(settings.Get().ConnectionsLimit)
-	err = utils.GotInfo(tor)
+
+	err = utils.GotInfo(tor, 60)
 	if err != nil {
 		return nil, err
 	}
 
 	state := new(TorrentState)
 	state.torrent = tor
+	state.TorrentSize = tor.Length()
 	state.TorrentStats = tor.Stats()
 	state.expiredTime = time.Now().Add(time.Minute * 5)
 	bt.states[hash] = state

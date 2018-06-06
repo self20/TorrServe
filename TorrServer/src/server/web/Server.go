@@ -28,7 +28,7 @@ var (
 	err     error
 )
 
-func Start() {
+func Start(port string) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	fmt.Println("Start web server, version:", version.Version)
@@ -64,9 +64,9 @@ func Start() {
 	go func() {
 		defer mutex.Unlock()
 
-		server.Listener, err = net.Listen("tcp", "0.0.0.0:8090")
+		server.Listener, err = net.Listen("tcp", "0.0.0.0:"+port)
 		if err == nil {
-			err = server.Start("0.0.0.0:8090")
+			err = server.Start("0.0.0.0:" + port)
 		}
 		server = nil
 		if err != nil {
@@ -129,7 +129,9 @@ func HTTPErrorHandler(err error, c echo.Context) {
 		msg = echo.Map{"message": msg}
 	}
 
-	log.Println("Web server error:", err, c.Request().URL)
+	if code != 404 && c.Request().URL.Path != "/torrent/stat" {
+		log.Println("Web server error:", err, c.Request().URL)
+	}
 
 	// Send response
 	if !c.Response().Committed {

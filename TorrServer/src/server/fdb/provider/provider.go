@@ -43,10 +43,12 @@ func readPage(url string) (string, int, error) {
 	if err != nil {
 		return "", 0, err
 	}
+
+	defer resp.Body.Close()
+
 	if resp.StatusCode != 200 {
 		return "", resp.StatusCode, fmt.Errorf("%s %d", resp.Status, resp.StatusCode)
 	}
-	defer resp.Body.Close()
 
 	var body io.Reader
 

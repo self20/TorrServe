@@ -24,10 +24,11 @@ func searchPage(c echo.Context) error {
 }
 
 type SearchRequest struct {
-	Name   string
-	Type   int
-	Page   int
-	Filter *tmdb.Filter `json:",omitempty"`
+	Name         string
+	Type         int
+	Page         int
+	HideWTorrent bool
+	Filter       *tmdb.Filter `json:",omitempty"`
 }
 
 func searchRequest(c echo.Context) error {
@@ -36,15 +37,15 @@ func searchRequest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	var movies []*fdb.Movie
+	var sResp *fdb.SearchResponce
 	switch jreq.Type {
 	case 1:
-		movies, err = fdb.NowWatching(jreq.Page)
+		sResp, err = fdb.NowWatching(jreq.Page)
 	case 2:
-		movies, err = fdb.SearchByFilter(jreq.Page, jreq.Filter)
+		sResp, err = fdb.SearchByFilter(jreq.Page, jreq.Filter)
 	default:
 		if jreq.Name != "" {
-			movies, err = fdb.SearchByName(jreq.Page, jreq.Name)
+			sResp, err = fdb.SearchByName(jreq.Page, jreq.Name)
 		} else {
 			return echo.NewHTTPError(http.StatusNotFound, "Empty name")
 		}
@@ -54,7 +55,17 @@ func searchRequest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, movies)
+	if jreq.HideWTorrent {
+		var filtered = make([]*fdb.Movie, 0)
+		for _, m := range sResp.Movies {
+			if len(m.Torrents) > 0 {
+				filtered = append(filtered, m)
+			}
+		}
+		sResp.Movies = filtered
+		return c.JSON(http.StatusOK, sResp)
+	}
+	return c.JSON(http.StatusOK, sResp)
 }
 
 func genresRequest(c echo.Context) error {

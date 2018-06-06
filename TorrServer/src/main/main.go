@@ -8,12 +8,18 @@ import (
 )
 
 func main() {
+	//test2()
+	//return
 	path, _ := os.Getwd()
-	if len(os.Args) == 2 {
+	port := ""
+	if len(os.Args) >= 2 {
 		path = os.Args[1]
 	}
+	if len(os.Args) >= 3 {
+		port = os.Args[2]
+	}
 
-	server.Start(path)
+	server.Start(path, port)
 	settings.SaveSettings()
 
 	fmt.Println(server.WaitServer())

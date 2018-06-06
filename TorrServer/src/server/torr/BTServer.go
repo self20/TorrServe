@@ -3,6 +3,7 @@ package torr
 import (
 	"errors"
 	"fmt"
+	"io"
 	"path/filepath"
 	"sync"
 	"time"
@@ -103,6 +104,8 @@ func (bt *BTServer) configure() {
 		//TorrentPeersLowWater: 50,
 		//TorrentPeersHighWater: 500,
 
+		HandshakesTimeout: time.Second * 10,
+
 		DisableIPv6: true,
 
 		//Debug: true,
@@ -127,6 +130,11 @@ func (bt *BTServer) Add(torrentLink string) (*settings.Torrent, error) {
 	mag, err := GetMagnet(torrentLink)
 	if err != nil {
 		return nil, err
+	}
+
+	tor, err := settings.LoadTorrentDB(mag.InfoHash.String())
+	if err != nil {
+		return tor, nil
 	}
 
 	return bt.add(mag)
@@ -179,6 +187,10 @@ func (bt *BTServer) TorrentState(hashHex string) *TorrentState {
 		return st
 	}
 	return nil
+}
+
+func (bt *BTServer) ClientState(w io.Writer) {
+	bt.client.WriteStatus(w)
 }
 
 func (bt *BTServer) CacheState(hashHex string) *state.CacheState {
@@ -236,14 +248,15 @@ func (bt *BTServer) Preload(hashHex string, fileLink string) error {
 	if !state.IsPreload {
 		state.IsPreload = true
 		pr := settings.Get().PreloadBufferSize
-		ep := pr / cState.PiecesLength
+		ep := int(pr / cState.PiecesLength)
 		if ep > 0 {
-			state.PreloadLength = ep * cState.PiecesLength
-			state.torrent.DownloadPieces(0, int(ep))
+			state.PreloadLength = int64(ep) * cState.PiecesLength
+			state.torrent.DownloadPieces(0, ep)
 			go bt.watcher()
+			cl := state.torrent.Closed()
 			for {
 				select {
-				case <-state.torrent.Closed():
+				case <-cl:
 					return nil
 				default:
 				}

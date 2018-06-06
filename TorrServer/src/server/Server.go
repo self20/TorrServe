@@ -7,13 +7,16 @@ import (
 	"server/web"
 )
 
-func Start(settingsPath string) {
+func Start(settingsPath, port string) {
 	settings.Path = settingsPath
 	err := settings.ReadSettings()
 	if err != nil {
 		fmt.Println("Error read settings:", err)
 	}
-	server.Start()
+	if port == "" {
+		port = "8090"
+	}
+	server.Start(port)
 }
 
 func WaitServer() string {
