@@ -60,7 +60,7 @@ func SearchByName(page int, name string) (*SearchResponce, error) {
 	fmt.Println("Search movies")
 	{
 		res, er := tmdb.SearchMovie(page, name)
-		if err != nil {
+		if er != nil {
 			err = er
 		} else {
 			resp.Pages = res.TotalPages
@@ -83,7 +83,7 @@ func SearchByName(page int, name string) (*SearchResponce, error) {
 	{
 		fmt.Println("Search tv")
 		res, er := tmdb.SearchTv(page, name)
-		if err != nil {
+		if er != nil {
 			err = er
 		} else {
 			if res.TotalPages > resp.Pages {
@@ -121,7 +121,7 @@ func NowWatching(page int) (*SearchResponce, error) {
 	fmt.Println("Search now watching movies")
 	{
 		res, er := tmdb.NowPlayingMovie(page)
-		if err != nil {
+		if er != nil {
 			err = er
 		} else {
 			resp.Pages = res.TotalPages
@@ -144,7 +144,7 @@ func NowWatching(page int) (*SearchResponce, error) {
 	{
 		fmt.Println("Search now watching tv")
 		res, er := tmdb.NowPlayingTv(page)
-		if err != nil {
+		if er != nil {
 			err = er
 		} else {
 			if res.TotalPages > resp.Pages {
@@ -182,7 +182,7 @@ func SearchByFilter(page int, filter *tmdb.Filter) (*SearchResponce, error) {
 	fmt.Println("Search filter movies")
 	{
 		res, er := tmdb.FilterMovie(page, filter)
-		if err != nil {
+		if er != nil {
 			err = er
 		} else {
 			resp.Pages = res.TotalPages
@@ -205,7 +205,7 @@ func SearchByFilter(page int, filter *tmdb.Filter) (*SearchResponce, error) {
 	{
 		fmt.Println("Search filter tv")
 		res, er := tmdb.FilterTv(page, filter)
-		if err != nil {
+		if er != nil {
 			err = er
 		} else {
 			if res.TotalPages > resp.Pages {

@@ -47,7 +47,7 @@ var searchPage = `
 	<div data-role="content">
 		<div class="ui-field-contain">
 			<label for="sName">Name</label>
-			<input id="sName">
+			<input type="text" name="search_movie" id="sName" value="">
 		</div>
 		<div class="ui-field-contain">
 			<label>
@@ -147,6 +147,9 @@ var searchPage = `
 			$('#sName').addClass('ui-disabled');
 		else
 			$('#sName').removeClass('ui-disabled');
+		
+		if (typeof page != "number")
+			page = 1;
 		$('#lPage').text('Page '+page+' / '+pages);
 	}
 	
@@ -188,6 +191,8 @@ var searchPage = `
 		$('#PageNext').prop("disabled", true);
 		
 		var hide = $('#hideWOTorrents').prop('checked');
+		if (typeof page != "number")
+			page = 1;
 		
 		var SRequest = {"Name":$('#sName').val(), "Type":selectSearchType, "Page":page, "HideWTorrent":hide};
 		if (selectSearchType == 2){

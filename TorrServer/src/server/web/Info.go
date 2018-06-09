@@ -7,6 +7,7 @@ import (
 
 	"server/utils"
 
+	"github.com/anacrolix/torrent/metainfo"
 	"github.com/labstack/echo"
 	"github.com/labstack/gommon/bytes"
 )
@@ -17,7 +18,7 @@ func initInfo(e *echo.Echo) {
 }
 
 func btStatePage(c echo.Context) error {
-	bts.ClientState(c.Response())
+	bts.WriteState(c.Response())
 	return c.NoContent(http.StatusOK)
 }
 
@@ -68,7 +69,8 @@ func statePage(c echo.Context) error {
 		msg += fmt.Sprintf("\t&emsp;Download Speed: %v/Sec<br>\n", utils.Format(st.DownloadSpeed))
 		msg += fmt.Sprintf("\t&emsp;Upload Speed:   %v/Sec<br>\n", utils.Format(st.UploadSpeed))
 
-		cState := bts.CacheState(st.Hash)
+		hash := metainfo.NewHashFromHex(st.Hash)
+		cState := bts.CacheState(hash)
 		if cState != nil {
 			msg += fmt.Sprintf("CacheType:<br>\n")
 			msg += fmt.Sprintf("Capacity: %v<br>\n", bytes.Format(cState.Capacity))

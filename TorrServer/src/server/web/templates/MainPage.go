@@ -31,7 +31,11 @@ var mainPage = `
 	<div data-role="content">
 		<h3>Add torrent: </h3>
 		<input id="magnet" autocomplete="off">
-		<button id="buttonAdd" data-icon="plus" onclick="addTorrent()">Add</button>
+		<div class="ui-grid-a">
+			<div class="ui-block-a"><button id="buttonAdd" data-icon="plus" onclick="addTorrent()">Add</button></div>
+			<div class="ui-block-b"><button id="buttonUpload" data-icon="plus">Upload</button></div>
+		</div>
+		
 		<br>
 		<a href="/search" rel="external" target="_blank" data-role="button" data-icon="search">Search</a>
 		<a href="/torrent/playlist.m3u" rel="external" data-role="button" data-icon="bullets">Playlist</a>
@@ -46,8 +50,12 @@ var mainPage = `
 		</div>
 	</div>
 
+	<form id="uploadForm" style="display:none" action="/torrent/upload" method="post">
+		<input type="file" id="filesUpload" style="display:none" multiple onchange="uploadTorrent()" name="files"/> 
+	</form>
+	
 	<div data-role="footer">
-	<center><p><a rel="external" style="text-decoration: none;" href="/about">About</a></p></center>
+		<center><p><a rel="external" style="text-decoration: none;" href="/about">About</a></p></center>
 	</div>
 </div> 
 
@@ -87,6 +95,45 @@ var mainPage = `
 	$( document ).ready(function() {
 		loadTorrents();
 	});
+
+	$('#buttonUpload').click(function() {
+   		$('#filesUpload').click();
+	});
+	
+	function uploadTorrent() {
+		var form = $("#uploadForm");
+		var formData = new FormData(document.getElementById("uploadForm"));
+		var data = new FormData();
+		$.each($('#filesUpload')[0].files, function(i, file) {
+    		data.append('file-'+i, file);
+		});
+		$.ajax({
+				cache: false,
+				processData: false,
+				contentType: false,
+				type: form.attr('method'),
+				url: form.attr('action'),
+				data: data
+				}).done(function(data) {
+					loadTorrents();
+				}).fail(function(data) {
+					alert(data.responseJSON.message);
+				});
+	}
+	
+	$('#uploadForm').submit(function(event) {
+    event.preventDefault(); // Prevent the form from submitting via the browser
+    var form = $(this);
+    $.ajax({
+      type: form.attr('method'),
+      url: form.attr('action'),
+      data: form.serialize()
+    }).done(function(data) {
+      loadTorrents();
+    }).fail(function(data) {
+      // Optionally alert the user of an error here...
+    });
+  });
 
 	function loadTorrents() {
 		$.post('/torrent/list')

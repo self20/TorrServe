@@ -35,7 +35,7 @@ type TorrentState struct {
 
 	readers     int
 	expiredTime time.Time
-	torrent     *torrent.Torrent
+	Torrent     *torrent.Torrent
 }
 
 func (ts *TorrentState) expired() bool {
@@ -43,10 +43,10 @@ func (ts *TorrentState) expired() bool {
 }
 
 func (ts *TorrentState) updateTorrentState() {
-	if ts.torrent == nil {
+	if ts.Torrent == nil {
 		return
 	}
-	state := ts.torrent.Stats()
+	state := ts.Torrent.Stats()
 
 	deltaDlBytes := state.BytesReadUsefulData - ts.TorrentStats.BytesReadUsefulData
 	deltaUpBytes := state.BytesWrittenData - ts.TorrentStats.BytesWrittenData
@@ -55,8 +55,8 @@ func (ts *TorrentState) updateTorrentState() {
 	ts.DownloadSpeed = float64(deltaDlBytes) / deltaTime
 	ts.UploadSpeed = float64(deltaUpBytes) / deltaTime
 	ts.TorrentStats = state
-	ts.Name = ts.torrent.Name()
-	ts.Hash = ts.torrent.InfoHash().HexString()
-	ts.LoadedSize = ts.torrent.BytesCompleted()
+	ts.Name = ts.Torrent.Name()
+	ts.Hash = ts.Torrent.InfoHash().HexString()
+	ts.LoadedSize = ts.Torrent.BytesCompleted()
 	ts.lastTimeSpeed = time.Now()
 }

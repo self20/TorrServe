@@ -104,7 +104,7 @@ func (bt *BTServer) configure() {
 		//TorrentPeersLowWater: 50,
 		//TorrentPeersHighWater: 500,
 
-		HandshakesTimeout: time.Second * 10,
+		//HandshakesTimeout: time.Second * 10,
 
 		DisableIPv6: true,
 
@@ -119,46 +119,44 @@ func (bt *BTServer) configure() {
 	}
 }
 
-func (bt *BTServer) Add(torrentLink string) (*settings.Torrent, error) {
-	if bt.client == nil {
-		return nil, errors.New("torrent client not started")
-	}
+func (bt *BTServer) AddTorrent(magnet *metainfo.Magnet, timeout int) (*TorrentState, error) {
+	tor, _, err := bt.client.AddTorrentSpec(&torrent.TorrentSpec{
+		Trackers:    [][]string{magnet.Trackers},
+		DisplayName: magnet.DisplayName,
+		InfoHash:    magnet.InfoHash,
+	})
 
-	bt.mu.Lock()
-	defer bt.mu.Unlock()
-
-	mag, err := GetMagnet(torrentLink)
 	if err != nil {
 		return nil, err
 	}
 
-	tor, err := settings.LoadTorrentDB(mag.InfoHash.String())
-	if err != nil {
-		return tor, nil
+	if st, ok := bt.states[magnet.InfoHash]; ok {
+		return st, nil
 	}
 
-	return bt.add(mag)
+	fmt.Println("Geting torrent info:", tor.Name())
+	err = utils.GotInfo(tor, timeout)
+	if err != nil {
+		go tor.Drop()
+		return nil, err
+	}
+
+	st := bt.Watching(tor)
+	return st, nil
 }
 
-func (bt *BTServer) Get(hashHex string) (*settings.Torrent, error) {
+func (bt *BTServer) GetTorrent(hash metainfo.Hash) *TorrentState {
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
 
-	return settings.LoadTorrentDB(hashHex)
+	if st, ok := bt.states[hash]; ok {
+		return st
+	}
+	return nil
 }
 
-func (bt *BTServer) Rem(hashHex string) error {
-	bt.mu.Lock()
-	defer bt.mu.Unlock()
-
-	return settings.RemoveTorrentDB(hashHex)
-}
-
-func (bt *BTServer) List() ([]*settings.Torrent, error) {
-	bt.mu.Lock()
-	defer bt.mu.Unlock()
-
-	return settings.LoadTorrentsDB()
+func (bt *BTServer) RemoveTorrent(torrState *TorrentState) {
+	bt.removeState(torrState)
 }
 
 func (bt *BTServer) BTState() *BTState {
@@ -178,37 +176,25 @@ func (bt *BTServer) BTState() *BTState {
 	return state
 }
 
-func (bt *BTServer) TorrentState(hashHex string) *TorrentState {
+func (bt *BTServer) CacheState(hash metainfo.Hash) *state.CacheState {
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
 
-	hash := metainfo.NewHashFromHex(hashHex)
-	if st, ok := bt.states[hash]; ok {
-		return st
-	}
-	return nil
-}
-
-func (bt *BTServer) ClientState(w io.Writer) {
-	bt.client.WriteStatus(w)
-}
-
-func (bt *BTServer) CacheState(hashHex string) *state.CacheState {
-	bt.mu.Lock()
-	defer bt.mu.Unlock()
-
-	hash := metainfo.NewHashFromHex(hashHex)
 	state := bt.storage.GetStats(hash)
 	return state
+}
+
+func (bt *BTServer) WriteState(w io.Writer) {
+	bt.client.WriteStatus(w)
 }
 
 func (bt *BTServer) Clean(hashHex string) {
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
 
-	if bt.storage != nil && hashHex == "" {
+	if hashHex == "" {
 		bt.storage.Clean()
-	} else if bt.client != nil && hashHex != "" {
+	} else {
 		hash := metainfo.NewHashFromHex(hashHex)
 		if tor, ok := bt.client.Torrent(hash); ok {
 			delete(bt.states, hash)
@@ -217,32 +203,15 @@ func (bt *BTServer) Clean(hashHex string) {
 	}
 }
 
-func (bt *BTServer) Preload(hashHex string, fileLink string) error {
+func (bt *BTServer) Preload(hash metainfo.Hash, file *torrent.File) error {
 	if settings.Get().PreloadBufferSize == 0 {
 		return nil
 	}
 
-	tordb, err := bt.Get(hashHex)
-	if err != nil {
-		return err
+	state, ok := bt.states[hash]
+	if !ok {
+		return errors.New("File in Torrent not found: " + hash.HexString() + " | " + file.Path())
 	}
-
-	var file *settings.File
-	for _, f := range tordb.Files {
-		if utils.FileToLink(f.Name) == fileLink {
-			file = &f
-			break
-		}
-	}
-
-	if file == nil {
-		return errors.New("File in torrent not found: " + hashHex + "/" + fileLink)
-	}
-	state, err := bt.getTorrent(tordb)
-	if err != nil {
-		return err
-	}
-	hash := metainfo.NewHashFromHex(hashHex)
 	cState := bt.storage.GetStats(hash)
 
 	if !state.IsPreload {
@@ -251,9 +220,11 @@ func (bt *BTServer) Preload(hashHex string, fileLink string) error {
 		ep := int(pr / cState.PiecesLength)
 		if ep > 0 {
 			state.PreloadLength = int64(ep) * cState.PiecesLength
-			state.torrent.DownloadPieces(0, ep)
+			state.Torrent.DownloadPieces(0, ep)
 			go bt.watcher()
-			cl := state.torrent.Closed()
+			cl := state.Torrent.Closed()
+			var lastSize int64 = 0
+			errCount := 0
 			for {
 				select {
 				case <-cl:
@@ -262,10 +233,21 @@ func (bt *BTServer) Preload(hashHex string, fileLink string) error {
 				}
 				state.expiredTime = time.Now().Add(time.Minute)
 				state.PreloadSize = state.LoadedSize
-				fmt.Println("Preload:", bytes.Format(state.PreloadSize), "/", bytes.Format(state.PreloadLength), "Speed:", utils.Format(state.DownloadSpeed), "Peers:", state.ConnectedSeeders, "/", state.ActivePeers, ",", state.TotalPeers)
+				fmt.Println("Preload:", bytes.Format(state.PreloadSize), "/", bytes.Format(state.PreloadLength), "Speed:", utils.Format(state.DownloadSpeed), "Peers:[", state.ConnectedSeeders, "]", state.ActivePeers, "/", state.TotalPeers)
 				if state.PreloadSize >= state.PreloadLength {
 					return nil
 				}
+
+				if lastSize == state.PreloadSize {
+					errCount++
+				} else {
+					lastSize = state.PreloadSize
+					errCount = 0
+				}
+				if errCount > 60 {
+					return errors.New("long time no progress download")
+				}
+
 				time.Sleep(time.Second)
 			}
 		}
