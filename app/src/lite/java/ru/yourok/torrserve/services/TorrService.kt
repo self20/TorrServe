@@ -16,29 +16,34 @@ class TorrService : Service() {
     override fun onBind(p0: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        thread {
-            intent?.let {
-                if (it.action != null) {
-                    when (it.action) {
-                        "ru.yourok.torrserve.notifications.action_exit" -> stopAndExit()
-                        "ru.yourok.torrserve.notifications.action_restart" -> restartServer()
+        intent?.let {
+            if (it.action != null) {
+                when (it.action) {
+                    "ru.yourok.torrserve.notifications.action_exit" -> {
+                        thread {
+                            Thread.sleep(1000)
+                            stopServer()
+                            System.exit(0)
+                        }
+                        return START_NOT_STICKY
                     }
-                    return@thread
-                }
-
-
-                if (it.hasExtra("Cmd")) {
-                    val cmd = it.getStringExtra("Cmd")
-                    when (cmd) {
-                        "Stop" -> stopServer()
-                        "Restart" -> restartServer()
-                        else -> startServer()
+                    "ru.yourok.torrserve.notifications.action_restart" -> {
+                        restartServer()
+                        return START_STICKY
                     }
-                    return@thread
                 }
             }
-            startServer()
+
+            if (it.hasExtra("Cmd")) {
+                val cmd = it.getStringExtra("Cmd")
+                when (cmd) {
+                    "Stop" -> stopServer()
+                    "Restart" -> restartServer()
+                    else -> startServer()
+                }
+            }
         }
+        startServer()
         return START_STICKY
     }
 
@@ -67,24 +72,6 @@ class TorrService : Service() {
             }
         }
 
-        fun stop() {
-            try {
-                val intent = Intent(App.getContext(), TorrService::class.java)
-                intent.putExtra("Cmd", "Stop")
-                App.getContext().startService(intent)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-
-        fun stopAndExit() {
-            thread {
-                TorrService.stop()
-                Thread.sleep(1000)
-                System.exit(0)
-            }
-        }
-
         fun waitServer(): Boolean {
             start()
             var count = 0
@@ -97,6 +84,16 @@ class TorrService : Service() {
                     return false
             }
             return true
+        }
+
+        fun exit() {
+            try {
+                val intent = Intent(App.getContext(), TorrService::class.java)
+                intent.action = "ru.yourok.torrserve.notifications.action_exit"
+                App.getContext().startService(intent)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

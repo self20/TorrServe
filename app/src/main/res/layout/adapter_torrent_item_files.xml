@@ -1,31 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:paddingLeft="5dp"
     android:paddingRight="5dp"
     android:layout_width="match_parent">
 
     <TextView
-        android:layout_gravity="start|center"
-        android:text="Name"
         android:id="@+id/textViewFileName"
-        android:minHeight="64dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical" />
+        android:layout_gravity="start|center"
+        android:layout_toLeftOf="@+id/textViewFileSize"
+        android:layout_toStartOf="@+id/textViewFileSize"
+        android:gravity="center_vertical"
+        android:minHeight="64dp"
+        android:text="Name" />
 
     <ImageView
-        android:layout_gravity="center|end"
         android:id="@+id/imageViewPlayed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/ic_circle_played" />
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center|end"
+        android:background="@drawable/ic_circle_played"
+        android:layout_alignParentRight="true" />
 
     <TextView
         android:id="@+id/textViewFileSize"
-        android:layout_gravity="bottom|end"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/textViewFileName"
+        android:layout_alignParentEnd="true"
+        android:layout_gravity="bottom|end"
         android:text="5 MB" />
 
-</FrameLayout>
+</RelativeLayout>

@@ -12,10 +12,12 @@ import ru.yourok.torrserve.serverhelper.ServerApi
 import ru.yourok.torrserve.serverhelper.Torrent
 import ru.yourok.torrserve.services.TorrService
 import ru.yourok.torrserve.utils.Mime
+import java.net.URLDecoder
 import kotlin.concurrent.thread
 
 class ViewActivity : AppCompatActivity() {
     var torrentLink = ""
+    var saveInDB = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,8 +31,13 @@ class ViewActivity : AppCompatActivity() {
         setFinishOnTouchOutside(false)
         ///Intent open
         if (intent.action != null && intent.action.equals(Intent.ACTION_VIEW)) {
-            torrentLink = intent.data?.toString() ?: ""
+            intent.data?.let {
+                torrentLink = URLDecoder.decode(it.toString(), "UTF-8")
+            }
         }
+
+        if (intent.hasExtra("DontSave"))
+            saveInDB = false
 
         ///Intent send
         if (intent.action != null && intent.action.equals(Intent.ACTION_SEND)) {
@@ -59,14 +66,18 @@ class ViewActivity : AppCompatActivity() {
             return
         }
         setMessage(R.string.preparing_torrent)
-        val tor = addTorrent()
+        val tors = addTorrent()
 
-        if (tor == null) {
+        if (tors.isEmpty()) {
             showToast(R.string.error_add_torrent)
             finish()
             return
+        } else if (tors.size == 1)
+            play(tors[0])
+        else {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
         }
-        play(tor)
         return
     }
 
@@ -126,15 +137,15 @@ class ViewActivity : AppCompatActivity() {
         }
     }
 
-    private fun addTorrent(): Torrent? {
+    private fun addTorrent(): List<Torrent> {
         try {
-            return ServerApi.add(torrentLink)
+            return ServerApi.add(torrentLink, saveInDB)
         } catch (e: Exception) {
             val msg = e.message ?: getString(R.string.error_add_torrent)
             runOnUiThread {
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
-            return null
+            return emptyList()
         }
     }
 

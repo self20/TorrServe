@@ -95,7 +95,7 @@ class TvMainActivity : AppCompatActivity() {
         }
 
         buttonExit.setOnClickListener {
-            TorrService.stopAndExit()
+            TorrService.exit()
         }
 
         buttonSettings.setOnClickListener {

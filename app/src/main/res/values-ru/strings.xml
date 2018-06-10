@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">TorrServe</string>
 
+    <string name="label_add_show">TorrServe\nДобавить &amp; Показать</string>
+    <string name="label_show">TorrServe\nПоказать</string>
+
     <string name="name">Имя</string>
     <string name="torr_link">Торрент ссылка</string>
     <string name="add">Добавить</string>

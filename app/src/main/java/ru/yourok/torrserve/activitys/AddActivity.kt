@@ -50,7 +50,7 @@ class AddActivity : AppCompatActivity() {
                 }
 
                 try {
-                    ServerApi.add(editTextTorrLink.text.toString())
+                    ServerApi.add(editTextTorrLink.text.toString(), true)
                     finish()
                 } catch (e: Exception) {
                     val msg = e.message ?: getString(R.string.error_add_torrent)

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"server/settings"
+	"server/torr"
 	"server/utils"
 	"server/web/helpers"
 
@@ -98,6 +99,9 @@ func torrentUpload(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+	defer form.RemoveAll()
+
+	js := make([]*TorrentJsonResponse, 0)
 
 	for _, file := range form.File {
 		torrFile, err := file[0].Open()
@@ -106,13 +110,19 @@ func torrentUpload(c echo.Context) error {
 		}
 		defer torrFile.Close()
 
-		err = helpers.AddFile(bts, torrFile)
+		torrDb, err := helpers.AddFile(bts, torrFile)
 		if err != nil {
 			fmt.Println("Error upload torrent", err)
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
+		jst, err := getTorrentJS(torrDb)
+		if err != nil {
+			fmt.Println("Error get torrent:", torrDb.Hash, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		js = append(js, jst)
 	}
-	return c.String(http.StatusOK, "Ok")
+	return c.JSON(http.StatusOK, js)
 }
 
 func torrentGet(c echo.Context) error {
@@ -128,6 +138,17 @@ func torrentGet(c echo.Context) error {
 	if err != nil {
 		fmt.Println("Error get torrent:", jreq.Hash, err)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if torr == nil {
+		hash := metainfo.NewHashFromHex(jreq.Hash)
+		ts := bts.GetTorrent(hash)
+		torr = toTorrentDB(ts)
+	}
+
+	if torr == nil {
+		fmt.Println("Error get torrent: not found", torr.Hash)
+		return echo.NewHTTPError(http.StatusBadRequest, "Error get torrent: not found "+torr.Hash)
 	}
 
 	js, err := getTorrentJS(torr)
@@ -335,6 +356,28 @@ func torrentView(c echo.Context) error {
 	file := helpers.FindFile(fileLink, st.Torrent)
 
 	return bts.Play(st, file, timestamp, c)
+}
+
+func toTorrentDB(ts *torr.TorrentState) *settings.Torrent {
+	if ts == nil {
+		return nil
+	}
+	tor := new(settings.Torrent)
+	tor.Name = ts.Name
+	tor.Hash = ts.Hash
+	tor.Timestamp = settings.StartTime.Unix()
+	mi := ts.Torrent.Metainfo()
+	tor.Magnet = mi.Magnet(ts.Name, ts.Torrent.InfoHash()).String()
+	tor.Size = ts.TorrentSize
+	for _, f := range ts.Torrent.Files() {
+		tf := settings.File{
+			Name:   f.Path(),
+			Size:   f.Length(),
+			Viewed: false,
+		}
+		tor.Files = append(tor.Files, tf)
+	}
+	return tor
 }
 
 func getTorrentJS(tor *settings.Torrent) (*TorrentJsonResponse, error) {

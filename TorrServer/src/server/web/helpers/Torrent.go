@@ -50,26 +50,26 @@ func Add(bts *torr.BTServer, magnet *metainfo.Magnet, save bool) (*settings.Torr
 	return torDb, nil
 }
 
-func AddFile(bts *torr.BTServer, reader io.Reader) error {
+func AddFile(bts *torr.BTServer, reader io.Reader) (*settings.Torrent, error) {
 	info, err := metainfo.Load(reader)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = settings.LoadTorrentDB(info.HashInfoBytes().String())
+	torrDb, err := settings.LoadTorrentDB(info.HashInfoBytes().String())
 	if err != nil {
-		return nil
+		return torrDb, nil
 	}
 
 	minfo, err := info.UnmarshalInfo()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	magnet := info.Magnet(minfo.Name, info.HashInfoBytes())
 
-	_, err = Add(bts, &magnet, true)
-	return err
+	torrDb, err = Add(bts, &magnet, true)
+	return torrDb, err
 }
 
 func FindFile(fileLink string, torr *torrent.Torrent) *torrent.File {

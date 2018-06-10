@@ -106,7 +106,7 @@ object NavigationBar {
                         icon = R.drawable.ic_cancel_black_24dp
                         selectable = false
                         onClick { _ ->
-                            TorrService.stopAndExit()
+                            TorrService.exit()
                             false
                         }
                     }

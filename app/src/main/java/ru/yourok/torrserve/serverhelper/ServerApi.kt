@@ -15,13 +15,29 @@ import kotlin.concurrent.thread
 
 
 object ServerApi {
-    fun add(magnet: String): Torrent {
-        var link = magnet
+    fun add(link: String, save: Boolean): List<Torrent> {
+        if (
+                link.startsWith("magnet:", true) ||
+                link.startsWith("http:", true) ||
+                link.startsWith("https:", true))
+            return listOf(addLink(link, save))
+        else
+            return addFile(link)
+    }
+
+    private fun addLink(link: String, save: Boolean): Torrent {
+        val addr = Preferences.getServerAddress()
+        val tor = ServerRequest.serverAdd(addr, link, save)
+        return tor
+    }
+
+    private fun addFile(path: String): List<Torrent> {
+        var link = path
         var isRemove = false
-        if (magnet.startsWith("content://", true)) {
+        if (link.startsWith("content://", true)) {
             val outputDir = App.getContext().getCacheDir() // context being the Activity pointer
             val outputFile = File.createTempFile("tmp", ".torr", outputDir)
-            val fd = App.getContext().contentResolver.openFileDescriptor(Uri.parse(magnet), "r")
+            val fd = App.getContext().contentResolver.openFileDescriptor(Uri.parse(link), "r")
             val inStream = FileInputStream(fd.fileDescriptor)
             val outStream = FileOutputStream(outputFile)
             val inChannel = inStream.getChannel()
@@ -33,8 +49,11 @@ object ServerApi {
             isRemove = true
         }
 
+        if (link.startsWith("file://", true))
+            link = link.substring(7)
+
         val addr = Preferences.getServerAddress()
-        val tor = ServerRequest.serverAdd(addr, link)
+        val tor = ServerRequest.serverAddFile(addr, link)
         if (isRemove)
             File(link).delete()
         return tor

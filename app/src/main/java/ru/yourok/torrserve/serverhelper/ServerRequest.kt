@@ -1,5 +1,11 @@
 package ru.yourok.torrserve.serverhelper
 
+import cz.msebera.android.httpclient.client.methods.HttpPost
+import cz.msebera.android.httpclient.entity.mime.HttpMultipartMode
+import cz.msebera.android.httpclient.entity.mime.MultipartEntityBuilder
+import cz.msebera.android.httpclient.entity.mime.content.FileBody
+import cz.msebera.android.httpclient.impl.client.HttpClients
+import cz.msebera.android.httpclient.util.EntityUtils
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.DataOutputStream
@@ -76,6 +82,13 @@ fun getRequest(link: String, hash: String): String {
     val js = JSONObject()
     js.put("Link", link)
     js.put("Hash", hash)
+    return js.toString(0)
+}
+
+fun getRequest(link: String, dontSave: Boolean): String {
+    val js = JSONObject()
+    js.put("Link", link)
+    js.put("DontSave", dontSave)
     return js.toString(0)
 }
 
@@ -160,6 +173,31 @@ object ServerRequest {
         return getTorrent(requestStr(post, url, req))
     }
 
+    private fun requestFile(url: String, path: String): List<Torrent> {
+        val file = java.io.File(path)
+
+        val httpclient = HttpClients.custom().build()
+        val httppost = HttpPost(url)
+
+        val mpEntity = MultipartEntityBuilder.create()
+        mpEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+        mpEntity.addPart(file.name, FileBody(file))
+
+        val entity = mpEntity.build()
+        httppost.setEntity(entity)
+        val response = httpclient.execute(httppost)
+        val str = EntityUtils.toString(response.getEntity())
+        val arr = JSONArray(str)
+
+        val torrList = mutableListOf<Torrent>()
+        for (i in 0 until arr.length()) {
+            val js = arr.getJSONObject(i)
+            val tor = getTorrent(js)
+            torrList.add(tor)
+        }
+        return torrList
+    }
+
     private fun requestStr(post: Boolean, url: String, req: String): String {
         val url = URL(url)
         val conn = url.openConnection() as HttpURLConnection
@@ -204,12 +242,16 @@ object ServerRequest {
         return str
     }
 
-    fun serverAdd(host: String, link: String): Torrent {
+    fun serverAdd(host: String, link: String, save: Boolean): Torrent {
         val url = joinUrl(host, "/torrent/add")
-        val req = getRequest(link, "")
+        val req = getRequest(link, !save)
         return requestTorr(true, url, req)
     }
 
+    fun serverAddFile(host: String, link: String): List<Torrent> {
+        val url = joinUrl(host, "/torrent/upload")
+        return requestFile(url, link)
+    }
 
     fun serverGet(host: String, hash: String): Torrent {
         val url = joinUrl(host, "/torrent/get")

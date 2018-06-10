@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import ru.yourok.torrserve.App
 import ru.yourok.torrserve.R
 import ru.yourok.torrserve.serverhelper.File
@@ -51,7 +52,13 @@ class ProgressActivity : AppCompatActivity() {
             }
 
             if (!isClosed && Preferences.isShowPreloadWnd())
-                waitPreload()
+                if (!waitPreload()) {
+                    isClosed = true
+                    try {
+                        Toast.makeText(this, R.string.error_open_torrent, Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                    }
+                }
             if (!isClosed)
                 play()
             finish()
@@ -67,7 +74,7 @@ class ProgressActivity : AppCompatActivity() {
     }
 
 
-    private fun waitPreload() {
+    private fun waitPreload(): Boolean {
         var err = 0
         torrent?.let { torrent ->
             file?.let { file ->
@@ -77,8 +84,9 @@ class ProgressActivity : AppCompatActivity() {
                     isPreload = false
                 }
                 while (isPreload) {
-                    if (err > 15) {
-                        return
+                    if (err > 60) {
+                        ServerApi.cleanCache(torrent.Hash)
+                        return false
                     }
                     Thread.sleep(1000)
                     val info = ServerApi.info(torrent.Hash)
@@ -86,9 +94,10 @@ class ProgressActivity : AppCompatActivity() {
                         err++
                         continue
                     }
+                    err = 0
 
                     if (!info.IsPreload || info.PreloadSize >= info.PreloadLength)
-                        return
+                        return true
 
                     var msg = ""
                     var prc = 0
@@ -100,8 +109,10 @@ class ProgressActivity : AppCompatActivity() {
                     msg += getString(R.string.download_speed) + ": " + Utils.byteFmt(info.DownloadSpeed) + "/Sec"
                     setMessage(msg, prc)
                 }
+                return err == 0
             }
         }
+        return false
     }
 
     private fun setMessage(msg: String, progress: Int) {
