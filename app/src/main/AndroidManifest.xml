@@ -251,6 +251,14 @@
                     android:host="*"
                     android:mimeType="application/x-bittorrent"
                     android:scheme="https" />
+                <data
+                    android:host="*"
+                    android:mimeType="application/x-bittorrent"
+                    android:scheme="content" />
+                <data
+                    android:host="*"
+                    android:mimeType="application/x-bittorrent"
+                    android:scheme="file" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -264,6 +272,12 @@
                 <data
                     android:host="*"
                     android:scheme="https" />
+                <data
+                    android:host="*"
+                    android:scheme="file" />
+                <data
+                    android:host="*"
+                    android:scheme="content" />
                 <data android:pathPattern=".*\.torrent" />
                 <data android:pathPattern=".*\.TORRENT" />
             </intent-filter>
@@ -281,6 +295,14 @@
                     android:host="*"
                     android:mimeType="*/*"
                     android:scheme="https" />
+                <data
+                    android:host="*"
+                    android:mimeType="*/*"
+                    android:scheme="file" />
+                <data
+                    android:host="*"
+                    android:mimeType="*/*"
+                    android:scheme="content" />
                 <data android:pathPattern=".*\.torrent" />
                 <data android:pathPattern=".*\.TORRENT" />
             </intent-filter>
@@ -314,6 +336,7 @@
 
                 <data android:scheme="http" />
                 <data android:scheme="https" />
+                <data android:scheme="file" />
                 <data android:scheme="magnet" />
                 <data android:host="*" />
                 <data android:pathPattern="*.torrent" />

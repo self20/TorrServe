@@ -1,9 +1,11 @@
 package ru.yourok.torrserve.serverhelper
 
 import cz.msebera.android.httpclient.client.methods.HttpPost
+import cz.msebera.android.httpclient.entity.ContentType
 import cz.msebera.android.httpclient.entity.mime.HttpMultipartMode
 import cz.msebera.android.httpclient.entity.mime.MultipartEntityBuilder
 import cz.msebera.android.httpclient.entity.mime.content.FileBody
+import cz.msebera.android.httpclient.entity.mime.content.StringBody
 import cz.msebera.android.httpclient.impl.client.HttpClients
 import cz.msebera.android.httpclient.util.EntityUtils
 import org.json.JSONArray
@@ -173,7 +175,7 @@ object ServerRequest {
         return getTorrent(requestStr(post, url, req))
     }
 
-    private fun requestFile(url: String, path: String): List<Torrent> {
+    private fun requestFile(url: String, path: String, save: Boolean): List<Torrent> {
         val file = java.io.File(path)
 
         val httpclient = HttpClients.custom().build()
@@ -182,6 +184,8 @@ object ServerRequest {
         val mpEntity = MultipartEntityBuilder.create()
         mpEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
         mpEntity.addPart(file.name, FileBody(file))
+        if (!save)
+            mpEntity.addPart("DontSave", StringBody("true", ContentType.DEFAULT_TEXT))
 
         val entity = mpEntity.build()
         httppost.setEntity(entity)
@@ -248,9 +252,9 @@ object ServerRequest {
         return requestTorr(true, url, req)
     }
 
-    fun serverAddFile(host: String, link: String): List<Torrent> {
+    fun serverAddFile(host: String, link: String, save: Boolean): List<Torrent> {
         val url = joinUrl(host, "/torrent/upload")
-        return requestFile(url, link)
+        return requestFile(url, link, save)
     }
 
     fun serverGet(host: String, hash: String): Torrent {

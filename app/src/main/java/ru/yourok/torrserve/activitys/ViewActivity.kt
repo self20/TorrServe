@@ -72,12 +72,8 @@ class ViewActivity : AppCompatActivity() {
             showToast(R.string.error_add_torrent)
             finish()
             return
-        } else if (tors.size == 1)
-            play(tors[0])
-        else {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
         }
+        play(tors[0])
         return
     }
 

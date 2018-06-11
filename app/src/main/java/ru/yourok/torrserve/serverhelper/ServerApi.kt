@@ -22,7 +22,7 @@ object ServerApi {
                 link.startsWith("https:", true))
             return listOf(addLink(link, save))
         else
-            return addFile(link)
+            return addFile(link, save)
     }
 
     private fun addLink(link: String, save: Boolean): Torrent {
@@ -31,7 +31,7 @@ object ServerApi {
         return tor
     }
 
-    private fun addFile(path: String): List<Torrent> {
+    private fun addFile(path: String, save: Boolean): List<Torrent> {
         var link = path
         var isRemove = false
         if (link.startsWith("content://", true)) {
@@ -53,7 +53,7 @@ object ServerApi {
             link = link.substring(7)
 
         val addr = Preferences.getServerAddress()
-        val tor = ServerRequest.serverAddFile(addr, link)
+        val tor = ServerRequest.serverAddFile(addr, link, save)
         if (isRemove)
             File(link).delete()
         return tor

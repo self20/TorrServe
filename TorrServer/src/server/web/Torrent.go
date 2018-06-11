@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"sort"
+	"sync"
 	"time"
 
 	"server/settings"
@@ -79,7 +80,7 @@ func torrentAdd(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	torrDb, err := helpers.Add(bts, magnet, !jreq.DontSave)
+	torrDb, err := helpers.Add(bts, magnet, !jreq.DontSave, 30)
 	if err != nil {
 		fmt.Println("Error add torrent:", jreq.Hash, err)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -101,7 +102,10 @@ func torrentUpload(c echo.Context) error {
 	}
 	defer form.RemoveAll()
 
-	js := make([]*TorrentJsonResponse, 0)
+	jsList := make([]*TorrentJsonResponse, 0)
+
+	_, dontSave := form.Value["DontSave"]
+	var magnets []metainfo.Magnet
 
 	for _, file := range form.File {
 		torrFile, err := file[0].Open()
@@ -110,19 +114,46 @@ func torrentUpload(c echo.Context) error {
 		}
 		defer torrFile.Close()
 
-		torrDb, err := helpers.AddFile(bts, torrFile)
+		mi, err := metainfo.Load(torrFile)
 		if err != nil {
 			fmt.Println("Error upload torrent", err)
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		jst, err := getTorrentJS(torrDb)
+
+		info, err := mi.UnmarshalInfo()
 		if err != nil {
-			fmt.Println("Error get torrent:", torrDb.Hash, err)
+			fmt.Println("Error upload torrent", err)
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		js = append(js, jst)
+		magnet := mi.Magnet(info.Name, mi.HashInfoBytes())
+		magnets = append(magnets, magnet)
 	}
-	return c.JSON(http.StatusOK, js)
+
+	var wa sync.WaitGroup
+	for _, magnet := range magnets {
+		wa.Add(1)
+		go func() {
+			torrDb, er := helpers.Add(bts, &magnet, !dontSave, 30)
+			if er != nil {
+				err = er
+				fmt.Println("Error add torrent:", magnet.String(), er)
+			} else {
+				js, er := getTorrentJS(torrDb)
+				if er != nil {
+					fmt.Println("Error create response:", torrDb.Hash, er)
+				} else {
+					err = er
+					jsList = append(jsList, js)
+				}
+			}
+			wa.Done()
+		}()
+	}
+	wa.Wait()
+	if len(jsList) == 0 && err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, jsList)
 }
 
 func torrentGet(c echo.Context) error {
