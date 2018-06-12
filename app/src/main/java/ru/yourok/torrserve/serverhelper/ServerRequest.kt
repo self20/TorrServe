@@ -24,6 +24,7 @@ data class Torrent(
         var Length: Long,
         var AddTime: Long,
         var Size: Long,
+        var IsGettingInfo: Boolean,
         var Playlist: String,
         var Files: List<File>
 )
@@ -36,6 +37,9 @@ data class File(
 )
 
 data class Info(
+        var Name: String,
+        var Hash: String,
+
         var BytesWritten: Long,
         var BytesWrittenData: Long,
 
@@ -61,6 +65,7 @@ data class Info(
         var ConnectedSeeders: Int,
         var HalfOpenPeers: Int,
 
+        var IsGettingInfo: Boolean,
         var IsPreload: Boolean,
         var PreloadSize: Long,
         var PreloadLength: Long
@@ -99,17 +104,19 @@ fun getTorrent(jsStr: String): Torrent {
 }
 
 fun getTorrent(js: JSONObject): Torrent {
-    val jsFiles = js.getJSONArray("Files")
     val fileList = mutableListOf<File>()
+    if (js.has("Files")) {
+        val jsFiles = js.getJSONArray("Files")
 
-    for (i in 0 until jsFiles.length()) {
-        val jsf = jsFiles.getJSONObject(i)
-        val tf = File(
-                jsf.getString("Name"),
-                jsf.getString("Link"),
-                jsf.getLong("Size"),
-                jsf.getBoolean("Viewed"))
-        fileList.add(tf)
+        for (i in 0 until jsFiles.length()) {
+            val jsf = jsFiles.getJSONObject(i)
+            val tf = File(
+                    jsf.getString("Name"),
+                    jsf.getString("Link"),
+                    jsf.getLong("Size"),
+                    jsf.getBoolean("Viewed"))
+            fileList.add(tf)
+        }
     }
 
     val ret = Torrent(
@@ -119,6 +126,7 @@ fun getTorrent(js: JSONObject): Torrent {
             js.getLong("Length"),
             js.getLong("AddTime"),
             js.getLong("Size"),
+            js.getBoolean("IsGettingInfo"),
             js.getString("Playlist"),
             fileList.toList()
     )
@@ -132,6 +140,9 @@ fun js2Info(jsStr: String): Info {
 
 fun js2Info(js: JSONObject): Info {
     return Info(
+            js.getString("Name"),
+            js.getString("Hash"),
+
             js.getLong("BytesWritten"),
             js.getLong("BytesWrittenData"),
 
@@ -157,6 +168,7 @@ fun js2Info(js: JSONObject): Info {
             js.getInt("ConnectedSeeders"),
             js.getInt("HalfOpenPeers"),
 
+            js.getBoolean("IsGettingInfo"),
             js.getBoolean("IsPreload"),
             js.getLong("PreloadSize"),
             js.getLong("PreloadLength")
@@ -175,7 +187,7 @@ object ServerRequest {
         return getTorrent(requestStr(post, url, req))
     }
 
-    private fun requestFile(url: String, path: String, save: Boolean): List<Torrent> {
+    private fun requestFile(url: String, path: String, save: Boolean): List<String> {
         val file = java.io.File(path)
 
         val httpclient = HttpClients.custom().build()
@@ -193,13 +205,12 @@ object ServerRequest {
         val str = EntityUtils.toString(response.getEntity())
         val arr = JSONArray(str)
 
-        val torrList = mutableListOf<Torrent>()
+        val hashList = mutableListOf<String>()
         for (i in 0 until arr.length()) {
-            val js = arr.getJSONObject(i)
-            val tor = getTorrent(js)
-            torrList.add(tor)
+            val str = arr.getString(i)
+            hashList.add(str)
         }
-        return torrList
+        return hashList
     }
 
     private fun requestStr(post: Boolean, url: String, req: String): String {
@@ -249,12 +260,20 @@ object ServerRequest {
     fun serverAdd(host: String, link: String, save: Boolean): Torrent {
         val url = joinUrl(host, "/torrent/add")
         val req = getRequest(link, !save)
-        return requestTorr(true, url, req)
+        val hash = requestStr(true, url, req)
+        return serverGet(host, hash)
     }
 
     fun serverAddFile(host: String, link: String, save: Boolean): List<Torrent> {
         val url = joinUrl(host, "/torrent/upload")
-        return requestFile(url, link, save)
+        val hashes = requestFile(url, link, save)
+        val torrs = serverList(host)
+        return torrs.filter { tor ->
+            val list = hashes.find {
+                it == tor.Hash
+            }
+            list != null && list.isNotEmpty()
+        }
     }
 
     fun serverGet(host: String, hash: String): Torrent {

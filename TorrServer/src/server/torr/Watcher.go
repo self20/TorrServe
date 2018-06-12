@@ -3,21 +3,14 @@ package torr
 import (
 	"time"
 
-	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/metainfo"
 )
 
-func (bt *BTServer) Watching(torr *torrent.Torrent) *TorrentState {
-	state := new(TorrentState)
-	state.Torrent = torr
-	state.TorrentSize = torr.Length()
-	state.TorrentStats = torr.Stats()
-	state.expiredTime = time.Now().Add(time.Minute * 5)
+func (bt *BTServer) Watching(state *TorrentState) {
 	state.updateTorrentState()
-
-	bt.states[torr.InfoHash()] = state
+	state.expiredTime = time.Now().Add(time.Minute * 5)
+	bt.states[state.Torrent.InfoHash()] = state
 	bt.watcher()
-	return state
 }
 
 func (bt *BTServer) watcher() {
@@ -33,7 +26,7 @@ func (bt *BTServer) watcher() {
 
 			for _, st := range bt.states {
 				if st.expired() {
-					bt.removeState(st)
+					bt.removeState(st.Hash)
 				} else {
 					st.updateTorrentState()
 				}
@@ -50,8 +43,8 @@ func (bt *BTServer) addState(state *TorrentState) {
 	bt.states[state.Torrent.InfoHash()] = state
 }
 
-func (bt *BTServer) removeState(state *TorrentState) {
-	hash := metainfo.NewHashFromHex(state.Hash)
+func (bt *BTServer) removeState(hashHex string) {
+	hash := metainfo.NewHashFromHex(hashHex)
 	if st, ok := bt.states[hash]; ok {
 		if st.Torrent != nil {
 			st.Torrent.Drop()

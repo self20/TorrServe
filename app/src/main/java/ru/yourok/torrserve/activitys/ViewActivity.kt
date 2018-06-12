@@ -12,12 +12,12 @@ import ru.yourok.torrserve.serverhelper.ServerApi
 import ru.yourok.torrserve.serverhelper.Torrent
 import ru.yourok.torrserve.services.TorrService
 import ru.yourok.torrserve.utils.Mime
-import java.net.URLDecoder
 import kotlin.concurrent.thread
 
 class ViewActivity : AppCompatActivity() {
-    var torrentLink = ""
-    var saveInDB = true
+    private var torrentLink = ""
+    private var saveInDB = true
+    private var isClosed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +32,7 @@ class ViewActivity : AppCompatActivity() {
         ///Intent open
         if (intent.action != null && intent.action.equals(Intent.ACTION_VIEW)) {
             intent.data?.let {
-                torrentLink = URLDecoder.decode(it.toString(), "UTF-8")
+                torrentLink = it.toString()
             }
         }
 
@@ -58,28 +58,42 @@ class ViewActivity : AppCompatActivity() {
     }
 
     private fun prepareTorrent() {
-        setMessage(R.string.starting_server)
+        setMessage(getString(R.string.starting_server))
         val run = TorrService.waitServer()
         if (!run) {
             showToast(R.string.error_server_start)
             finish()
             return
         }
-        setMessage(R.string.preparing_torrent)
-        val tors = addTorrent()
+        if (!isClosed) {
+            setMessage(getString(R.string.connects_to_torrent))
+            val tors = addTorrent()
+            if (tors.isEmpty()) {
+                showToast(R.string.error_add_torrent)
+                finish()
+                return
+            }
 
-        if (tors.isEmpty()) {
-            showToast(R.string.error_add_torrent)
-            finish()
-            return
+            if (!isClosed) {
+                wait(tors[0])?.let {
+                    if (!isClosed)
+                        play(it)
+                } ?: let {
+                    startActivity(Intent(this, MainActivity::class.java))
+                }
+            }
         }
-        play(tors[0])
         return
     }
 
-    private fun setMessage(msg: Int) {
+    override fun onBackPressed() {
+        super.onBackPressed()
+        isClosed = true
+    }
+
+    private fun setMessage(msg: String) {
         runOnUiThread {
-            if (msg != -1) {
+            if (msg.isNotEmpty()) {
                 findViewById<ProgressBar>(R.id.progressBar).visibility = View.VISIBLE
                 findViewById<TextView>(R.id.textViewStatus).visibility = View.VISIBLE
                 findViewById<TextView>(R.id.textViewStatus).setText(msg)
@@ -94,6 +108,24 @@ class ViewActivity : AppCompatActivity() {
         runOnUiThread {
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun wait(tor: Torrent): Torrent? {
+        while (!isClosed) {
+            val info = ServerApi.info(tor.Hash)
+            if (info == null || !info.IsGettingInfo) {
+                break
+            }
+            var msg = getString(R.string.connects_to_torrent) + "\n" +
+                    info.Name + "\n" +
+                    info.Hash + "\n"
+            msg += getString(R.string.peers) + ": [" + info.ConnectedSeeders.toString() + "] " + info.ActivePeers.toString() + "/" + info.TotalPeers.toString()
+            runOnUiThread {
+                findViewById<TextView>(R.id.textViewStatus).setText(msg)
+            }
+            Thread.sleep(1000)
+        }
+        return ServerApi.get(tor.Hash)
     }
 
     private fun play(tor: Torrent) {

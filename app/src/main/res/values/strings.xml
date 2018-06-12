@@ -31,13 +31,13 @@
     <string name="restart_server">Restart local server</string>
     <string name="exit">Exit</string>
 
+    <string name="connects_to_torrent">Connects to torrent</string>
     <string name="buffering_torrent">Buffering torrent</string>
     <string name="buffer">Buffer</string>
     <string name="peers">Peers</string>
     <string name="download_speed">Download speed</string>
     <string name="upload_speed">Upload speed</string>
 
-    <string name="preparing_torrent">Preparing the torrent...</string>
     <string name="starting_server">Starting server...</string>
     <string name="loading_torrent_list">Loading torrent list...</string>
     <string name="server_stoped">Torrent server is stopped</string>

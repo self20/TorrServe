@@ -50,7 +50,7 @@ object ServerApi {
         }
 
         if (link.startsWith("file://", true))
-            link = link.substring(7)
+            link = Uri.parse(link).path
 
         val addr = Preferences.getServerAddress()
         val tor = ServerRequest.serverAddFile(addr, link, save)

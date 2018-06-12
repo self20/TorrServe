@@ -12,41 +12,40 @@ import (
 	"github.com/anacrolix/torrent/metainfo"
 )
 
-func Add(bts *torr.BTServer, magnet *metainfo.Magnet, save bool, timeout int) (*settings.Torrent, error) {
+func Add(bts *torr.BTServer, magnet *metainfo.Magnet, save bool) error {
 	if len(magnet.Trackers) == 0 {
 		magnet.Trackers = append(magnet.Trackers, utils.GetDefTrackers()...)
 	}
 
 	fmt.Println("Adding torrent", magnet.String())
-	torrState, err := bts.AddTorrent(magnet, timeout)
-	if err != nil {
-		return nil, err
-	}
-
-	torDb := new(settings.Torrent)
-	torDb.Name = torrState.Name
-	torDb.Hash = torrState.Hash
-	torDb.Size = torrState.TorrentSize
-	torDb.Magnet = magnet.String()
-	torDb.Timestamp = time.Now().Unix()
-	files := torrState.Torrent.Files()
-	for _, f := range files {
-		ff := settings.File{
-			f.Path(),
-			f.Length(),
-			false,
+	err := bts.AddTorrentQueue(magnet, func(torrState *torr.TorrentState) {
+		torDb := new(settings.Torrent)
+		torDb.Name = torrState.Name
+		torDb.Hash = torrState.Hash
+		torDb.Size = torrState.TorrentSize
+		torDb.Magnet = magnet.String()
+		torDb.Timestamp = time.Now().Unix()
+		files := torrState.Torrent.Files()
+		for _, f := range files {
+			ff := settings.File{
+				f.Path(),
+				f.Length(),
+				false,
+			}
+			torDb.Files = append(torDb.Files, ff)
 		}
-		torDb.Files = append(torDb.Files, ff)
-	}
 
-	if save {
-		err = settings.SaveTorrentDB(torDb)
-	}
+		if save {
+			err := settings.SaveTorrentDB(torDb)
+			if err != nil {
+				fmt.Println("Error add torrent to db:", err)
+			}
+		}
+	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	return torDb, nil
+	return nil
 }
 
 func FindFile(fileLink string, torr *torrent.Torrent) *torrent.File {

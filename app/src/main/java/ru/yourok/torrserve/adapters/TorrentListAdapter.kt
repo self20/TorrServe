@@ -45,9 +45,15 @@ class TorrentListAdapter(val activity: Activity) : BaseAdapter() {
     override fun getView(index: Int, convertView: View?, viewGroup: ViewGroup): View {
         val vi: View = convertView ?: (activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.adapter_torrent_item, null)
         if (index in 0 until torrList.size) {
-            vi.findViewById<TextView>(R.id.textViewTorrName).text = torrList[index].Name
-            vi.findViewById<TextView>(R.id.textViewTorrSize).text = Utils.byteFmt(torrList[index].Length)
-            vi.findViewById<TextView>(R.id.textViewTorrMagnet).text = torrList[index].Magnet
+            if (torrList[index].IsGettingInfo) {
+                vi.findViewById<TextView>(R.id.textViewTorrName).text = torrList[index].Name + " " + torrList[index].Hash
+                vi.findViewById<TextView>(R.id.textViewTorrSize).text = Utils.byteFmt(torrList[index].Length)
+                vi.findViewById<TextView>(R.id.textViewTorrMagnet).text = activity.getText(R.string.connects_to_torrent)
+            } else {
+                vi.findViewById<TextView>(R.id.textViewTorrName).text = torrList[index].Name
+                vi.findViewById<TextView>(R.id.textViewTorrSize).text = Utils.byteFmt(torrList[index].Length)
+                vi.findViewById<TextView>(R.id.textViewTorrMagnet).text = torrList[index].Magnet
+            }
         }
         return vi
     }

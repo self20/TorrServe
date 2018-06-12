@@ -22,6 +22,7 @@ type TorrentState struct {
 	Name string
 	Hash string
 
+	IsGettingInfo bool
 	IsPreload     bool
 	LoadedSize    int64
 	PreloadSize   int64
@@ -38,8 +39,23 @@ type TorrentState struct {
 	Torrent     *torrent.Torrent
 }
 
+func NewState(torr *torrent.Torrent) *TorrentState {
+	state := new(TorrentState)
+	state.Torrent = torr
+	state.lastTimeSpeed = time.Now()
+	state.updateTorrentState()
+	return state
+}
+
 func (ts *TorrentState) expired() bool {
-	return ts.readers == 0 && ts.expiredTime.Before(time.Now())
+	return ts.readers == 0 && ts.expiredTime.Before(time.Now()) && !ts.IsGettingInfo
+}
+
+func (ts *TorrentState) Files() []*torrent.File {
+	if ts.Torrent != nil && ts.Torrent.Info() != nil {
+		return ts.Torrent.Files()
+	}
+	return nil
 }
 
 func (ts *TorrentState) updateTorrentState() {
@@ -47,7 +63,9 @@ func (ts *TorrentState) updateTorrentState() {
 		return
 	}
 	state := ts.Torrent.Stats()
-
+	if info := ts.Torrent.Info(); info != nil {
+		ts.TorrentSize = info.Length
+	}
 	deltaDlBytes := state.BytesReadUsefulData - ts.TorrentStats.BytesReadUsefulData
 	deltaUpBytes := state.BytesWrittenData - ts.TorrentStats.BytesWrittenData
 	deltaTime := time.Since(ts.lastTimeSpeed).Seconds()

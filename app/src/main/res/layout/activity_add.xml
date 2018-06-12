@@ -30,7 +30,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:inputType="textWebEditText"
+                android:inputType="textMultiLine|textWebEditText"
+                android:minLines="1"
+                android:gravity="top|left"
                 android:selectAllOnFocus="true" />
 
             <View

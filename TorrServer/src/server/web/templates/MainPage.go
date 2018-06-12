@@ -122,51 +122,108 @@ var mainPage = `
 	}
 	
 	$('#uploadForm').submit(function(event) {
-    event.preventDefault(); // Prevent the form from submitting via the browser
-    var form = $(this);
-    $.ajax({
-      type: form.attr('method'),
-      url: form.attr('action'),
-      data: form.serialize()
-    }).done(function(data) {
-      loadTorrents();
-    }).fail(function(data) {
-      // Optionally alert the user of an error here...
-    });
-  });
+		event.preventDefault();
+		var form = $(this);
+		$.ajax({
+			type: form.attr('method'),
+			url: form.attr('action'),
+			data: form.serialize()
+			}).done(function(data) {
+				loadTorrents();
+			}).fail(function(data) {});
+	});
 
 	function loadTorrents() {
 		$.post('/torrent/list')
 			.done(function( data ) {
 				var torrents = $("#torrents");
 				torrents.empty();
+				var html = "";
+				var queueInfo = [];
 				for(var key in data) {
 					var tor = data[key];
-					$("<hr>").appendTo(torrents);
-					var divColl = $('<div id="'+tor.Hash+'" data-role="collapsible"></div>')
-					$("<h3>"+tor.Name+" "+humanizeSize(tor.Size)+"</h3>").appendTo(divColl);
-					$('<a data-role="button" data-icon="bullets" target="_blank" href="'+tor.Playlist+'">Playlist</a>').appendTo(divColl);
-					$('<button data-icon="delete" onclick="removeTorrent(\''+tor.Hash+'\');">Remove ['+tor.Name+']</button>').appendTo(divColl);
-					$("<br>").appendTo(divColl);
-					for(var i in tor.Files){
-						var file = tor.Files[i];
-						var btn = $('<a data-role="button" target="_blank" onClick="loadTorrents()" href="'+file.Link+'">'+file.Name+" "+humanizeSize(file.Size)+'</a>');
-						if (file.Viewed)
-							btn.buttonMarkup({ icon: "check" });
-						btn.appendTo(divColl);
+					if (tor.IsGettingInfo){
+						queueInfo.push(tor);
+						continue;
 					}
-					divColl.appendTo(torrents);
+					html += tor2Html(tor);
 				}
+				getingInfo = queueInfo.length;
+				if (queueInfo.length>0){
+					html += "<br><hr><h3>Got info: </h3>";
+					for(var key in queueInfo) {
+						var tor = queueInfo[key];
+						html += tor2Html(tor);
+					}
+				}
+				if (getingInfo>0)
+					watchInfo();
+				$(html).appendTo(torrents);
 				torrents.enhanceWithin();
 			})
 			.fail(function( data ) {
 				alert(data.responseJSON.message);
 			});
 	}
-
+	
+	function tor2Html(tor){
+		var html = '<hr>';
+		html += '<div id="'+tor.Hash+'" data-role="collapsible">';
+		if (tor.IsGettingInfo)
+			html += '<h3>'+tor.Name+' '+humanizeSize(tor.Size)+' '+tor.Hash+'</h3>';
+		else
+			html += '<h3>'+tor.Name+' '+humanizeSize(tor.Size)+'</h3>';
+		html += '<button data-icon="delete" onclick="removeTorrent(\''+tor.Hash+'\');">Remove ['+tor.Name+']</button>';
+		if (typeof tor.Files != 'undefined' && tor.Files != 0){
+			html += '<br>';
+			html += '<a data-role="button" data-icon="bullets" target="_blank" href="'+tor.Playlist+'">Playlist</a>';
+			for(var i in tor.Files){
+				var file = tor.Files[i];
+				var cls = "";
+				if (file.Viewed)
+					cls = 'class="icon-check"';
+				html += '<a '+cls+' data-role="button" target="_blank" onClick="loadTorrents()" href="'+file.Link+'">'+file.Name+" "+humanizeSize(file.Size)+'</a>';
+			}
+		}
+		html += '</div>';
+		return html;
+	}
+	
+	var timer = 0;
+	var getingInfo = 0;
+	
+	function watchInfo(){
+		if (timer != 0 || getingInfo == 0)
+			return;
+		timer = setInterval(function() {
+			$.post('/torrent/list')
+			.done(function( data ) {
+				var ginfo = 0;
+				for(var key in data) {
+					var tor = data[key];
+					if (tor.IsGettingInfo){
+						ginfo++;
+					}
+				}
+				if (ginfo != getingInfo || ginfo == 0){
+					clearInterval(timer);
+					timer = 0;
+					loadTorrents();
+				}
+			})
+			.fail(function( data ) {
+				clearInterval(timer);
+				timer = 0;
+				loadTorrents();
+			});
+		}, 1000);
+	}
+	
 	function humanizeSize(size) {
+		if (typeof size == 'undefined' || size == 0)
+			return "";
 		var i = Math.floor( Math.log(size) / Math.log(1024) );
-    	return ( size / Math.pow(1024, i) ).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+		return ( size / Math.pow(1024, i) ).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 	};
 
 </script>
