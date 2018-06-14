@@ -84,17 +84,12 @@ class ProgressActivity : AppCompatActivity() {
                     isPreload = false
                 }
                 while (isPreload) {
-                    if (err > 60) {
-                        ServerApi.cleanCache(torrent.Hash)
-                        return false
-                    }
                     Thread.sleep(1000)
                     val info = ServerApi.info(torrent.Hash)
                     if (info == null) {
-                        err++
+                        Thread.sleep(1000)
                         continue
                     }
-                    err = 0
 
                     if (!info.IsPreload || info.PreloadSize >= info.PreloadLength)
                         return true

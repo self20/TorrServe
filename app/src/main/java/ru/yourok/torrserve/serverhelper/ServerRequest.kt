@@ -1,5 +1,6 @@
 package ru.yourok.torrserve.serverhelper
 
+import android.net.Uri
 import cz.msebera.android.httpclient.client.methods.HttpPost
 import cz.msebera.android.httpclient.entity.ContentType
 import cz.msebera.android.httpclient.entity.mime.HttpMultipartMode
@@ -13,6 +14,7 @@ import org.json.JSONObject
 import java.io.DataOutputStream
 import java.io.IOException
 import java.net.HttpURLConnection
+import java.net.URI
 import java.net.URL
 import java.nio.charset.Charset
 
@@ -84,6 +86,18 @@ data class ServerSettings(var CacheSize: Int,
                           var DownloadRateLimit: Int,
                           var UploadRateLimit: Int,
                           var ConnectionsLimit: Int)
+
+fun fixLink(link: String): String {
+    try {
+        if (link.isNotEmpty()) {
+            val url = Uri.parse(link)
+            val uri = URI(url.scheme, url.userInfo, url.host, url.port, url.path, url.query, url.fragment)
+            return uri.toASCIIString()
+        }
+    } catch (e: Exception) {
+    }
+    return link
+}
 
 fun getRequest(link: String, hash: String): String {
     val js = JSONObject()

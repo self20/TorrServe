@@ -113,9 +113,13 @@ class ViewActivity : AppCompatActivity() {
     private fun wait(tor: Torrent): Torrent? {
         while (!isClosed) {
             val info = ServerApi.info(tor.Hash)
-            if (info == null || !info.IsGettingInfo) {
-                break
+            if (info == null) {
+                Thread.sleep(1000)
+                continue
             }
+
+            if (!info.IsGettingInfo)
+                break
             var msg = getString(R.string.connects_to_torrent) + "\n" +
                     info.Name + "\n" +
                     info.Hash + "\n"

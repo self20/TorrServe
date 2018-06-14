@@ -385,6 +385,14 @@ func torrentView(c echo.Context) error {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, "Error parser magnet in db: "+hashHex)
 		}
+
+		switch settings.Get().RetrackersMode {
+		case 1:
+			m.Trackers = append(m.Trackers, utils.GetDefTrackers()...)
+		case 2:
+			m.Trackers = nil
+		}
+
 		st, err = bts.AddTorrent(&m)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())

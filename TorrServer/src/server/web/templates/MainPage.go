@@ -179,10 +179,10 @@ var mainPage = `
 			html += '<a data-role="button" data-icon="bullets" target="_blank" href="'+tor.Playlist+'">Playlist</a>';
 			for(var i in tor.Files){
 				var file = tor.Files[i];
-				var cls = "";
+				var ico = "";
 				if (file.Viewed)
-					cls = 'class="icon-check"';
-				html += '<a '+cls+' data-role="button" target="_blank" onClick="loadTorrents()" href="'+file.Link+'">'+file.Name+" "+humanizeSize(file.Size)+'</a>';
+					ico = 'data-icon="check"';
+				html += '<a '+ico+' data-role="button" target="_blank" onClick="loadTorrents()" href="'+file.Link+'">'+file.Name+" "+humanizeSize(file.Size)+'</a>';
 			}
 		}
 		html += '</div>';

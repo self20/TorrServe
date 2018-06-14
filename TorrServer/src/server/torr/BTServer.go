@@ -162,6 +162,7 @@ func (bt *BTServer) AddTorrent(magnet *metainfo.Magnet) (*TorrentState, error) {
 	st := NewState(tor)
 	st.IsGettingInfo = true
 	bt.Watching(st)
+
 	select {
 	case <-tor.GotInfo():
 		fmt.Println("Torrent received info:", st.Name)

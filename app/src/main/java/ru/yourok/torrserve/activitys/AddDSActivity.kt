@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import java.net.URLDecoder
 
 class AddDSActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -14,7 +13,7 @@ class AddDSActivity : AppCompatActivity() {
 
         if (intent.action != null && intent.action.equals(Intent.ACTION_VIEW)) {
             intent.data?.let {
-                torrentLink = URLDecoder.decode(it.toString(), "UTF-8")
+                torrentLink = it.toString()
             }
         }
 

@@ -69,6 +69,7 @@ func getMagFromHttp(url string) (*metainfo.Magnet, error) {
 }
 
 func getMagFromFile(path string) (*metainfo.Magnet, error) {
+
 	minfo, err := metainfo.LoadFromFile(path)
 	if err != nil {
 		return nil, err
@@ -77,6 +78,7 @@ func getMagFromFile(path string) (*metainfo.Magnet, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	mag := minfo.Magnet(info.Name, minfo.HashInfoBytes())
 	return &mag, nil
 }

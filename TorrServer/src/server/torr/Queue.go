@@ -2,6 +2,7 @@ package torr
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/metainfo"
@@ -19,6 +20,14 @@ func (bt *BTServer) addQueue(tor *torrent.Torrent, onAdd func(*TorrentState)) {
 
 		select {
 		case <-tor.GotInfo():
+			//get all info
+			count := 0
+			for tor.Info() != nil && len(tor.Files()) == 0 && count < 60 {
+				<-tor.GotInfo()
+				time.Sleep(time.Millisecond * 200)
+				count++
+			}
+
 			st.IsGettingInfo = false
 			bt.Watching(st)
 			fmt.Println("Torrent received info:", tor.Name())

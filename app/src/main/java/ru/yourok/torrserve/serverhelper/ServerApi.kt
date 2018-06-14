@@ -16,8 +16,9 @@ import kotlin.concurrent.thread
 
 object ServerApi {
     fun add(link: String, save: Boolean): List<Torrent> {
-        if (
-                link.startsWith("magnet:", true) ||
+        if (link.startsWith("magnet:", true))
+            return listOf(addLink(fixLink(link), save))
+        else if (
                 link.startsWith("http:", true) ||
                 link.startsWith("https:", true))
             return listOf(addLink(link, save))
@@ -75,7 +76,6 @@ object ServerApi {
         try {
             return ServerRequest.serverGet(addr, hash)
         } catch (e: Exception) {
-            e.printStackTrace()
         }
         return null
     }
@@ -98,6 +98,7 @@ object ServerApi {
             val addr = Preferences.getServerAddress()
             return ServerRequest.serverInfo(addr, hash)
         } catch (e: Exception) {
+            e.printStackTrace()
         }
         return null
     }
