@@ -15,11 +15,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Torrent.go" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Torrent.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/server/web/Torrent.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="99">
-              <caret line="402" column="0" lean-forward="false" selection-start-line="402" selection-start-column="0" selection-end-line="402" selection-end-column="0" />
+            <state relative-caret-position="218">
+              <caret line="220" column="30" lean-forward="false" selection-start-line="220" selection-start-column="30" selection-end-line="220" selection-end-column="30" />
               <folding>
                 <element signature="e#16#254#0" expanded="true" />
               </folding>
@@ -27,21 +27,41 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BTServer.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/server/torr/BTServer.go">
+      <file leaf-file-name="Settings.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/server/settings/Settings.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-309">
-              <caret line="145" column="20" lean-forward="false" selection-start-line="145" selection-start-column="20" selection-end-line="145" selection-end-column="20" />
+            <state relative-caret-position="167">
+              <caret line="20" column="27" lean-forward="false" selection-start-line="20" selection-start-column="27" selection-end-line="20" selection-end-column="27" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Magnet.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/server/web/helpers/Magnet.go">
+      <file leaf-file-name="Version.go" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/server/version/Version.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
-              <caret line="71" column="0" lean-forward="false" selection-start-line="71" selection-start-column="0" selection-end-line="71" selection-end-column="0" />
+            <state relative-caret-position="34">
+              <caret line="2" column="23" lean-forward="false" selection-start-line="2" selection-start-column="23" selection-end-line="2" selection-end-column="23" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BTServer.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/server/torr/BTServer.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="99">
+              <caret line="17" column="4" lean-forward="false" selection-start-line="17" selection-start-column="4" selection-end-line="17" selection-end-column="4" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Queue.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/server/torr/Queue.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-9">
+              <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -50,8 +70,8 @@
       <file leaf-file-name="Torrent.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/server/web/helpers/Torrent.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-281">
-              <caret line="17" column="5" lean-forward="false" selection-start-line="15" selection-start-column="4" selection-end-line="17" selection-end-column="5" />
+            <state relative-caret-position="102">
+              <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -143,7 +163,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/server/utils/Prallel.go" />
         <option value="$PROJECT_DIR$/src/server/fdb/tmdb.go" />
         <option value="$PROJECT_DIR$/src/server/fdb/providers/provider.go" />
         <option value="$PROJECT_DIR$/src/server/fdb/providers/rutor.go" />
@@ -166,7 +185,6 @@
         <option value="$PROJECT_DIR$/src/server/web/Server.go" />
         <option value="$PROJECT_DIR$/src/server/torr/Magnet.go" />
         <option value="$PROJECT_DIR$/src/github.com/anacrolix/torrent/config.go" />
-        <option value="$PROJECT_DIR$/src/server/settings/Settings.go" />
         <option value="$PROJECT_DIR$/src/github.com/anacrolix/dht/dht.go" />
         <option value="$PROJECT_DIR$/src/server/web/Search.go" />
         <option value="$PROJECT_DIR$/src/server/utils/Torrent.go" />
@@ -182,17 +200,19 @@
         <option value="$PROJECT_DIR$/src/server/web/torrenthelper/Torrent.go" />
         <option value="$PROJECT_DIR$/src/server/torr/Play.go" />
         <option value="$PROJECT_DIR$/src/server/web/Info.go" />
-        <option value="$PROJECT_DIR$/src/server/web/helpers/Torrent.go" />
         <option value="$PROJECT_DIR$/src/server/torr/Add.go" />
         <option value="$PROJECT_DIR$/src/server/torr/Watcher.go" />
         <option value="$PROJECT_DIR$/src/server/web/helpers/Utils.go" />
         <option value="$PROJECT_DIR$/src/server/torr/State.go" />
         <option value="$PROJECT_DIR$/src/server/web/templates/MainPage.go" />
-        <option value="$PROJECT_DIR$/src/server/torr/Queue.go" />
         <option value="$PROJECT_DIR$/src/server/web/mods/corejs.go" />
-        <option value="$PROJECT_DIR$/src/server/version/Version.go" />
         <option value="$PROJECT_DIR$/src/server/web/helpers/Magnet.go" />
+        <option value="$PROJECT_DIR$/src/server/torr/Queue.go" />
+        <option value="$PROJECT_DIR$/src/server/web/helpers/Torrent.go" />
         <option value="$PROJECT_DIR$/src/server/web/Torrent.go" />
+        <option value="$PROJECT_DIR$/src/server/torr/Utils.go" />
+        <option value="$PROJECT_DIR$/src/server/settings/Settings.go" />
+        <option value="$PROJECT_DIR$/src/server/version/Version.go" />
         <option value="$PROJECT_DIR$/src/server/torr/BTServer.go" />
       </list>
     </option>
@@ -241,6 +261,13 @@
               <item name="TorrServer" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="server" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="TorrServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="TorrServer" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="server" type="462c0819:PsiDirectoryNode" />
+              <item name="settings" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="TorrServer" type="b2602c69:ProjectViewProjectNode" />
@@ -477,12 +504,6 @@
           <line>30</line>
           <option name="timeStamp" value="609" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/src/server/torr/Queue.go</url>
-          <line>26</line>
-          <properties />
-          <option name="timeStamp" value="1127" />
-        </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
@@ -541,13 +562,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/github.com/edsrzf/mmap-go/mmap.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="233">
-          <caret line="76" column="13" lean-forward="true" selection-start-line="76" selection-start-column="13" selection-end-line="76" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/github.com/anacrolix/torrent/mmap_span/mmap_span.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="63">
@@ -636,13 +650,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/server/settings/Settings.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="218">
-          <caret line="23" column="22" lean-forward="true" selection-start-line="23" selection-start-column="22" selection-end-line="23" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/local/go/src/runtime/panic.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="109">
@@ -677,6 +684,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="85">
           <caret line="5" column="0" lean-forward="false" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -806,14 +814,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/server/torr/Queue.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="10" column="20" lean-forward="false" selection-start-line="10" selection-start-column="20" selection-end-line="10" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/github.com/anacrolix/torrent/bencode/decode.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-6919">
@@ -862,10 +862,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/server/version/Version.go">
+    <entry file="file://$PROJECT_DIR$/src/server/web/helpers/Magnet.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="23" lean-forward="false" selection-start-line="2" selection-start-column="23" selection-end-line="2" selection-end-column="23" />
+        <state relative-caret-position="1071">
+          <caret line="71" column="0" lean-forward="false" selection-start-line="71" selection-start-column="0" selection-end-line="71" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/server/torr/Queue.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-9">
+          <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/server/web/helpers/Torrent.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -878,37 +894,45 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/server/web/helpers/Magnet.go">
+    <entry file="file://$PROJECT_DIR$/src/server/torr/Utils.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="71" column="0" lean-forward="false" selection-start-line="71" selection-start-column="0" selection-end-line="71" selection-end-column="0" />
+        <state relative-caret-position="170">
+          <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/server/web/helpers/Torrent.go">
+    <entry file="file://$PROJECT_DIR$/src/server/settings/Settings.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-281">
-          <caret line="17" column="5" lean-forward="false" selection-start-line="15" selection-start-column="4" selection-end-line="17" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/server/torr/BTServer.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-309">
-          <caret line="145" column="20" lean-forward="false" selection-start-line="145" selection-start-column="20" selection-end-line="145" selection-end-column="20" />
+        <state relative-caret-position="167">
+          <caret line="20" column="27" lean-forward="false" selection-start-line="20" selection-start-column="27" selection-end-line="20" selection-end-column="27" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/server/web/Torrent.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="99">
-          <caret line="402" column="0" lean-forward="false" selection-start-line="402" selection-start-column="0" selection-end-line="402" selection-end-column="0" />
+        <state relative-caret-position="218">
+          <caret line="220" column="30" lean-forward="false" selection-start-line="220" selection-start-column="30" selection-end-line="220" selection-end-column="30" />
           <folding>
             <element signature="e#16#254#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/server/torr/BTServer.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="99">
+          <caret line="17" column="4" lean-forward="false" selection-start-line="17" selection-start-column="4" selection-end-line="17" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/server/version/Version.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="23" lean-forward="false" selection-start-line="2" selection-start-column="23" selection-end-line="2" selection-end-column="23" />
+          <folding />
         </state>
       </provider>
     </entry>

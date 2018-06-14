@@ -84,6 +84,7 @@
         <item>Do nothing</item>
         <item>Add retrackers</item>
         <item>Remove retrackers</item>
+        <item>Replace retrackers</item>
     </string-array>
 
     <string name="search">Search</string>

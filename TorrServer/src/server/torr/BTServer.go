@@ -123,7 +123,15 @@ func (bt *BTServer) configure() {
 	}
 }
 
-func (bt *BTServer) AddTorrentQueue(magnet *metainfo.Magnet, onAdd func(*TorrentState)) error {
+func (bt *BTServer) addTorrent(magnet *metainfo.Magnet) (*TorrentState, *torrent.Torrent, error) {
+	switch settings.Get().RetrackersMode {
+	case 1:
+		magnet.Trackers = append(magnet.Trackers, utils.GetDefTrackers()...)
+	case 2:
+		magnet.Trackers = nil
+	case 3:
+		magnet.Trackers = append(magnet.Trackers, utils.GetDefTrackers()...)
+	}
 	tor, _, err := bt.client.AddTorrentSpec(&torrent.TorrentSpec{
 		Trackers:    [][]string{magnet.Trackers},
 		DisplayName: magnet.DisplayName,
@@ -131,10 +139,22 @@ func (bt *BTServer) AddTorrentQueue(magnet *metainfo.Magnet, onAdd func(*Torrent
 	})
 
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	if st, ok := bt.states[magnet.InfoHash]; ok {
+		return st, tor, nil
+	}
+	return nil, tor, nil
+}
+
+func (bt *BTServer) AddTorrentQueue(magnet *metainfo.Magnet, onAdd func(*TorrentState)) error {
+	st, tor, err := bt.addTorrent(magnet)
+	if err != nil {
+		return err
+	}
+
+	if st != nil {
 		onAdd(st)
 		return nil
 	}
@@ -144,22 +164,17 @@ func (bt *BTServer) AddTorrentQueue(magnet *metainfo.Magnet, onAdd func(*Torrent
 }
 
 func (bt *BTServer) AddTorrent(magnet *metainfo.Magnet) (*TorrentState, error) {
-	tor, _, err := bt.client.AddTorrentSpec(&torrent.TorrentSpec{
-		Trackers:    [][]string{magnet.Trackers},
-		DisplayName: magnet.DisplayName,
-		InfoHash:    magnet.InfoHash,
-	})
-
+	st, tor, err := bt.addTorrent(magnet)
 	if err != nil {
 		return nil, err
 	}
 
-	if st, ok := bt.states[magnet.InfoHash]; ok {
+	if st != nil {
 		return st, nil
 	}
 
-	fmt.Println("Geting torrent info:", tor.Name())
-	st := NewState(tor)
+	fmt.Println("Geting torrent info:", magnet.String())
+	st = NewState(tor)
 	st.IsGettingInfo = true
 	bt.Watching(st)
 
@@ -180,6 +195,7 @@ func (bt *BTServer) List() []*TorrentState {
 	for _, st := range bt.states {
 		list = append(list, st)
 	}
+
 	for _, st := range bt.queueAdd {
 		list = append(list, st)
 	}

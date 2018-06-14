@@ -81,6 +81,7 @@
         <item>Ничего не делать</item>
         <item>Добовлять ретрекеры</item>
         <item>Удалять ретрекеры</item>
+        <item>Заменить ретрекеры</item>
     </string-array>
 
     <string name="search">Поиск</string>

@@ -13,9 +13,7 @@ import (
 )
 
 func Add(bts *torr.BTServer, magnet *metainfo.Magnet, save bool) error {
-	if len(magnet.Trackers) == 0 {
-		magnet.Trackers = append(magnet.Trackers, utils.GetDefTrackers()...)
-	}
+	magnet.Trackers = append(magnet.Trackers, utils.GetDefTrackers()...)
 
 	fmt.Println("Adding torrent", magnet.String())
 	err := bts.AddTorrentQueue(magnet, func(torrState *torr.TorrentState) {

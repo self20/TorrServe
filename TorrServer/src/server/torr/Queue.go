@@ -10,7 +10,8 @@ import (
 
 func (bt *BTServer) addQueue(tor *torrent.Torrent, onAdd func(*TorrentState)) {
 	go func() {
-		fmt.Println("Geting torrent info:", tor.Name())
+		mi := tor.Metainfo()
+		fmt.Println("Geting torrent info:", mi.Magnet(tor.Name(), tor.InfoHash()))
 		st := NewState(tor)
 		st.IsGettingInfo = true
 
