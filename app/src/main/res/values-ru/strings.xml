@@ -1,15 +1,14 @@
 <resources>
     <string name="app_name">TorrServe</string>
 
-    <string name="label_add_show">TorrServe\nДобавить &amp; Показать</string>
-    <string name="label_show">TorrServe\nПоказать</string>
+    <string name="label_add">Добавить &amp; Играть</string>
+    <string name="label_play">Играть</string>
 
     <string name="name">Имя</string>
     <string name="torr_link">Торрент ссылка</string>
     <string name="add">Добавить</string>
     <string name="remove_all">Удалить все</string>
     <string name="remove">Удалить</string>
-    <string name="clear_cache">Очистить кэш</string>
     <string name="settings">Настройки</string>
     <string name="donate">Пожертвование</string>
     <string name="playlist">Плейлист</string>

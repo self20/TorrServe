@@ -67,15 +67,6 @@
 
         <Button
             android:textSize="24sp"
-            android:id="@+id/buttonClearCache"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/clear_cache"
-            android:layout_weight="1"
-            android:background="?android:attr/selectableItemBackground" />
-
-        <Button
-            android:textSize="24sp"
             android:id="@+id/buttonSettings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

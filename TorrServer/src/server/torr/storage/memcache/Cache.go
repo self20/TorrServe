@@ -90,12 +90,6 @@ func (c *Cache) Close() error {
 	return nil
 }
 
-func (c *Cache) Clean() {
-	c.pieces = make(map[int]*Piece)
-	c.bufferPull = NewBufferPool(c.pieceLength, c.capacity)
-	utils.FreeOSMemGC()
-}
-
 func (c *Cache) GetState() state.CacheState {
 	cState := state.CacheState{}
 	cState.Capacity = c.capacity

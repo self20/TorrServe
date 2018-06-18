@@ -73,7 +73,7 @@
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
             android:noHistory="true"
-            android:label="@string/label_add_show"
+            android:label="@string/label_add"
             android:theme="@style/MyDialog">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -217,7 +217,8 @@
             android:name=".activitys.AddDSActivity"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
-            android:label="@string/label_show"
+            android:label="@string/label_play"
+            android:icon="@drawable/ic_launcher_p"
             android:configChanges="mcc|mnc|locale|orientation|screenLayout|screenSize|layoutDirection|fontScale"
             android:noHistory="true"
             android:theme="@style/MyDialog">

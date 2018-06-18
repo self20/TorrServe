@@ -12,6 +12,7 @@ import (
 	"server/settings"
 	"server/torr"
 	"server/version"
+	"server/web/mods"
 	"server/web/templates"
 
 	"github.com/anacrolix/sync"
@@ -56,10 +57,12 @@ func Start(port string) {
 	initSearch(server)
 	initInfo(server)
 	initAbout(server)
+	mods.InitMods(server)
 
 	server.GET("/", mainPage)
 	server.GET("/echo", echoPage)
 	server.POST("/shutdown", shutdownPage)
+	server.GET("/js/api.js", templates.Api_JS)
 
 	go func() {
 		defer mutex.Unlock()

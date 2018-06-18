@@ -67,9 +67,6 @@ class ProgressActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        torrent?.let {
-            ServerApi.cleanCache(it.Hash)
-        }
         isClosed = true
     }
 

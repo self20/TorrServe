@@ -44,14 +44,6 @@ func (s *Storage) GetStats(hash metainfo.Hash) *state.CacheState {
 	return nil
 }
 
-func (s *Storage) Clean() {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	for _, ch := range s.caches {
-		go ch.Clean()
-	}
-}
-
 func (s *Storage) CloseHash(hash metainfo.Hash) {
 	if s.caches == nil {
 		return

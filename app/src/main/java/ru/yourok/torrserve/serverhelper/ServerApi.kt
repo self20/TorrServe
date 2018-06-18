@@ -103,17 +103,6 @@ object ServerApi {
         return null
     }
 
-    fun cleanCache(hash: String) {
-        thread {
-            try {
-                val addr = Preferences.getServerAddress()
-                ServerRequest.serverCleanCache(addr, hash)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
     fun preload(hash: String, fileLink: String) {
         if (hash.isEmpty() || fileLink.isEmpty())
             return

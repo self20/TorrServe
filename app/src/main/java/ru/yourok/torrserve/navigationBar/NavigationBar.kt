@@ -86,14 +86,7 @@ object NavigationBar {
                             false
                         }
                     }
-                    secondaryItem(R.string.clear_cache) {
-                        icon = R.drawable.ic_clean_cache_black_24dp
-                        selectable = false
-                        onClick { _ ->
-                            ServerApi.cleanCache("")
-                            false
-                        }
-                    }
+
                     secondaryItem(R.string.settings) {
                         icon = R.drawable.ic_settings_black_24dp
                         selectable = false

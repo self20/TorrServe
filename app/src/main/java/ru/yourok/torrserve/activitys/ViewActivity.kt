@@ -79,7 +79,8 @@ class ViewActivity : AppCompatActivity() {
                     if (!isClosed)
                         play(it)
                 } ?: let {
-                    startActivity(Intent(this, MainActivity::class.java))
+                    if (!isClosed)
+                        startActivity(Intent(this, MainActivity::class.java))
                 }
             }
         }

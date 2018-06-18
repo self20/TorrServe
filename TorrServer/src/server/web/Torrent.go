@@ -27,7 +27,6 @@ func initTorrent(e *echo.Echo) {
 	e.POST("/torrent/list", torrentList)
 	e.POST("/torrent/stat", torrentStat)
 
-	e.POST("/torrent/cleancache", torrentCleanCache)
 	e.GET("/torrent/restart", torrentRestart)
 
 	e.GET("/torrent/playlist/:hash/*", torrentPlayList)
@@ -153,8 +152,10 @@ func torrentGet(c echo.Context) error {
 	if torr == nil {
 		hash := metainfo.NewHashFromHex(jreq.Hash)
 		ts := bts.GetTorrent(hash)
-		isGotInfo = ts.IsGettingInfo
-		torr = toTorrentDB(ts)
+		if ts != nil {
+			isGotInfo = ts.IsGettingInfo
+			torr = toTorrentDB(ts)
+		}
 	}
 
 	if torr == nil {
@@ -274,7 +275,7 @@ func torrentPreload(c echo.Context) error {
 		st := bts.GetTorrent(hash)
 		if st == nil {
 			torrDb, err := settings.LoadTorrentDB(hashHex)
-			if err != nil {
+			if err != nil || torrDb == nil {
 				return echo.NewHTTPError(http.StatusBadRequest, "Torrent not found: "+hashHex)
 			}
 			m, err := metainfo.ParseMagnetURI(torrDb.Magnet)
@@ -294,16 +295,6 @@ func torrentPreload(c echo.Context) error {
 		}
 	}
 	return c.NoContent(http.StatusOK)
-}
-
-func torrentCleanCache(c echo.Context) error {
-	jreq, err := getJsReqTorr(c)
-	if err != nil {
-		bts.Clean("")
-		return c.JSON(http.StatusOK, nil)
-	}
-	bts.Clean(jreq.Hash)
-	return c.JSON(http.StatusOK, nil)
 }
 
 func torrentRestart(c echo.Context) error {

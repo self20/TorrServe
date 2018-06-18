@@ -12,5 +12,4 @@ type Storage interface {
 
 	GetStats(hash metainfo.Hash) *state.CacheState
 	CloseHash(hash metainfo.Hash)
-	Clean()
 }

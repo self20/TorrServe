@@ -14,6 +14,7 @@ var mainPage = `
 	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
 	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+	<script src="/js/api.js"></script>
 	<title>Torrent server</title>
 </head>
 <body>
@@ -32,7 +33,7 @@ var mainPage = `
 		<h3>Add torrent: </h3>
 		<input id="magnet" autocomplete="off">
 		<div class="ui-grid-a">
-			<div class="ui-block-a"><button id="buttonAdd" data-icon="plus" onclick="addTorrent()">Add</button></div>
+			<div class="ui-block-a"><button id="buttonAdd" data-icon="plus" onclick="addTorr()">Add</button></div>
 			<div class="ui-block-b"><button id="buttonUpload" data-icon="plus">Upload</button></div>
 		</div>
 		
@@ -60,40 +61,40 @@ var mainPage = `
 </div> 
 
 <script>
-	function addTorrent(){
+	function addTorr(){
 		var magnet = $("#magnet").val();
 		$("#magnet").val("");
 		if(magnet!=""){
-			var magJS = JSON.stringify({ Link: magnet });
-			$.post('/torrent/add',magJS)
-			.done(function( data ) {
+			addTorrent(magnet,true,
+			function( data ) {
 				loadTorrents();
-			})
-			.fail(function( data ) {
+			},
+			function( data ) {
 				alert(data.responseJSON.message);
 			});
 		}
 	}
 	
-	function shutdown(){
-		$.post('/shutdown');
-	}
-
-	function removeTorrent(id){
-		if(id!=""){
-			var magJS = JSON.stringify({ Hash: id });
-			$.post('/torrent/rem', magJS)
-			.done(function( data ) {
+	function removeTorr(hash){
+		if(hash!=""){
+			removeTorrent(hash,
+			function( data ) {
 				loadTorrents();
-			})
-			.fail(function( data ) {
+			},
+			function( data ) {
 				alert(data.responseJSON.message);
 			});
 		}
 	};
+	
+	function shutdown(){
+		shutdownServer(function( data ) {
+				alert(data.responseJSON.message);
+		});
+	}
 
 	$( document ).ready(function() {
-		loadTorrents();
+		watchInfo();
 	});
 
 	$('#buttonUpload').click(function() {
@@ -130,12 +131,12 @@ var mainPage = `
 			data: form.serialize()
 			}).done(function(data) {
 				loadTorrents();
-			}).fail(function(data) {});
+			});
 	});
 
 	function loadTorrents() {
-		$.post('/torrent/list')
-			.done(function( data ) {
+		listTorrent(
+			function( data ) {
 				var torrents = $("#torrents");
 				torrents.empty();
 				var html = "";
@@ -148,7 +149,6 @@ var mainPage = `
 					}
 					html += tor2Html(tor);
 				}
-				getingInfo = queueInfo.length;
 				if (queueInfo.length>0){
 					html += "<br><hr><h3>Got info: </h3>";
 					for(var key in queueInfo) {
@@ -156,12 +156,10 @@ var mainPage = `
 						html += tor2Html(tor);
 					}
 				}
-				if (getingInfo>0)
-					watchInfo();
 				$(html).appendTo(torrents);
 				torrents.enhanceWithin();
-			})
-			.fail(function( data ) {
+			},
+			function( data ) {
 				alert(data.responseJSON.message);
 			});
 	}
@@ -189,43 +187,27 @@ var mainPage = `
 		return html;
 	}
 	
-	var timer = 0;
-	var getingInfo = 0;
-	
 	function watchInfo(){
-		if (timer != 0 || getingInfo == 0)
-			return;
+		var lastTorrentCount = 0;
+		var lastGettingInfo = 0;
 		timer = setInterval(function() {
-			$.post('/torrent/list')
-			.done(function( data ) {
-				var ginfo = 0;
+			listTorrent(
+			function( data ) {
+				var gettingInfo = 0;
 				for(var key in data) {
 					var tor = data[key];
-					if (tor.IsGettingInfo){
-						ginfo++;
-					}
+					if (tor.IsGettingInfo)
+						gettingInfo++;
 				}
-				if (ginfo != getingInfo || ginfo == 0){
-					clearInterval(timer);
-					timer = 0;
+	
+				if (lastTorrentCount!=data.length || gettingInfo!=lastGettingInfo){
 					loadTorrents();
+					lastTorrentCount = data.length;
+					lastGettingInfo = gettingInfo;
 				}
-			})
-			.fail(function( data ) {
-				clearInterval(timer);
-				timer = 0;
-				loadTorrents();
 			});
 		}, 1000);
 	}
-	
-	function humanizeSize(size) {
-		if (typeof size == 'undefined' || size == 0)
-			return "";
-		var i = Math.floor( Math.log(size) / Math.log(1024) );
-		return ( size / Math.pow(1024, i) ).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
-	};
-
 </script>
 </body>
 </html>

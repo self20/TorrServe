@@ -28,13 +28,10 @@ type BTServer struct {
 
 	storage storage.Storage
 
-	states   map[metainfo.Hash]*TorrentState
-	queueAdd map[metainfo.Hash]*TorrentState
+	states map[metainfo.Hash]*TorrentState
 
-	mu sync.Mutex
-
+	mu  sync.Mutex
 	wmu sync.Mutex
-	qmu sync.Mutex
 
 	watching bool
 }
@@ -42,7 +39,6 @@ type BTServer struct {
 func NewBTS() *BTServer {
 	bts := new(BTServer)
 	bts.states = make(map[metainfo.Hash]*TorrentState)
-	bts.queueAdd = make(map[metainfo.Hash]*TorrentState)
 	return bts
 }
 
@@ -53,7 +49,6 @@ func (bt *BTServer) Connect() error {
 	bt.configure()
 	bt.client, err = torrent.NewClient(bt.config)
 	bt.states = make(map[metainfo.Hash]*TorrentState)
-	bt.queueAdd = make(map[metainfo.Hash]*TorrentState)
 	return err
 }
 
@@ -123,7 +118,7 @@ func (bt *BTServer) configure() {
 	}
 }
 
-func (bt *BTServer) addTorrent(magnet *metainfo.Magnet) (*TorrentState, *torrent.Torrent, error) {
+func (bt *BTServer) addTorrent(magnet *metainfo.Magnet) (*torrent.Torrent, error) {
 	switch settings.Get().RetrackersMode {
 	case 1:
 		magnet.Trackers = append(magnet.Trackers, utils.GetDefTrackers()...)
@@ -139,24 +134,16 @@ func (bt *BTServer) addTorrent(magnet *metainfo.Magnet) (*TorrentState, *torrent
 	})
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	if st, ok := bt.states[magnet.InfoHash]; ok {
-		return st, tor, nil
-	}
-	return nil, tor, nil
+	return tor, nil
 }
 
 func (bt *BTServer) AddTorrentQueue(magnet *metainfo.Magnet, onAdd func(*TorrentState)) error {
-	st, tor, err := bt.addTorrent(magnet)
+	tor, err := bt.addTorrent(magnet)
 	if err != nil {
 		return err
-	}
-
-	if st != nil {
-		onAdd(st)
-		return nil
 	}
 
 	bt.addQueue(tor, onAdd)
@@ -164,26 +151,24 @@ func (bt *BTServer) AddTorrentQueue(magnet *metainfo.Magnet, onAdd func(*Torrent
 }
 
 func (bt *BTServer) AddTorrent(magnet *metainfo.Magnet) (*TorrentState, error) {
-	st, tor, err := bt.addTorrent(magnet)
+	tor, err := bt.addTorrent(magnet)
 	if err != nil {
 		return nil, err
 	}
 
-	if st != nil {
-		return st, nil
-	}
-
 	fmt.Println("Geting torrent info:", magnet.String())
-	st = NewState(tor)
+	st := NewState(tor)
 	st.IsGettingInfo = true
 	bt.Watching(st)
 
 	select {
 	case <-tor.GotInfo():
 		fmt.Println("Torrent received info:", st.Name)
+		st.updateTorrentState()
 		st.IsGettingInfo = false
 		return st, nil
 	case <-tor.Closed():
+		bt.removeState(st.Hash)
 		return nil, errors.New("Torrent closed: " + st.Name)
 	}
 }
@@ -193,10 +178,6 @@ func (bt *BTServer) List() []*TorrentState {
 	defer bt.mu.Unlock()
 	list := make([]*TorrentState, 0)
 	for _, st := range bt.states {
-		list = append(list, st)
-	}
-
-	for _, st := range bt.queueAdd {
 		list = append(list, st)
 	}
 	return list
@@ -209,10 +190,6 @@ func (bt *BTServer) GetTorrent(hash metainfo.Hash) *TorrentState {
 	if st, ok := bt.states[hash]; ok {
 		return st
 	}
-
-	if st, ok := bt.queueAdd[hash]; ok {
-		return st
-	}
 	return nil
 }
 
@@ -220,7 +197,6 @@ func (bt *BTServer) RemoveTorrent(hashHex string) {
 	bt.wmu.Lock()
 	defer bt.wmu.Unlock()
 	bt.removeState(hashHex)
-	bt.removeQueue(hashHex)
 }
 
 func (bt *BTServer) BTState() *BTState {
@@ -250,21 +226,6 @@ func (bt *BTServer) CacheState(hash metainfo.Hash) *state.CacheState {
 
 func (bt *BTServer) WriteState(w io.Writer) {
 	bt.client.WriteStatus(w)
-}
-
-func (bt *BTServer) Clean(hashHex string) {
-	bt.mu.Lock()
-	defer bt.mu.Unlock()
-
-	if hashHex == "" {
-		bt.storage.Clean()
-	} else {
-		hash := metainfo.NewHashFromHex(hashHex)
-		if tor, ok := bt.client.Torrent(hash); ok {
-			delete(bt.states, hash)
-			tor.Drop()
-		}
-	}
 }
 
 func (bt *BTServer) Preload(hash metainfo.Hash, file *torrent.File) error {

@@ -86,10 +86,6 @@ class TvMainActivity : AppCompatActivity() {
             Donate.donateDialog(this)
         }
 
-        buttonClearCache.setOnClickListener {
-            ServerApi.cleanCache("")
-        }
-
         buttonSearch.setOnClickListener {
             startActivity(Intent(this, SearchActivity::class.java))
         }
@@ -150,16 +146,12 @@ class TvMainActivity : AppCompatActivity() {
                 KeyEvent.KEYCODE_4, KeyEvent.KEYCODE_NUMPAD_4, KeyEvent.KEYCODE_BUTTON_4 -> {
                     buttonDonate.performClick()
                 }
-            //Clear Cache
-                KeyEvent.KEYCODE_5, KeyEvent.KEYCODE_NUMPAD_5, KeyEvent.KEYCODE_BUTTON_5 -> {
-                    buttonClearCache.performClick()
-                }
             //Exit
-                KeyEvent.KEYCODE_6, KeyEvent.KEYCODE_NUMPAD_6, KeyEvent.KEYCODE_BUTTON_6 -> {
+                KeyEvent.KEYCODE_5, KeyEvent.KEYCODE_NUMPAD_5, KeyEvent.KEYCODE_BUTTON_5 -> {
                     buttonExit.performClick()
                 }
             //Settings
-                KeyEvent.KEYCODE_7, KeyEvent.KEYCODE_NUMPAD_7, KeyEvent.KEYCODE_BUTTON_7 -> {
+                KeyEvent.KEYCODE_6, KeyEvent.KEYCODE_NUMPAD_6, KeyEvent.KEYCODE_BUTTON_6 -> {
                     buttonSettings.performClick()
                 }
                 else -> return super.onKeyUp(keyCode, event)
