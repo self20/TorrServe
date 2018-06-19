@@ -66,6 +66,7 @@
 
     <string name="crash_app">"Ооооой... Во мне случилась ошибка,\nНо не волнуйтесь, Вы можете отправить отчет об ошибке разработчику, чтобы он её поскорее исправил."</string>
 
+    <string name="error_torrent_not_found">Ошибка торрент не найден</string>
     <string name="error_server_start">Ошибка запуска сервера</string>
     <string name="error_torrent_with_this_link_exists">Торрент с этой ссылкой существует</string>
     <string name="error_open_torrent">Ошибка при открытии торрента</string>

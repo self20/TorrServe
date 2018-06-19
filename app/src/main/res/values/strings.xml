@@ -69,6 +69,7 @@
 
     <string name="crash_app">"Ooooops... I crashed, but don't worry you can send error report to my developer to help him fix the issue."</string>
 
+    <string name="error_torrent_not_found">Error torrent not found</string>
     <string name="error_server_start">Server start error</string>
     <string name="error_torrent_with_this_link_exists">Torrent with this link is exists</string>
     <string name="error_open_torrent">Error open torrent</string>

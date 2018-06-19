@@ -275,12 +275,14 @@ object ServerRequest {
         val url = joinUrl(host, "/torrent/add")
         val req = getRequest(link, !save)
         val hash = requestStr(true, url, req)
+        Thread.sleep(1000)
         return serverGet(host, hash)
     }
 
     fun serverAddFile(host: String, link: String, save: Boolean): List<Torrent> {
         val url = joinUrl(host, "/torrent/upload")
         val hashes = requestFile(url, link, save)
+        Thread.sleep(1000)
         val torrs = serverList(host)
         return torrs.filter { tor ->
             val list = hashes.find {

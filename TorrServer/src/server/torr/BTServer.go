@@ -237,44 +237,65 @@ func (bt *BTServer) Preload(hash metainfo.Hash, file *torrent.File) error {
 	if !ok {
 		return errors.New("File in Torrent not found: " + hash.HexString() + " | " + file.Path())
 	}
-	cState := bt.storage.GetStats(hash)
 
 	if !state.IsPreload {
 		state.IsPreload = true
-		pr := settings.Get().PreloadBufferSize
-		ep := int(pr / cState.PiecesLength)
-		if ep > 0 {
-			state.PreloadLength = int64(ep) * cState.PiecesLength
-			state.Torrent.DownloadPieces(0, ep)
-			go bt.watcher()
-			cl := state.Torrent.Closed()
-			var lastSize int64 = 0
-			errCount := 0
-			for {
-				select {
-				case <-cl:
-					return nil
-				default:
-				}
-				state.expiredTime = time.Now().Add(time.Minute)
-				state.PreloadSize = state.LoadedSize
-				fmt.Println("Preload:", bytes.Format(state.PreloadSize), "/", bytes.Format(state.PreloadLength), "Speed:", utils.Format(state.DownloadSpeed), "Peers:[", state.ConnectedSeeders, "]", state.ActivePeers, "/", state.TotalPeers)
-				if state.PreloadSize >= state.PreloadLength {
-					return nil
-				}
+		minBuff := int64(5 * 1024 * 1024)
+		startPreloadLength := settings.Get().PreloadBufferSize
+		endPreloadOffset := int64(0)
+		if startPreloadLength > minBuff {
+			startPreloadLength -= minBuff
+			endPreloadOffset = file.Offset() + file.Length() - minBuff
+		}
 
-				if lastSize == state.PreloadSize {
-					errCount++
-				} else {
-					lastSize = state.PreloadSize
-					errCount = 0
-				}
-				if errCount > 60 {
-					return errors.New("long time no progress download")
-				}
+		readerPre := file.NewReader()
+		state.readers++
+		readerPre.SetReadahead(startPreloadLength)
+		defer func() {
+			readerPre.Close()
+			state.readers--
+		}()
 
-				time.Sleep(time.Second)
+		if endPreloadOffset > 0 {
+			readerPost := file.NewReader()
+			state.readers++
+			readerPost.SetReadahead(1)
+			readerPost.Seek(endPreloadOffset, io.SeekStart)
+			readerPost.SetReadahead(minBuff)
+			defer func() {
+				readerPost.Close()
+				state.readers--
+			}()
+		}
+
+		state.PreloadLength = settings.Get().PreloadBufferSize
+		go bt.watcher()
+		cl := state.Torrent.Closed()
+		var lastSize int64 = 0
+		errCount := 0
+		for {
+			select {
+			case <-cl:
+				return nil
+			default:
 			}
+			state.expiredTime = time.Now().Add(time.Minute)
+			state.PreloadSize = state.LoadedSize
+			fmt.Println("Preload:", bytes.Format(state.PreloadSize), "/", bytes.Format(state.PreloadLength), "Speed:", utils.Format(state.DownloadSpeed), "Peers:[", state.ConnectedSeeders, "]", state.ActivePeers, "/", state.TotalPeers)
+			if state.PreloadSize >= state.PreloadLength {
+				return nil
+			}
+
+			if lastSize == state.PreloadSize {
+				errCount++
+			} else {
+				lastSize = state.PreloadSize
+				errCount = 0
+			}
+			if errCount > 60 {
+				return errors.New("long time no progress download")
+			}
+			time.Sleep(time.Second)
 		}
 		state.IsPreload = false
 	}

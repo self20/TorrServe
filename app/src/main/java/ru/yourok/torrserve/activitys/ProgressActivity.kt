@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import ru.yourok.torrserve.App
 import ru.yourok.torrserve.R
 import ru.yourok.torrserve.serverhelper.File
@@ -51,14 +50,16 @@ class ProgressActivity : AppCompatActivity() {
                 NotificationServer.Show(this, it.Hash)
             }
 
-            if (!isClosed && Preferences.isShowPreloadWnd())
-                if (!waitPreload()) {
-                    isClosed = true
+            if (!isClosed && Preferences.isShowPreloadWnd()) {
+                val errMsg = waitPreload()
+                if (!isClosed && errMsg.isNotEmpty()) {
                     try {
-                        Toast.makeText(this, R.string.error_open_torrent, Toast.LENGTH_SHORT).show()
+                        App.Toast(errMsg)
                     } catch (e: Exception) {
                     }
+                    isClosed = true
                 }
+            }
             if (!isClosed)
                 play()
             finish()
@@ -71,13 +72,13 @@ class ProgressActivity : AppCompatActivity() {
     }
 
 
-    private fun waitPreload(): Boolean {
-        var err = 0
+    private fun waitPreload(): String {
+        var errMsg = ""
         torrent?.let { torrent ->
             file?.let { file ->
                 var isPreload = true
-                thread {
-                    ServerApi.preload(torrent.Hash, file.Link)
+                val th = thread {
+                    errMsg = ServerApi.preload(torrent.Hash, file.Link)
                     isPreload = false
                 }
                 while (isPreload) {
@@ -88,8 +89,8 @@ class ProgressActivity : AppCompatActivity() {
                         continue
                     }
 
-                    if (!info.IsPreload || info.PreloadSize >= info.PreloadLength)
-                        return true
+                    if (!info.IsGettingInfo && (!info.IsPreload || info.PreloadSize >= info.PreloadLength))
+                        return errMsg
 
                     var msg = ""
                     var prc = 0
@@ -101,10 +102,17 @@ class ProgressActivity : AppCompatActivity() {
                     msg += getString(R.string.download_speed) + ": " + Utils.byteFmt(info.DownloadSpeed) + "/Sec"
                     setMessage(msg, prc)
                 }
-                return err == 0
+                th.join(15000)
+                if (ServerApi.get(torrent.Hash) == null) {
+                    if (errMsg.isNotEmpty())
+                        return errMsg
+                    else
+                        return getString(R.string.error_open_torrent)
+                }
+                return ""
             }
         }
-        return false
+        return getString(R.string.error_open_torrent)
     }
 
     private fun setMessage(msg: String, progress: Int) {

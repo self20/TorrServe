@@ -383,7 +383,9 @@ func torrentView(c echo.Context) error {
 		}
 	}
 	file := helpers.FindFile(fileLink, st.Torrent)
-
+	if file == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "File in torrent not found: "+fileLink)
+	}
 	return bts.Play(st, file, timestamp, c)
 }
 

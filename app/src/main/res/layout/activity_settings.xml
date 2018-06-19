@@ -27,6 +27,7 @@
                 android:id="@+id/editTextServerAddr"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:imeOptions="actionSend"
                 android:ems="10"
                 android:inputType="textWebEditText" />
 

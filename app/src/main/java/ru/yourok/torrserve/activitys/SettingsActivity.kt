@@ -3,8 +3,11 @@ package ru.yourok.torrserve.activitys
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_settings.*
 import ru.yourok.torrserve.App
@@ -23,6 +26,29 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
+        val autocomplete = Preferences.getAutocomplet()
+        val editTextServAddr = findViewById<EditText>(R.id.editTextServerAddr)
+        editTextServAddr.setOnLongClickListener {
+            val builder = AlertDialog.Builder(this)
+            builder.setItems(autocomplete.toTypedArray()) { _, i ->
+                val host = autocomplete[i]
+                editTextServAddr.setText(host)
+                Preferences.setServerAddress(host)
+                loadSettings(true)
+            }
+            builder.create().show()
+            false
+        }
+
+        editTextServAddr.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEND) {
+                val addr = editTextServerAddr.text.toString()
+                Preferences.setServerAddress(addr)
+                loadSettings(true)
+            }
+            false
+        }
+
         buttonOk.setOnClickListener {
             saveSettings()
             finish()
@@ -33,6 +59,8 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         buttonRetrieveSettings.setOnClickListener {
+            val addr = editTextServerAddr.text.toString()
+            Preferences.setServerAddress(addr)
             loadSettings(true)
         }
 
@@ -84,8 +112,8 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    fun loadSettings(load: Boolean): Boolean {
-        if (!load) {
+    fun loadSettings(fromServer: Boolean): Boolean {
+        if (!fromServer) {
             val addr = Preferences.getServerAddress()
             editTextServerAddr.setText(addr)
 
@@ -161,6 +189,8 @@ class SettingsActivity : AppCompatActivity() {
                     Handler(Looper.getMainLooper()).post {
                         Toast.makeText(App.getContext(), R.string.error_sending_settings, Toast.LENGTH_SHORT).show()
                     }
+                else
+                    Preferences.addAutocomplet(addr)
             }
         } catch (e: Exception) {
         }

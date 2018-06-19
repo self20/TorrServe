@@ -2,19 +2,22 @@ package torr
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/anacrolix/torrent"
 )
 
 func (bt *BTServer) addQueue(tor *torrent.Torrent, onAdd func(*TorrentState)) {
+	var wa sync.WaitGroup
+	wa.Add(1)
 	go func() {
 		mi := tor.Metainfo()
 		fmt.Println("Geting torrent info:", mi.Magnet(tor.Name(), tor.InfoHash()))
 		st := NewState(tor)
 		st.IsGettingInfo = true
 		bt.Watching(st)
-
+		wa.Done()
 		select {
 		case <-tor.GotInfo():
 			//get all info
@@ -34,4 +37,5 @@ func (bt *BTServer) addQueue(tor *torrent.Torrent, onAdd func(*TorrentState)) {
 			fmt.Println("Torrent closed:", tor.Name())
 		}
 	}()
+	wa.Wait()
 }

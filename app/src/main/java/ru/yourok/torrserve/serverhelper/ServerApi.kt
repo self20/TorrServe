@@ -3,8 +3,10 @@ package ru.yourok.torrserve.serverhelper
 import android.content.Intent
 import android.net.Uri
 import ru.yourok.torrserve.App
+import ru.yourok.torrserve.R
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import kotlin.concurrent.thread
 
@@ -103,14 +105,18 @@ object ServerApi {
         return null
     }
 
-    fun preload(hash: String, fileLink: String) {
+    fun preload(hash: String, fileLink: String): String {
         if (hash.isEmpty() || fileLink.isEmpty())
-            return
+            return "empty torrent or file"
         try {
             val addr = Preferences.getServerAddress()
             ServerRequest.serverPreload(addr, fileLink)
+            return ""
+        } catch (e: FileNotFoundException) {
+            return App.getContext().getString(R.string.error_torrent_not_found) + ": $hash | $fileLink"
         } catch (e: Exception) {
             e.printStackTrace()
+            return e.message ?: "error preload torrent"
         }
     }
 

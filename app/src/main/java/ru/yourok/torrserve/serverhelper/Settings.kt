@@ -50,6 +50,20 @@ object Preferences {
         set("LastViewDonate", l)
     }
 
+    fun getAutocomplet(): List<String> {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext())
+        val ret = prefs.getStringSet("AutoCompleteHost", mutableSetOf())
+        return ret.toList()
+    }
+
+    fun addAutocomplet(v: String) {
+        val list = getAutocomplet()
+        val set = list.toMutableSet()
+        set.add(v)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext())
+        prefs.edit().putStringSet("AutoCompleteHost", set).apply()
+    }
+
     private fun get(name: String, def: Any): Any? {
         val prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext())
         if (prefs.all.containsKey(name))
