@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"os"
+
 	"server"
 	"server/settings"
 )
 
 func main() {
-	//test2()
+	//test()
 	//return
 	path, _ := os.Getwd()
 	port := ""

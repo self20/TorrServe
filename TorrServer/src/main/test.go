@@ -19,11 +19,12 @@ import (
 )
 
 func test() {
-	config := &torrent.Config{
-		EstablishedConnsPerTorrent: 150,
-		HalfOpenConnsPerTorrent:    97,
-		DisableIPv6:                true,
-	}
+	config := torrent.NewDefaultClientConfig()
+
+	config.EstablishedConnsPerTorrent = 150
+	config.HalfOpenConnsPerTorrent = 97
+	config.DisableIPv6 = true
+	config.NoDHT = true
 
 	client, err := torrent.NewClient(config)
 	if err != nil {
@@ -81,7 +82,7 @@ func test2() {
 	storage := memcache.NewStorage(settings.Get().CacheSize)
 	blocklist, _ := iplist.MMapPackedFile(filepath.Join(settings.Path, "blocklist"))
 
-	config := &torrent.Config{
+	config := &torrent.ClientConfig{
 		DisableTCP:              settings.Get().DisableTCP,
 		DisableUTP:              settings.Get().DisableUTP,
 		NoDefaultPortForwarding: settings.Get().DisableUPNP,

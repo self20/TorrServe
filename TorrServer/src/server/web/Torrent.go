@@ -7,7 +7,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"sort"
+	"strconv"
 	"time"
 
 	"server/settings"
@@ -26,6 +28,7 @@ func initTorrent(e *echo.Echo) {
 	e.POST("/torrent/rem", torrentRem)
 	e.POST("/torrent/list", torrentList)
 	e.POST("/torrent/stat", torrentStat)
+	e.POST("/torrent/drop", torrentDrop)
 
 	e.GET("/torrent/restart", torrentRestart)
 
@@ -35,6 +38,8 @@ func initTorrent(e *echo.Echo) {
 	e.GET("/torrent/view/:hash/:file", torrentView)
 	e.HEAD("/torrent/view/:hash/:file", torrentView)
 	e.GET("/torrent/preload/:hash/:file", torrentPreload)
+	e.GET("/torrent/preload/:size/:hash/:file", torrentPreloadSize)
+	e.HEAD("/torrent/preload/:hash/:file", torrentView)
 }
 
 type TorrentJsonRequest struct {
@@ -58,6 +63,7 @@ type TorrentJsonResponse struct {
 type TorFile struct {
 	Name     string
 	Link     string
+	Preload  string
 	Playlist string
 	Size     int64
 	Viewed   bool
@@ -253,24 +259,8 @@ func torrentStat(c echo.Context) error {
 	return c.JSON(http.StatusOK, stat)
 }
 
-func torrentPreload(c echo.Context) error {
-	if settings.Get().PreloadBufferSize > 0 {
-		hashHex, err := url.PathUnescape(c.Param("hash"))
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		fileLink, err := url.PathUnescape(c.Param("file"))
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-
-		if hashHex == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, "Hash must be non-empty")
-		}
-		if fileLink == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, "File link must be non-empty")
-		}
-
+func preload(hashHex, fileLink string, size int64) *echo.HTTPError {
+	if size > 0 {
 		hash := metainfo.NewHashFromHex(hashHex)
 		st := bts.GetTorrent(hash)
 		if st == nil {
@@ -289,11 +279,87 @@ func torrentPreload(c echo.Context) error {
 		}
 		file := helpers.FindFile(fileLink, st.Torrent)
 
-		err = bts.Preload(hash, file)
+		err = bts.Preload(hash, file, size)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
+	return nil
+}
+
+func torrentPreload(c echo.Context) error {
+	hashHex, err := url.PathUnescape(c.Param("hash"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	fileLink, err := url.PathUnescape(c.Param("file"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if hashHex == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Hash must be non-empty")
+	}
+	if fileLink == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "File link must be non-empty")
+	}
+
+	errHttp := preload(hashHex, fileLink, settings.Get().PreloadBufferSize)
+	if err != nil {
+		return errHttp
+	}
+
+	redirectUrl := c.Scheme() + "://" + c.Request().Host + filepath.Join("/torrent/view/", hashHex, fileLink)
+	return c.Redirect(http.StatusFound, redirectUrl)
+}
+
+func torrentPreloadSize(c echo.Context) error {
+	hashHex, err := url.PathUnescape(c.Param("hash"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	fileLink, err := url.PathUnescape(c.Param("file"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	szPreload, err := url.PathUnescape(c.Param("size"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if hashHex == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Hash must be non-empty")
+	}
+	if fileLink == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "File link must be non-empty")
+	}
+
+	var size = settings.Get().PreloadBufferSize
+	if szPreload != "" {
+		sz, err := strconv.Atoi(szPreload)
+		if err == nil && sz > 0 {
+			size = int64(sz) * 1024 * 1024
+		}
+	}
+
+	errHttp := preload(hashHex, fileLink, size)
+	if err != nil {
+		return errHttp
+	}
+	redirectUrl := c.Scheme() + "://" + c.Request().Host + filepath.Join("/torrent/view/", hashHex, fileLink)
+	return c.Redirect(http.StatusFound, redirectUrl)
+}
+
+func torrentDrop(c echo.Context) error {
+	jreq, err := getJsReqTorr(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if jreq.Hash == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Hash must be non-empty")
+	}
+
+	bts.RemoveTorrent(jreq.Hash)
 	return c.NoContent(http.StatusOK)
 }
 
@@ -423,10 +489,11 @@ func getTorrentJS(tor *settings.Torrent) (*TorrentJsonResponse, error) {
 	for _, f := range tor.Files {
 		size += f.Size
 		tf := TorFile{
-			Name:   f.Name,
-			Link:   "/torrent/view/" + js.Hash + "/" + utils.FileToLink(f.Name),
-			Size:   f.Size,
-			Viewed: f.Viewed,
+			Name:    f.Name,
+			Link:    "/torrent/view/" + js.Hash + "/" + utils.FileToLink(f.Name),
+			Preload: "/torrent/preload/" + js.Hash + "/" + utils.FileToLink(f.Name),
+			Size:    f.Size,
+			Viewed:  f.Viewed,
 		}
 		js.Files = append(js.Files, tf)
 	}

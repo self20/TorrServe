@@ -11,54 +11,71 @@ var mainPage = `
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link href="` + faviconB64 + `" rel="icon" type="image/x-icon">
-	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
-	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
-	<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
 	<script src="/js/api.js"></script>
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+	
 	<title>Torrent server</title>
 </head>
 <body>
-<style>
-.ui-btn {
-   word-wrap: break-word !important;
-   white-space: normal !important;
-}
-</style>
-
-<div data-role="page">
-
-	<div data-role="header"><h3>TorrServer ` + version.Version + `</h3></div>
-
-	<div data-role="content">
-		<h3>Add torrent: </h3>
-		<input id="magnet" autocomplete="off">
-		<div class="ui-grid-a">
-			<div class="ui-block-a"><button id="buttonAdd" data-icon="plus" onclick="addTorr()">Add</button></div>
-			<div class="ui-block-b"><button id="buttonUpload" data-icon="plus">Upload</button></div>
+	<style>
+		 .btn_wrap {
+			white-space: normal;
+			word-wrap: break-word;
+			word-break: break-all;
+		}
+		.content {
+			margin: 1%;
+		}
+		a {
+			vertical-align: middle;
+		}
+	</style>
+	
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+	  <span class="navbar-brand mx-auto">
+		  TorrServer ` + version.Version + `
+	  </span>
+	</nav>
+		  
+	<div class="content">
+		<div>
+			<label for="magnet">Add torrent: </label>
+			<input id="magnet" class="w-100" autocomplete="off">
 		</div>
-		
+		<div class="btn-group d-flex" role="group">
+			<button id="buttonAdd" class="btn w-100" onclick="addTorr()"><i class="fas fa-plus"></i> Add</button>
+			<button id="buttonUpload" class="btn w-100"><i class="fas fa-file-upload"></i> Upload</button>
+		</div>
 		<br>
-		<a href="/search" rel="external" target="_blank" data-role="button" data-icon="search">Search</a>
-		<a href="/torrent/playlist.m3u" rel="external" data-role="button" data-icon="bullets">Playlist</a>
+			  
+		<div>
+			<a href="/search" rel="external" target="_blank" class="btn btn-primary w-100" role="button" ><i class="fas fa-search"></i> Search</a>
+			<a href="/torrent/playlist.m3u" rel="external" class="btn btn-primary w-100" role="button" ><i class="fas fa-th-list"></i> Playlist all torrents</a>
+		</div>
 		<br>
 		<h3>Torrents: </h3>
 		<div id="torrents"></div>
 		<hr>
-
-		<div class="ui-grid-a">
-			<div class="ui-block-a"><button id="buttonShutdown" data-icon="power" onclick="shutdown()">Shutdown</button></div>
-			<div class="ui-block-b"><a href="/settings" rel="external" data-role="button" data-icon="gear" id="buttonSettings">Settings</a></div>
-		</div>
-	</div>
-
-	<form id="uploadForm" style="display:none" action="/torrent/upload" method="post">
-		<input type="file" id="filesUpload" style="display:none" multiple onchange="uploadTorrent()" name="files"/> 
-	</form>
 	
-	<div data-role="footer">
-		<center><p><a rel="external" style="text-decoration: none;" href="/about">About</a></p></center>
+		<div class="btn-group d-flex" role="group">
+			<a href="/settings" rel="external" class="btn btn-primary w-100" role="button" id="buttonSettings"><i class="fas fa-cog"></i> Settings</a>
+			<button id="buttonShutdown" class="btn btn-primary w-100" onclick="shutdown()"><i class="fas fa-power-off"></i> Shutdown</button>
+		</div>
+	
+		<form id="uploadForm" style="display:none" action="/torrent/upload" method="post">
+			<input type="file" id="filesUpload" style="display:none" multiple onchange="uploadTorrent()" name="files"/> 
+		</form>
 	</div>
-</div> 
+		  
+	<footer class="page-footer navbar-dark bg-dark">
+		<span class="navbar-brand d-flex justify-content-center">
+		  <a rel="external" style="text-decoration: none;" href="/about">About</a>
+		</span>
+	</footer>
 
 <script>
 	function addTorr(){
@@ -166,22 +183,27 @@ var mainPage = `
 	
 	function tor2Html(tor){
 		var html = '<hr>';
-		html += '<div id="'+tor.Hash+'" data-role="collapsible">';
+		var name = "";
 		if (tor.IsGettingInfo)
-			html += '<h3>'+tor.Name+' '+humanizeSize(tor.Size)+' '+tor.Hash+'</h3>';
+			name = tor.Name+' '+humanizeSize(tor.Size)+' '+tor.Hash;
 		else
-			html += '<h3>'+tor.Name+' '+humanizeSize(tor.Size)+'</h3>';
-		html += '<button data-icon="delete" onclick="removeTorrent(\''+tor.Hash+'\');">Remove ['+tor.Name+']</button>';
-		if (typeof tor.Files != 'undefined' && tor.Files != 0){
-			html += '<br>';
-			html += '<a data-role="button" data-icon="bullets" target="_blank" href="'+tor.Playlist+'">Playlist</a>';
-			for(var i in tor.Files){
-				var file = tor.Files[i];
-				var ico = "";
-				if (file.Viewed)
-					ico = 'data-icon="check"';
-				html += '<a '+ico+' data-role="button" target="_blank" onClick="loadTorrents()" href="'+file.Link+'">'+file.Name+" "+humanizeSize(file.Size)+'</a>';
-			}
+			name = tor.Name+' '+humanizeSize(tor.Size);
+
+		html += '<div class="btn-group d-flex" role="group">';
+		html += '	<button type="button" class="btn btn-secondary btn_wrap w-100" data-toggle="collapse" data-target="#info_'+tor.Hash+'">'+name+'</button>';
+		if (!tor.IsGettingInfo) html += '	<a role="button" class="btn btn-secondary" href="'+tor.Playlist+'"><i class="fas fa-th-list"></i> Playlist</a>';
+		html += '	<button type="button" class="btn btn-secondary" onclick="removeTorrent(\''+tor.Hash+'\');"><i class="fas fa-trash-alt"></i> Remove</button>';
+		html += '</div>';
+		html += '<div class="collapse" id="info_'+tor.Hash+'">';
+		for(var i in tor.Files){
+			var file = tor.Files[i];
+		  	var ico = "";
+		  	if (file.Viewed)
+		  		ico = '<i class="far fa-eye"></i> ';
+			html += '	<div class="btn-group d-flex" role="group">';
+			html += '		<button type="button" class="btn btn-secondary btn_wrap w-100">'+ico+file.Name+" "+humanizeSize(file.Size)+'</button>';
+			html += '		<a role="button" class="btn btn-secondary" href="'+file.Preload+'"><i class="fas fa-sync-alt"></i></a>';
+			html += '	</div>';
 		}
 		html += '</div>';
 		return html;

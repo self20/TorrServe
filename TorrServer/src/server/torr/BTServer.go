@@ -14,7 +14,6 @@ import (
 	"server/torr/storage/state"
 	"server/utils"
 
-	"github.com/anacrolix/dht"
 	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/iplist"
 	"github.com/anacrolix/torrent/metainfo"
@@ -23,7 +22,7 @@ import (
 )
 
 type BTServer struct {
-	config *torrent.Config
+	config *torrent.ClientConfig
 	client *torrent.Client
 
 	storage storage.Storage
@@ -75,40 +74,27 @@ func (bt *BTServer) configure() {
 	userAgent := "uTorrent/3.4.9"
 	peerID := "-UT3490-"
 
-	bt.config = &torrent.Config{
-		DisableIPv6: true,
+	bt.config = torrent.NewDefaultClientConfig()
 
-		DisableTCP:              settings.Get().DisableTCP,
-		DisableUTP:              settings.Get().DisableUTP,
-		NoDefaultPortForwarding: settings.Get().DisableUPNP,
-		NoDHT:    settings.Get().DisableDHT,
-		NoUpload: settings.Get().DisableUpload,
-
-		EncryptionPolicy: torrent.EncryptionPolicy{
-			DisableEncryption: settings.Get().Encryption == 1,
-			ForceEncryption:   settings.Get().Encryption == 2,
-		},
-		DownloadRateLimiter: rate.NewLimiter(rate.Inf, 2<<16),
-		UploadRateLimiter:   rate.NewLimiter(rate.Inf, 2<<16),
-
-		IPBlocklist: blocklist,
-
-		DefaultStorage: bt.storage,
-
-		DhtStartingNodes: dht.GlobalBootstrapAddrs,
-		ListenHost:       func(network string) string { return "" },
-
-		Bep20:         peerID,
-		PeerID:        utils.PeerIDRandom(peerID),
-		HTTPUserAgent: userAgent,
-
-		EstablishedConnsPerTorrent: settings.Get().ConnectionsLimit,
-		HalfOpenConnsPerTorrent:    int(float64(settings.Get().ConnectionsLimit) * 0.65),
-		//TorrentPeersLowWater: 50,
-		//TorrentPeersHighWater: 500,
-
-		//Debug: true,
+	bt.config.DisableIPv6 = true
+	bt.config.DisableTCP = settings.Get().DisableTCP
+	bt.config.DisableUTP = settings.Get().DisableUTP
+	bt.config.NoDefaultPortForwarding = settings.Get().DisableUPNP
+	bt.config.NoDHT = settings.Get().DisableDHT
+	bt.config.NoUpload = settings.Get().DisableUpload
+	bt.config.EncryptionPolicy = torrent.EncryptionPolicy{
+		DisableEncryption: settings.Get().Encryption == 1,
+		ForceEncryption:   settings.Get().Encryption == 2,
 	}
+	bt.config.DownloadRateLimiter = rate.NewLimiter(rate.Inf, 2<<16)
+	bt.config.UploadRateLimiter = rate.NewLimiter(rate.Inf, 2<<16)
+	bt.config.IPBlocklist = blocklist
+	bt.config.DefaultStorage = bt.storage
+	bt.config.Bep20 = peerID
+	bt.config.PeerID = utils.PeerIDRandom(peerID)
+	bt.config.HTTPUserAgent = userAgent
+	bt.config.EstablishedConnsPerTorrent = settings.Get().ConnectionsLimit
+	bt.config.HalfOpenConnsPerTorrent = int(float64(settings.Get().ConnectionsLimit) * 0.65)
 
 	if settings.Get().DownloadRateLimit > 0 {
 		bt.config.DownloadRateLimiter = rate.NewLimiter(rate.Limit(settings.Get().DownloadRateLimit*1024), 1024)
@@ -228,8 +214,11 @@ func (bt *BTServer) WriteState(w io.Writer) {
 	bt.client.WriteStatus(w)
 }
 
-func (bt *BTServer) Preload(hash metainfo.Hash, file *torrent.File) error {
-	if settings.Get().PreloadBufferSize == 0 {
+func (bt *BTServer) Preload(hash metainfo.Hash, file *torrent.File, size int64) error {
+	if size == 0 {
+		size = settings.Get().PreloadBufferSize
+	}
+	if size == 0 {
 		return nil
 	}
 
@@ -240,12 +229,11 @@ func (bt *BTServer) Preload(hash metainfo.Hash, file *torrent.File) error {
 
 	if !state.IsPreload {
 		state.IsPreload = true
-		minBuff := int64(5 * 1024 * 1024)
-		startPreloadLength := settings.Get().PreloadBufferSize
+		buff5mb := int64(5 * 1024 * 1024)
+		startPreloadLength := size
 		endPreloadOffset := int64(0)
-		if startPreloadLength > minBuff {
-			startPreloadLength -= minBuff
-			endPreloadOffset = file.Offset() + file.Length() - minBuff
+		if startPreloadLength > buff5mb {
+			endPreloadOffset = file.Offset() + file.Length() - buff5mb
 		}
 
 		readerPre := file.NewReader()
@@ -261,14 +249,15 @@ func (bt *BTServer) Preload(hash metainfo.Hash, file *torrent.File) error {
 			state.readers++
 			readerPost.SetReadahead(1)
 			readerPost.Seek(endPreloadOffset, io.SeekStart)
-			readerPost.SetReadahead(minBuff)
+			readerPost.SetReadahead(buff5mb)
 			defer func() {
 				readerPost.Close()
 				state.readers--
+				state.IsPreload = false
 			}()
 		}
 
-		state.PreloadLength = settings.Get().PreloadBufferSize
+		state.PreloadLength = size
 		go bt.watcher()
 		cl := state.Torrent.Closed()
 		var lastSize int64 = 0
@@ -297,7 +286,6 @@ func (bt *BTServer) Preload(hash metainfo.Hash, file *torrent.File) error {
 			}
 			time.Sleep(time.Second)
 		}
-		state.IsPreload = false
 	}
 	return nil
 }

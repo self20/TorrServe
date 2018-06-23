@@ -17,7 +17,23 @@ type BTState struct {
 }
 
 type TorrentState struct {
-	torrent.TorrentStats
+	BytesWritten        int64
+	BytesWrittenData    int64
+	BytesRead           int64
+	BytesReadData       int64
+	BytesReadUsefulData int64
+	ChunksWritten       int64
+	ChunksRead          int64
+	ChunksReadUseful    int64
+	ChunksReadUnwanted  int64
+	PiecesDirtiedGood   int64
+	PiecesDirtiedBad    int64
+
+	TotalPeers       int
+	PendingPeers     int
+	ActivePeers      int
+	ConnectedSeeders int
+	HalfOpenPeers    int
 
 	Name string
 	Hash string
@@ -36,7 +52,7 @@ type TorrentState struct {
 
 	readers     int
 	expiredTime time.Time
-	Torrent     *torrent.Torrent
+	Torrent     *torrent.Torrent `json:"-"`
 }
 
 func NewState(torr *torrent.Torrent) *TorrentState {
@@ -62,17 +78,35 @@ func (ts *TorrentState) updateTorrentState() {
 	if ts.Torrent == nil {
 		return
 	}
-	state := ts.Torrent.Stats()
 	if info := ts.Torrent.Info(); info != nil {
 		ts.TorrentSize = info.Length
-	}
-	deltaDlBytes := state.BytesReadUsefulData - ts.TorrentStats.BytesReadUsefulData
-	deltaUpBytes := state.BytesWrittenData - ts.TorrentStats.BytesWrittenData
-	deltaTime := time.Since(ts.lastTimeSpeed).Seconds()
 
-	ts.DownloadSpeed = float64(deltaDlBytes) / deltaTime
-	ts.UploadSpeed = float64(deltaUpBytes) / deltaTime
-	ts.TorrentStats = state
+		state := ts.Torrent.Stats()
+		deltaDlBytes := state.BytesReadUsefulData.Int64() - ts.BytesReadUsefulData
+		deltaUpBytes := state.BytesWrittenData.Int64() - ts.BytesWrittenData
+		deltaTime := time.Since(ts.lastTimeSpeed).Seconds()
+
+		ts.DownloadSpeed = float64(deltaDlBytes) / deltaTime
+		ts.UploadSpeed = float64(deltaUpBytes) / deltaTime
+
+		ts.BytesWritten = state.BytesWritten.Int64()
+		ts.BytesWrittenData = state.BytesWrittenData.Int64()
+		ts.BytesRead = state.BytesRead.Int64()
+		ts.BytesReadData = state.BytesReadData.Int64()
+		ts.BytesReadUsefulData = state.BytesReadUsefulData.Int64()
+		ts.ChunksWritten = state.ChunksWritten.Int64()
+		ts.ChunksRead = state.ChunksRead.Int64()
+		ts.ChunksReadUseful = state.ChunksReadUseful.Int64()
+		ts.ChunksReadUnwanted = state.ChunksReadUnwanted.Int64()
+		ts.PiecesDirtiedGood = state.PiecesDirtiedGood.Int64()
+		ts.PiecesDirtiedBad = state.PiecesDirtiedBad.Int64()
+
+		ts.TotalPeers = state.TotalPeers
+		ts.PendingPeers = state.PendingPeers
+		ts.ActivePeers = state.ActivePeers
+		ts.ConnectedSeeders = state.ConnectedSeeders
+		ts.HalfOpenPeers = state.HalfOpenPeers
+	}
 	ts.Name = ts.Torrent.Name()
 	ts.Hash = ts.Torrent.InfoHash().HexString()
 	ts.LoadedSize = ts.Torrent.BytesCompleted()
