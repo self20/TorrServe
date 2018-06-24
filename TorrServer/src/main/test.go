@@ -36,7 +36,6 @@ func test() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	<-t.GotInfo()
 	file := t.Files()[0]
 

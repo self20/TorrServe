@@ -39,7 +39,6 @@ func initTorrent(e *echo.Echo) {
 	e.HEAD("/torrent/view/:hash/:file", torrentView)
 	e.GET("/torrent/preload/:hash/:file", torrentPreload)
 	e.GET("/torrent/preload/:size/:hash/:file", torrentPreloadSize)
-	e.HEAD("/torrent/preload/:hash/:file", torrentView)
 }
 
 type TorrentJsonRequest struct {
@@ -430,7 +429,7 @@ func torrentView(c echo.Context) error {
 	st := bts.GetTorrent(hash)
 	if st == nil {
 		torrDb, err := settings.LoadTorrentDB(hashHex)
-		if err != nil {
+		if err != nil || torrDb == nil {
 			return echo.NewHTTPError(http.StatusBadRequest, "Torrent not found: "+hashHex)
 		}
 

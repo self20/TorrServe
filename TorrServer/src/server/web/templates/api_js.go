@@ -45,7 +45,7 @@ function removeTorrent(hash, done, fail){
 
 function statTorrent(hash, done, fail){
 	var reqJson = JSON.stringify({ Hash: hash});
-	$.post('/torrent/rem',reqJson)
+	$.post('/torrent/stat',reqJson)
 	.done(function( data ) {
 		done(data);
 	})
@@ -74,8 +74,8 @@ function restartService(done, fail){
 	});
 }
 
-function preloadTorrent(hash, fileLink, done, fail){
-	$.get('/torrent/preload/'+hash+'/'+fileLink)
+function preloadTorrent(preloadLink, done, fail){
+	$.get(preloadLink)
 	.done(function( data ) {
 		done();
 	})
