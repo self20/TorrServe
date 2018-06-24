@@ -262,7 +262,7 @@ var mainPage = `
 								}
 							}else{
 								$('#preloadBuffer').text("Loaded: " + humanizeSize(data.BytesReadUsefulData));
-								$('#preloadProgress').width('0%');
+								$('#preloadProgress').width('100%');
 							}
 						}
 					},function(){

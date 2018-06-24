@@ -79,7 +79,7 @@
     <string name="retrackers">Ретрекеры</string>
     <string-array name="retracker_mode">
         <item>Ничего не делать</item>
-        <item>Добовлять ретрекеры</item>
+        <item>Добавлять ретрекеры</item>
         <item>Удалять ретрекеры</item>
         <item>Заменить ретрекеры</item>
     </string-array>

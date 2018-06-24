@@ -83,5 +83,15 @@ func statePage(c echo.Context) error {
 		}
 		msg += "<hr><br><br>\n\n"
 	}
+	//msg += `
+	//<script>
+	//document.addEventListener("DOMContentLoaded", function(event) {
+	//	setTimeout(function(){
+	//		location.reload();
+	//	}, 1000);
+	//});
+	//</script>
+	//
+	//`
 	return c.HTML(http.StatusOK, msg)
 }

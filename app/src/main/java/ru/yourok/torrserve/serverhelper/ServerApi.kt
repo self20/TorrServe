@@ -100,9 +100,18 @@ object ServerApi {
             val addr = Preferences.getServerAddress()
             return ServerRequest.serverInfo(addr, hash)
         } catch (e: Exception) {
-            e.printStackTrace()
         }
         return null
+    }
+
+    fun drop(hash: String) {
+        if (hash.isEmpty())
+            return
+        try {
+            val addr = Preferences.getServerAddress()
+            ServerRequest.serverDrop(addr, hash)
+        } catch (e: Exception) {
+        }
     }
 
     fun preload(hash: String, fileLink: String): String {

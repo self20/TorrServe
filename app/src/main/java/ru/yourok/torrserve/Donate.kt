@@ -15,6 +15,9 @@ import kotlin.concurrent.thread
 
 
 object Donate {
+    private fun isShowDonate(): Boolean {
+        return true
+    }
 
     fun donateDialog(context: Context) {
         AlertDialog.Builder(context)
@@ -48,30 +51,31 @@ object Donate {
     private var showDonate = false
 
     fun showDonate(activity: Activity) {
-        if (BuildConfig.FLAVOR != "pay")
-            thread {
-                synchronized(showDonate) {
-                    val last: Long = Preferences.getLastViewDonate()
-                    if (last == -1L || System.currentTimeMillis() < last || showDonate)
-                        return@thread
-                    showDonate = true
-                    Preferences.setLastViewDonate(System.currentTimeMillis() + 5 * 60 * 1000)
-                }
-
-                val snackbar = Snackbar.make(activity.findViewById(android.R.id.content), R.string.donate, Snackbar.LENGTH_INDEFINITE)
-                Handler(Looper.getMainLooper()).postDelayed(Runnable {
-                    snackbar
-                            .setAction(android.R.string.ok) {
-                                Preferences.setLastViewDonate(System.currentTimeMillis())
-                                donateDialog(activity)
-                            }
-                            .show()
-                }, 5000)
-                Handler(Looper.getMainLooper()).postDelayed(Runnable {
-                    if (snackbar.isShown)
-                        snackbar.dismiss()
-                    showDonate = false
-                }, 15000)
+        thread {
+            synchronized(showDonate) {
+                if (!isShowDonate())
+                    return@thread
+                val last: Long = Preferences.getLastViewDonate()
+                if (last == -1L || System.currentTimeMillis() < last || showDonate)
+                    return@thread
+                showDonate = true
+                Preferences.setLastViewDonate(System.currentTimeMillis() + 5 * 60 * 1000)
             }
+
+            val snackbar = Snackbar.make(activity.findViewById(android.R.id.content), R.string.donate, Snackbar.LENGTH_INDEFINITE)
+            Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                snackbar
+                        .setAction(android.R.string.ok) {
+                            Preferences.setLastViewDonate(System.currentTimeMillis())
+                            donateDialog(activity)
+                        }
+                        .show()
+            }, 5000)
+            Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                if (snackbar.isShown)
+                    snackbar.dismiss()
+                showDonate = false
+            }, 15000)
+        }
     }
 }

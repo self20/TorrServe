@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"path/filepath"
 	"sort"
 	"strconv"
 	"time"
@@ -308,8 +307,7 @@ func torrentPreload(c echo.Context) error {
 		return errHttp
 	}
 
-	redirectUrl := c.Scheme() + "://" + c.Request().Host + filepath.Join("/torrent/view/", hashHex, fileLink)
-	return c.Redirect(http.StatusFound, redirectUrl)
+	return c.NoContent(http.StatusOK)
 }
 
 func torrentPreloadSize(c echo.Context) error {
@@ -345,8 +343,9 @@ func torrentPreloadSize(c echo.Context) error {
 	if err != nil {
 		return errHttp
 	}
-	redirectUrl := c.Scheme() + "://" + c.Request().Host + filepath.Join("/torrent/view/", hashHex, fileLink)
-	return c.Redirect(http.StatusFound, redirectUrl)
+	//redirectUrl := c.Scheme() + "://" + c.Request().Host + filepath.Join("/torrent/view/", hashHex, fileLink)
+	//return c.Redirect(http.StatusFound, redirectUrl)
+	return c.NoContent(http.StatusOK)
 }
 
 func torrentDrop(c echo.Context) error {

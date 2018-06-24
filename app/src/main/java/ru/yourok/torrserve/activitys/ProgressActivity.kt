@@ -21,6 +21,7 @@ import kotlin.concurrent.thread
 class ProgressActivity : AppCompatActivity() {
 
     private var isClosed = false
+    private var isPreload = false
 
     companion object {
         private var torrent: Torrent? = null
@@ -69,6 +70,12 @@ class ProgressActivity : AppCompatActivity() {
     override fun onBackPressed() {
         super.onBackPressed()
         isClosed = true
+        if (isPreload)
+            torrent?.let {
+                thread {
+                    ServerApi.drop(it.Hash)
+                }
+            }
     }
 
 
@@ -76,7 +83,7 @@ class ProgressActivity : AppCompatActivity() {
         var errMsg = ""
         torrent?.let { torrent ->
             file?.let { file ->
-                var isPreload = true
+                isPreload = true
                 val th = thread {
                     errMsg = ServerApi.preload(torrent.Hash, file.Link)
                     isPreload = false

@@ -1,8 +1,11 @@
 package ru.yourok.torrserve.serverhelper
 
 import android.net.Uri
+import cz.msebera.android.httpclient.client.methods.HttpEntityEnclosingRequestBase
+import cz.msebera.android.httpclient.client.methods.HttpGet
 import cz.msebera.android.httpclient.client.methods.HttpPost
 import cz.msebera.android.httpclient.entity.ContentType
+import cz.msebera.android.httpclient.entity.StringEntity
 import cz.msebera.android.httpclient.entity.mime.HttpMultipartMode
 import cz.msebera.android.httpclient.entity.mime.MultipartEntityBuilder
 import cz.msebera.android.httpclient.entity.mime.content.FileBody
@@ -11,12 +14,8 @@ import cz.msebera.android.httpclient.impl.client.HttpClients
 import cz.msebera.android.httpclient.util.EntityUtils
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.DataOutputStream
 import java.io.IOException
-import java.net.HttpURLConnection
 import java.net.URI
-import java.net.URL
-import java.nio.charset.Charset
 
 
 data class Torrent(
@@ -228,47 +227,37 @@ object ServerRequest {
     }
 
     private fun requestStr(post: Boolean, url: String, req: String): String {
-        val url = URL(url)
-        val conn = url.openConnection() as HttpURLConnection
+        val httpclient = HttpClients.custom().disableRedirectHandling().build()
 
-        if (post) {
-            conn.requestMethod = "POST"
-            conn.setRequestProperty("Content-Type", "application/json")
-        } else
-            conn.requestMethod = "GET"
-        conn.connect()
-
-        if (req.isNotEmpty()) {
-            val os = DataOutputStream(conn.outputStream)
-            os.writeBytes(req)
-            os.flush()
-            os.close()
+        val httpreq = if (post) HttpPost(url) else HttpGet(url)
+        if (post && req.isNotEmpty()) {
+            (httpreq as HttpEntityEnclosingRequestBase).setEntity(StringEntity(req))
         }
-
-        val input = conn.inputStream
-        val str = input.bufferedReader(Charset.defaultCharset()).readText()
-
-        if (conn.responseCode != 200) {
-            val input = conn.errorStream
-            var err = "Error connect to server"
-            val str = input.bufferedReader(Charset.defaultCharset()).readText()
-            if (str.isNotEmpty()) {
-                err = try {
-                    JSONObject(str).getString("Message")
-                } catch (e: Exception) {
-                    str
+        val response = httpclient.execute(httpreq)
+        val status = response.statusLine?.statusCode ?: -1
+        if (status == 200) {
+            val entity = response.entity ?: return ""
+            return EntityUtils.toString(entity)
+        } else if (status == 302) {
+            return ""
+        } else {
+            val resp = EntityUtils.toString(response.entity)
+            resp?.let {
+                if (it.isNotEmpty()) {
+                    var errMsg = response.statusLine.reasonPhrase
+                    try {
+                        errMsg = JSONObject(it).getString("Message")
+                    } catch (e: Exception) {
+                        try {
+                            errMsg = JSONObject(it).getString("message")
+                        } catch (e: Exception) {
+                        }
+                    }
+                    throw IOException(errMsg)
                 }
-            } else
-                conn.responseMessage?.let {
-                    err = it
-                }
-            input.close()
-            throw IOException(err)
+            }
+            throw IOException(response.statusLine.reasonPhrase)
         }
-
-        input.close()
-        conn.disconnect()
-        return str
     }
 
     fun serverAdd(host: String, link: String, save: Boolean): Torrent {
@@ -323,6 +312,12 @@ object ServerRequest {
         val req = getRequest("", hash)
         val str = requestStr(true, url, req)
         return js2Info(str)
+    }
+
+    fun serverDrop(host: String, hash: String) {
+        val url = joinUrl(host, "/torrent/drop")
+        val req = getRequest("", hash)
+        requestStr(true, url, req)
     }
 
     fun serverEcho(host: String) {
