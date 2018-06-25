@@ -25,7 +25,7 @@ type TorrentState struct {
 	ChunksWritten       int64
 	ChunksRead          int64
 	ChunksReadUseful    int64
-	ChunksReadUnwanted  int64
+	ChunksReadWasted    int64
 	PiecesDirtiedGood   int64
 	PiecesDirtiedBad    int64
 
@@ -97,7 +97,7 @@ func (ts *TorrentState) updateTorrentState() {
 		ts.ChunksWritten = state.ChunksWritten.Int64()
 		ts.ChunksRead = state.ChunksRead.Int64()
 		ts.ChunksReadUseful = state.ChunksReadUseful.Int64()
-		ts.ChunksReadUnwanted = state.ChunksReadUnwanted.Int64()
+		ts.ChunksReadWasted = state.ChunksReadWasted.Int64()
 		ts.PiecesDirtiedGood = state.PiecesDirtiedGood.Int64()
 		ts.PiecesDirtiedBad = state.PiecesDirtiedBad.Int64()
 

@@ -19,6 +19,7 @@ type Movie struct {
 	Overview    string
 	IsTv        bool
 	Torrents    []*provider.Torrent
+	Genres      []string
 }
 
 type SearchResponce struct {
@@ -47,7 +48,7 @@ func Init() {
 }
 
 func GetGenres() []struct {
-	ID   int
+	ID   uint32
 	Name string
 } {
 	return tmdb.GetGenres()
@@ -58,6 +59,10 @@ func SearchByName(page int, name string) (*SearchResponce, error) {
 	resp := new(SearchResponce)
 	list := make([]*Movie, 0)
 	fmt.Println("Search movies")
+	genres := make(map[uint32]string)
+	for _, g := range tmdb.GetGenres() {
+		genres[g.ID] = g.Name
+	}
 	{
 		res, er := tmdb.SearchMovie(page, name)
 		if er != nil {
@@ -76,6 +81,11 @@ func SearchByName(page int, name string) (*SearchResponce, error) {
 				mov.BackdropUrl = m.BackdropPath
 				mov.PosterUrl = m.PosterPath
 				mov.Overview = m.Overview
+				for _, i := range m.GenreIds {
+					if gn, ok := genres[i]; ok {
+						mov.Genres = append(mov.Genres, gn)
+					}
+				}
 				list = append(list, mov)
 			}
 		}
@@ -102,6 +112,11 @@ func SearchByName(page int, name string) (*SearchResponce, error) {
 				mov.PosterUrl = m.PosterPath
 				mov.Overview = m.Overview
 				mov.IsTv = true
+				for _, i := range m.GenreIds {
+					if gn, ok := genres[i]; ok {
+						mov.Genres = append(mov.Genres, gn)
+					}
+				}
 				list = append(list, mov)
 			}
 		}
@@ -119,6 +134,10 @@ func NowWatching(page int) (*SearchResponce, error) {
 	resp := new(SearchResponce)
 	list := make([]*Movie, 0)
 	fmt.Println("Search now watching movies")
+	genres := make(map[uint32]string)
+	for _, g := range tmdb.GetGenres() {
+		genres[g.ID] = g.Name
+	}
 	{
 		res, er := tmdb.NowPlayingMovie(page)
 		if er != nil {
@@ -137,6 +156,11 @@ func NowWatching(page int) (*SearchResponce, error) {
 				mov.BackdropUrl = m.BackdropPath
 				mov.PosterUrl = m.PosterPath
 				mov.Overview = m.Overview
+				for _, i := range m.GenreIds {
+					if gn, ok := genres[i]; ok {
+						mov.Genres = append(mov.Genres, gn)
+					}
+				}
 				list = append(list, mov)
 			}
 		}
@@ -163,6 +187,11 @@ func NowWatching(page int) (*SearchResponce, error) {
 				mov.PosterUrl = m.PosterPath
 				mov.Overview = m.Overview
 				mov.IsTv = true
+				for _, i := range m.GenreIds {
+					if gn, ok := genres[i]; ok {
+						mov.Genres = append(mov.Genres, gn)
+					}
+				}
 				list = append(list, mov)
 			}
 		}
@@ -180,6 +209,10 @@ func SearchByFilter(page int, filter *tmdb.Filter) (*SearchResponce, error) {
 	resp := new(SearchResponce)
 	list := make([]*Movie, 0)
 	fmt.Println("Search filter movies")
+	genres := make(map[uint32]string)
+	for _, g := range tmdb.GetGenres() {
+		genres[g.ID] = g.Name
+	}
 	{
 		res, er := tmdb.FilterMovie(page, filter)
 		if er != nil {
@@ -198,6 +231,11 @@ func SearchByFilter(page int, filter *tmdb.Filter) (*SearchResponce, error) {
 				mov.BackdropUrl = m.BackdropPath
 				mov.PosterUrl = m.PosterPath
 				mov.Overview = m.Overview
+				for _, i := range m.GenreIds {
+					if gn, ok := genres[i]; ok {
+						mov.Genres = append(mov.Genres, gn)
+					}
+				}
 				list = append(list, mov)
 			}
 		}
@@ -224,6 +262,11 @@ func SearchByFilter(page int, filter *tmdb.Filter) (*SearchResponce, error) {
 				mov.PosterUrl = m.PosterPath
 				mov.Overview = m.Overview
 				mov.IsTv = true
+				for _, i := range m.GenreIds {
+					if gn, ok := genres[i]; ok {
+						mov.Genres = append(mov.Genres, gn)
+					}
+				}
 				list = append(list, mov)
 			}
 		}

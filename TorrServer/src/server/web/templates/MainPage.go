@@ -17,22 +17,20 @@ var mainPage = `
 		<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
-		<title>Torrent server</title>
+		<title>TorrServer ` + version.Version + `</title>
 	</head>
 	<body>
 		<style>
 			.wrap {
-			white-space: normal;
-			word-wrap: break-word;
-			word-break: break-all;
+				white-space: normal;
+				word-wrap: break-word;
+				word-break: break-all;
 			}
 			.content {
-			margin: 1%;
-			}
-			a {
-			vertical-align: middle;
+				margin: 1%;
 			}
 		</style>
+		
 		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 			<span class="navbar-brand mx-auto">
 			TorrServer ` + version.Version + `

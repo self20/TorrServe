@@ -62,7 +62,7 @@ func statePage(c echo.Context) error {
 		msg += fmt.Sprintf("\t&emsp;ChunksWritten:      %v<br>\n", st.ChunksWritten)
 		msg += fmt.Sprintf("\t&emsp;ChunksRead: 	       %v<br>\n", st.ChunksRead)
 		msg += fmt.Sprintf("\t&emsp;ChunksReadUseful:   %v<br>\n", st.ChunksReadUseful)
-		msg += fmt.Sprintf("\t&emsp;ChunksReadUnwanted: %v<br>\n", st.ChunksReadUnwanted)
+		msg += fmt.Sprintf("\t&emsp;ChunksReadWasted: %v<br>\n", st.ChunksReadWasted)
 		msg += fmt.Sprintf("\t&emsp;PiecesDirtiedGood: %v<br>\n", st.PiecesDirtiedGood)
 		msg += fmt.Sprintf("\t&emsp;PiecesDirtiedBad:  %v<br>\n", st.PiecesDirtiedBad)
 

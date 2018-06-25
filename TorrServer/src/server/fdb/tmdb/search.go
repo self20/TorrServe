@@ -69,6 +69,7 @@ func searchTv(page int, name string) (*tmdb.TvPagedResults, error) {
 			Name:          r.Name,
 			VoteAverage:   r.VoteAverage,
 			VoteCount:     r.VoteCount,
+			GenreIds:      r.GenreIds,
 		}
 		ret.Results = append(ret.Results, tvs)
 	}
@@ -127,18 +128,18 @@ func fixLinksTv(list []tmdb.TvShort) {
 	}
 }
 
-func removeDuplicateMovies(elements []tmdb.MovieShort) []tmdb.MovieShort {
-	encountered := map[tmdb.MovieShort]bool{}
-	var result []tmdb.MovieShort
-
-	for v := range elements {
-		if !encountered[elements[v]] {
-			encountered[elements[v]] = true
-			result = append(result, elements[v])
-		}
-	}
-	return result
-}
+//func removeDuplicateMovies(elements []tmdb.MovieShort) []tmdb.MovieShort {
+//	encountered := map[tmdb.MovieShort]bool{}
+//	var result []tmdb.MovieShort
+//
+//	for v := range elements {
+//		if !encountered[elements[v]] {
+//			encountered[elements[v]] = true
+//			result = append(result, elements[v])
+//		}
+//	}
+//	return result
+//}
 
 //
 //func removeDuplicateTv(elements []tmdb.TvShort) []tmdb.TvShort {

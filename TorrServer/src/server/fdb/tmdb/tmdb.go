@@ -39,13 +39,18 @@ func initDb() error {
 		if err != nil {
 			return err
 		}
+		gen, err = tm.GetTvGenres(opt)
+		genres.Genres = append(genres.Genres, gen.Genres...)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
 func GetGenres() []struct {
-	ID   int
+	ID   uint32
 	Name string
 } {
 	initDb()
@@ -63,7 +68,7 @@ func SearchMovie(page int, name string) (*tmdb.MovieSearchResults, error) {
 		return nil, err
 	}
 
-	res.Results = removeDuplicateMovies(res.Results)
+	//res.Results = removeDuplicateMovies(res.Results)
 	sort.Slice(res.Results, func(i, j int) bool {
 		return res.Results[i].Popularity > res.Results[j].Popularity
 	})
