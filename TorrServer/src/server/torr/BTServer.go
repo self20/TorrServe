@@ -94,7 +94,7 @@ func (bt *BTServer) configure() {
 	bt.config.PeerID = utils.PeerIDRandom(peerID)
 	bt.config.HTTPUserAgent = userAgent
 	bt.config.EstablishedConnsPerTorrent = settings.Get().ConnectionsLimit
-	bt.config.HalfOpenConnsPerTorrent = int(float64(settings.Get().ConnectionsLimit) * 0.65)
+	bt.config.HalfOpenConnsPerTorrent = settings.Get().ConnectionsLimit >> 1
 
 	if settings.Get().DownloadRateLimit > 0 {
 		bt.config.DownloadRateLimiter = rate.NewLimiter(rate.Limit(settings.Get().DownloadRateLimit*1024), 1024)
@@ -102,6 +102,9 @@ func (bt *BTServer) configure() {
 	if settings.Get().UploadRateLimit > 0 {
 		bt.config.UploadRateLimiter = rate.NewLimiter(rate.Limit(settings.Get().UploadRateLimit*1024), 1024)
 	}
+	bt.config.RequestStrategy = settings.Get().RequestStrategy
+
+	fmt.Println("Configure client:", settings.Get())
 }
 
 func (bt *BTServer) addTorrent(magnet *metainfo.Magnet) (*torrent.Torrent, error) {
@@ -236,7 +239,7 @@ func (bt *BTServer) Preload(hash metainfo.Hash, file *torrent.File, size int64) 
 			endPreloadOffset = file.Offset() + file.Length() - buff5mb
 		}
 
-		readerPre := file.NewReader()
+		readerPre := NewReader(file)
 		state.readers++
 		readerPre.SetReadahead(startPreloadLength)
 		defer func() {
@@ -245,9 +248,8 @@ func (bt *BTServer) Preload(hash metainfo.Hash, file *torrent.File, size int64) 
 		}()
 
 		if endPreloadOffset > 0 {
-			readerPost := file.NewReader()
+			readerPost := NewReader(file)
 			state.readers++
-			readerPost.SetReadahead(1)
 			readerPost.Seek(endPreloadOffset, io.SeekStart)
 			readerPost.SetReadahead(buff5mb)
 			defer func() {

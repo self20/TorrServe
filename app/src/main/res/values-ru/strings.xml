@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">TorrServe</string>
-
     <string name="label_add">Добавить &amp; Играть</string>
     <string name="label_play">Играть</string>
 
@@ -46,6 +44,7 @@
     <string name="server_addr">Адрес сервера</string>
     <string name="cache_size">Размер кэша (Мбайты)</string>
     <string name="preload_buffer_size">Размер буфера предварительной загрузки (Мбайты)</string>
+    <string name="read_ahead_prc">Упреждающее чтение %</string>
     <string name="disable_tcp">Отключить TCP</string>
     <string name="disable_utp">Отключить UTP</string>
     <string name="disable_upnp">Отключить UPNP</string>
@@ -90,5 +89,12 @@
         <item>Искать по имени</item>
         <item>Сейчас смотрят</item>
         <item>Искать по фильтру</item>
+    </string-array>
+
+    <string name="strategy">Стратегия запроса</string>
+    <string-array name="strategy_num">
+        <item>Быстрая скорость, больше трафика</item>
+        <item>Нормальная скорость, немного трафика</item>
+        <item>Низкая скорость, меньше трафика</item>
     </string-array>
 </resources>

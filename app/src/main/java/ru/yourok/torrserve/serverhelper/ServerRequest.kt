@@ -52,7 +52,7 @@ data class Info(
 
         var ChunksRead: Long,
         var ChunksReadUseful: Long,
-        var ChunksReadUnwanted: Long,
+        var ChunksReadWasted: Long,
 
         var PiecesDirtiedGood: Long,
         var PiecesDirtiedBad: Long,
@@ -75,6 +75,7 @@ data class Info(
 
 data class ServerSettings(var CacheSize: Int,
                           var PreloadBufferSize: Int,
+                          var ReadAhead: Int,
                           var RetrackersMode: Int,
                           var DisableTCP: Boolean,
                           var DisableUTP: Boolean,
@@ -84,7 +85,8 @@ data class ServerSettings(var CacheSize: Int,
                           var Encryption: Int,
                           var DownloadRateLimit: Int,
                           var UploadRateLimit: Int,
-                          var ConnectionsLimit: Int)
+                          var ConnectionsLimit: Int,
+                          var RequestStrategy: Int)
 
 fun fixLink(link: String): String {
     try {
@@ -167,7 +169,7 @@ fun js2Info(js: JSONObject): Info {
 
             js.getLong("ChunksRead"),
             js.getLong("ChunksReadUseful"),
-            js.getLong("ChunksReadUnwanted"),
+            js.getLong("ChunksReadWasted"),
 
             js.getLong("PiecesDirtiedGood"),
             js.getLong("PiecesDirtiedBad"),
@@ -335,6 +337,7 @@ object ServerRequest {
         return ServerSettings(
                 js.getInt("CacheSize") / (1024 * 1024),
                 js.getInt("PreloadBufferSize") / (1024 * 1024),
+                js.getInt("ReadAhead"),
                 js.getInt("RetrackersMode"),
                 js.getBoolean("DisableTCP"),
                 js.getBoolean("DisableUTP"),
@@ -344,7 +347,8 @@ object ServerRequest {
                 js.getInt("Encryption"),
                 js.getInt("DownloadRateLimit"),
                 js.getInt("UploadRateLimit"),
-                js.getInt("ConnectionsLimit"))
+                js.getInt("ConnectionsLimit"),
+                js.getInt("RequestStrategy"))
     }
 
     fun writeSettings(sets: ServerSettings) {
@@ -353,6 +357,7 @@ object ServerRequest {
         val js = JSONObject()
         js.put("CacheSize", sets.CacheSize * (1024 * 1024))
         js.put("PreloadBufferSize", sets.PreloadBufferSize * (1024 * 1024))
+        js.put("ReadAhead", sets.ReadAhead)
         js.put("RetrackersMode", sets.RetrackersMode)
         js.put("DisableTCP", sets.DisableTCP)
         js.put("DisableUTP", sets.DisableUTP)
@@ -363,6 +368,7 @@ object ServerRequest {
         js.put("DownloadRateLimit", sets.DownloadRateLimit)
         js.put("UploadRateLimit", sets.UploadRateLimit)
         js.put("ConnectionsLimit", sets.ConnectionsLimit)
+        js.put("RequestStrategy", sets.RequestStrategy)
 
         requestStr(true, url, js.toString(0))
     }

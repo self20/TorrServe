@@ -15,11 +15,7 @@ import (
 func (bt *BTServer) Play(state *TorrentState, file *torrent.File, timestamp time.Time, c echo.Context) error {
 	bt.watcher()
 	go settings.SetViewed(state.Hash, file.Path())
-	reader := file.NewReader()
-	//readahead := int64(float64(settings.Get().CacheSize) * 0.33)
-	//if readahead < 5*1024*1024 {
-	//	readahead = 5 * 1024 * 1024
-	//}
+	reader := NewReader(file)
 
 	readahead := int64(float64(settings.Get().CacheSize) * 0.33)
 	if readahead < 66*1024*1024 {

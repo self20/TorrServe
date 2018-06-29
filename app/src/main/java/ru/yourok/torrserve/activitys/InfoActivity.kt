@@ -38,7 +38,7 @@ class InfoActivity : AppCompatActivity() {
                             msg += "ChunksWritten: ${info.ChunksWritten}\n"
                             msg += "ChunksRead: ${info.ChunksRead}\n"
                             msg += "ChunksReadUseful: ${info.ChunksReadUseful}\n"
-                            msg += "ChunksReadUnwanted: ${info.ChunksReadUnwanted}\n"
+                            msg += "ChunksReadWasted: ${info.ChunksReadWasted}\n"
                             msg += "PiecesDirtiedGood: ${info.PiecesDirtiedGood}\n"
                             msg += "PiecesDirtiedBad: ${info.PiecesDirtiedBad}\n"
                             msg += "TotalPeers: ${info.TotalPeers}\n"

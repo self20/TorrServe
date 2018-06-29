@@ -50,14 +50,16 @@ object Preferences {
         set("LastViewDonate", l)
     }
 
-    fun getAutocomplet(): List<String> {
+    fun getSaveHosts(): List<String> {
         val prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext())
         val ret = prefs.getStringSet("AutoCompleteHost", mutableSetOf())
+        if (ret.isEmpty())
+            ret.add("http://localhost:8090")
         return ret.toList()
     }
 
-    fun addAutocomplet(v: String) {
-        val list = getAutocomplet()
+    fun addSaveHost(v: String) {
+        val list = getSaveHosts()
         val set = list.toMutableSet()
         set.add(v)
         val prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext())

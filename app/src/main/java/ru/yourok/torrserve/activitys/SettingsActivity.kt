@@ -26,7 +26,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        val autocomplete = Preferences.getAutocomplet()
+        val autocomplete = Preferences.getSaveHosts()
         val editTextServAddr = findViewById<EditText>(R.id.editTextServerAddr)
         editTextServAddr.setOnLongClickListener {
             val builder = AlertDialog.Builder(this)
@@ -75,6 +75,10 @@ class SettingsActivity : AppCompatActivity() {
         val adp2 = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.retracker_mode))
         adp2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerRetracker.setAdapter(adp2)
+
+        val adp3 = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.strategy_num))
+        adp3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerRequestStrategy.setAdapter(adp3)
 
         textViewVersion.setText("YouROK " + getText(R.string.app_name) + " ${BuildConfig.FLAVOR} ${BuildConfig.VERSION_NAME}")
 
@@ -142,7 +146,9 @@ class SettingsActivity : AppCompatActivity() {
 
         editTextCacheSize.setText(sets.CacheSize.toString())
         editTextPreloadBufferSize.setText(sets.PreloadBufferSize.toString())
+        editTextReadahead.setText(sets.ReadAhead.toString())
         spinnerRetracker.setSelection(sets.RetrackersMode)
+        spinnerRequestStrategy.setSelection(sets.RequestStrategy - 1)
 
         checkBoxDisableTCP.setChecked(sets.DisableTCP)
         checkBoxDisableUTP.setChecked(sets.DisableUTP)
@@ -172,6 +178,7 @@ class SettingsActivity : AppCompatActivity() {
             val sets = ServerSettings(
                     editTextCacheSize.text.toString().toInt(),
                     editTextPreloadBufferSize.text.toString().toInt(),
+                    editTextReadahead.text.toString().toInt(),
                     spinnerRetracker.selectedItemPosition,
                     checkBoxDisableTCP.isChecked,
                     checkBoxDisableUTP.isChecked,
@@ -181,7 +188,8 @@ class SettingsActivity : AppCompatActivity() {
                     editTextEncryption.text.toString().toInt(),
                     editTextDownloadRateLimit.text.toString().toInt(),
                     editTextUploadRateLimit.text.toString().toInt(),
-                    editTextConnectionsLimit.text.toString().toInt())
+                    editTextConnectionsLimit.text.toString().toInt(),
+                    spinnerRequestStrategy.selectedItemPosition + 1)
 
             thread {
                 val err = ServerApi.writeSettings(sets)
@@ -190,7 +198,7 @@ class SettingsActivity : AppCompatActivity() {
                         Toast.makeText(App.getContext(), R.string.error_sending_settings, Toast.LENGTH_SHORT).show()
                     }
                 else
-                    Preferences.addAutocomplet(addr)
+                    Preferences.addSaveHost(addr)
             }
         } catch (e: Exception) {
         }

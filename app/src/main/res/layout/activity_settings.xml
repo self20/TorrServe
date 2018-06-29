@@ -64,6 +64,19 @@
                 android:ems="10"
                 android:inputType="numberSigned" />
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:labelFor="@+id/editTextCacheSize"
+                android:text="@string/read_ahead_prc" />
+
+            <EditText
+                android:id="@+id/editTextReadahead"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="numberSigned" />
+
             <CheckBox
                 android:text="@string/disable_tcp"
                 android:id="@+id/checkBoxDisableTCP"
@@ -154,6 +167,11 @@
 
             <Spinner
                 android:id="@+id/spinnerRetracker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Spinner
+                android:id="@+id/spinnerRequestStrategy"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 

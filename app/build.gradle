@@ -10,10 +10,6 @@ def freeKeystorePropertiesFile = rootProject.file("free.property")
 def freeProperties = new Properties()
 freeProperties.load(new FileInputStream(freeKeystorePropertiesFile))
 
-def payKeystorePropertiesFile = rootProject.file("pay.property")
-def payProperties = new Properties()
-payProperties.load(new FileInputStream(payKeystorePropertiesFile))
-
 android {
     compileSdkVersion 26
     defaultConfig {
@@ -21,7 +17,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 26
         versionCode 60
-        versionName "1.0.60_s1"
+        versionName "1.0.60_test11"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
@@ -36,12 +32,6 @@ android {
             keyPassword freeProperties['keyPassword']
             storeFile rootProject.file(freeProperties['storeFile'])
             storePassword freeProperties['storePassword']
-        }
-        payRelease {
-            keyAlias payProperties['keyAlias']
-            keyPassword payProperties['keyPassword']
-            storeFile rootProject.file(payProperties['storeFile'])
-            storePassword payProperties['storePassword']
         }
     }
 

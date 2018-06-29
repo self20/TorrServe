@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">TorrServe</string>
+    <string name="app_name" translatable="false">TorrServe</string>
+    <string name="app_name_test" translatable="false">TorrServe Test</string>
 
     <string name="label_add">Add &amp; Play</string>
     <string name="label_play">Play</string>
@@ -49,6 +50,7 @@
     <string name="server_addr">Server address</string>
     <string name="cache_size">Cache size (MBytes)</string>
     <string name="preload_buffer_size">Preload buffer size (MBytes)</string>
+    <string name="read_ahead_prc">Read ahead %</string>
     <string name="disable_tcp">Disable TCP</string>
     <string name="disable_utp">Disable UTP</string>
     <string name="disable_upnp">Disable UPNP</string>
@@ -93,5 +95,12 @@
         <item>Search by name</item>
         <item>Search now watching</item>
         <item>Search by filter</item>
+    </string-array>
+
+    <string name="strategy">Request strategy</string>
+    <string-array name="strategy_num">
+        <item>Fast speed, more traffic</item>
+        <item>Normal speed, normal traffic</item>
+        <item>Low speed, less traffic</item>
     </string-array>
 </resources>

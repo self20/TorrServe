@@ -44,7 +44,7 @@ var settingsPage = `
                 </div>
                 <input id="CacheSize" class="form-control" type="number" autocomplete="off">
             </div>
-            <br>
+		<br>
             <div class="input-group">
                 <div class="input-group-prepend">
                     <div class="input-group-text">Preload Buffer Size</div>
@@ -52,7 +52,14 @@ var settingsPage = `
                 <input id="PreloadBufferSize" class="form-control" type="number" autocomplete="off">
             </div>
          	<small class="form-text text-muted">Cache and Preload Buffer size in megabyte</small>
-            <br>
+         <br>
+         	<div class="input-group">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">Read ahead</div>
+                </div>
+                <input id="ReadAhead" class="form-control" type="number" autocomplete="off">
+            </div>
+		<br>
             <div class="form-check">
                 <input id="DisableTCP" class="form-check-input" type="checkbox" autocomplete="off">
                 <label for="DisableTCP">Disable TCP</label>
@@ -73,7 +80,7 @@ var settingsPage = `
                 <input id="DisableUpload" class="form-check-input" type="checkbox" autocomplete="off">
                 <label for="DisableUpload">Disable Upload</label>
             </div>
-            <br>
+		<br>
             <div class="input-group">
                 <div class="input-group-prepend">
                     <div class="input-group-text">Encryption</div>
@@ -84,14 +91,14 @@ var settingsPage = `
                     <option value="2">Force</option>
                 </select>
             </div>
-            <br>
+		<br>
             <div class="input-group">
                 <div class="input-group-prepend">
                     <div class="input-group-text">Connections Limit</div>
                 </div>
                 <input id="ConnectionsLimit" class="form-control" type="number" autocomplete="off">
             </div>
-            <br>
+		<br>
             <div class="input-group">
                 <div class="input-group-prepend">
                     <div class="input-group-text">Download Rate Limit</div>
@@ -105,7 +112,7 @@ var settingsPage = `
                 <input id="UploadRateLimit" class="form-control" type="number" autocomplete="off">
             </div>
             <small class="form-text text-muted">Download / Upload Rate Limit setup in kilobytes, 0 for infinite</small>
-            <br>
+	 	<br>
             <div class="input-group">
                 <div class="input-group-prepend">
                     <div class="input-group-text">Retrackers Mode</div>
@@ -114,6 +121,17 @@ var settingsPage = `
          			<option value="0">Do nothing</option>
          			<option value="1">Add retrackers</option>
                     <option value="2">Remove retrackers</option>
+                </select>
+            </div>
+        <br>
+         	<div class="input-group">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">Request Strategy</div>
+                </div>
+                <select id="RequestStrategy" class="form-control">
+         			<option value="1">Fast speed, more traffic</option>
+         			<option value="2">Normal speed, normal traffic</option>
+                    <option value="3">Low speed, less traffic</option>
                 </select>
             </div>
         </form>
@@ -133,6 +151,7 @@ var settingsPage = `
             var data = {};
             data.CacheSize = Number($('#CacheSize').val())*(1024*1024);
 			data.PreloadBufferSize = Number($('#PreloadBufferSize').val())*(1024*1024);
+         	data.ReadAhead = Number($('#ReadAhead').val());
 			
 			data.DisableTCP = $('#DisableTCP').prop('checked');
 			data.DisableUTP = $('#DisableUTP').prop('checked');
@@ -147,6 +166,8 @@ var settingsPage = `
 			data.UploadRateLimit = Number($('#UploadRateLimit').val());
 			
 			data.RetrackersMode = Number($('#RetrackersMode').val());
+         
+         	data.RequestStrategy = Number($('#RequestStrategy').val());
 
             $.post("/settings/write", JSON.stringify(data))
                 .done(function(data) {
@@ -162,6 +183,7 @@ var settingsPage = `
                 .done(function(data) {
          			$('#CacheSize').val(data.CacheSize/(1024*1024));
 					$('#PreloadBufferSize').val(data.PreloadBufferSize/(1024*1024));
+         			$('#ReadAhead').val(data.ReadAhead);
 					
          			$('#DisableTCP').prop('checked', data.DisableTCP);
 					$('#DisableUTP').prop('checked', data.DisableUTP);
@@ -176,6 +198,8 @@ var settingsPage = `
 					$('#UploadRateLimit').val(data.UploadRateLimit);
 					
          			$('#RetrackersMode').val(data.RetrackersMode);
+         
+         			$('#RequestStrategy').val(data.RequestStrategy);
                 });
         };
 
