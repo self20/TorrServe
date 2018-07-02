@@ -10,7 +10,7 @@ type CacheState struct {
 	Filled       int64
 	PiecesLength int64
 	PiecesCount  int
-	Pieces       []ItemState
+	Pieces       map[int]ItemState
 }
 
 type ItemState struct {

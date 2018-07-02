@@ -194,6 +194,16 @@ func torrentRem(c echo.Context) error {
 }
 
 func torrentList(c echo.Context) error {
+	buf, _ := ioutil.ReadAll(c.Request().Body)
+	jsstr := string(buf)
+	decoder := json.NewDecoder(bytes.NewBufferString(jsstr))
+	jsreq := struct {
+		Request int
+	}{}
+	decoder.Decode(&jsreq)
+
+	reqType := jsreq.Request
+
 	js := make([]TorrentJsonResponse, 0)
 	list, _ := settings.LoadTorrentsDB()
 
@@ -235,6 +245,24 @@ func torrentList(c echo.Context) error {
 				js = append(js, *jsTor)
 			}
 		}
+	}
+
+	if reqType == 1 {
+		ret := make([]TorrentJsonResponse, 0)
+		for _, r := range js {
+			if !r.IsGettingInfo || len(r.Files) > 0 {
+				ret = append(ret, r)
+			}
+		}
+		return c.JSON(http.StatusOK, ret)
+	} else if reqType == 2 {
+		ret := make([]TorrentJsonResponse, 0)
+		for _, r := range js {
+			if r.IsGettingInfo {
+				ret = append(ret, r)
+			}
+		}
+		return c.JSON(http.StatusOK, ret)
 	}
 
 	return c.JSON(http.StatusOK, js)

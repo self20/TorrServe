@@ -59,7 +59,7 @@ var cachePage = `
 	</body>
 	<script>
 		$( document ).ready(function() {
-			setInterval(updateState, 100);
+			setInterval(updateState, 1000);
 		});
 		
 		var cacheHash = "";
@@ -99,31 +99,55 @@ var cachePage = `
 					html += '<span>Pieces length: '+humanizeSize(st.PiecesLength)+'</span><br>';
 					html += '<span>Pieces count: '+st.PiecesCount+'</span><br>';
 					$("#cacheInfo").html(html);
-					html = "";
-					for(var key in st.Pieces) {
-						var piece = st.Pieces[key];
-						var color = "grey";
-						if (piece.Completed && piece.BufferSize >= st.PiecesLength)
-							color = "green";
-						else if (piece.Completed && piece.BufferSize == 0)
-							color = "silver";
-						else if (!piece.Completed && piece.BufferSize > 0)
-							color = getColor(piece.BufferSize/st.PiecesLength);
-						html += '<span class="piece" style="background-color: '+color+';">'+piece.Id+' '+humanizeSize(piece.BufferSize)+'</span>';
+					makePieces(st.PiecesCount);
+					for(var i = 0; i < st.PiecesCount; i++) {
+						var color = "silver";
+						var size = "";
+						var piece = st.Pieces[i];
+						if (piece){
+							if (piece.Completed && piece.BufferSize >= st.PiecesLength)
+								color = "green";
+							else if (piece.Completed && piece.BufferSize == 0)
+								color = "silver";
+							else if (!piece.Completed && piece.BufferSize > 0)
+								color = "red";
+							size = ' ' + humanizeSize(piece.BufferSize);
+						}
+						setPiece(i,color,size);
 					}
-					cache.html(html);
 				},function(){
 					$("#cacheInfo").empty();
 					cache.empty();
 				});
 			}
 		}
-			
-		function getColor(value){
-			var hue=((value)*120).toString(10);
-			return ["hsl(",hue,",100%,50%)"].join("");
-		}
 		
+		function makePieces(len){
+			var cache = $("#cache");
+			if (cache.children().length==len)
+				return;
+			var html = "";
+			for(var i = 0; i < len; i++) {
+				html += '<span class="piece" id="p'+i+'" style="background-color: silver;">'+i+'</span>';
+			}
+			cache.html(html);
+		}
+			
+		function setPiece(i, color, size){
+			var piece = $("#p"+i);
+			piece.delay(100).css("background-color",color);
+			piece.text(i+''+size);
+		}
+			
+		function contains(arr, elem) {
+			for (var i = 0; i < arr.length; i++) {
+				if (arr[i].Id === elem) {
+					return true;
+				}
+			}
+			return false;
+		}
+			
 		function updateState(){
 			updateTorrents();
 			updateCache();

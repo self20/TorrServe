@@ -97,22 +97,19 @@ func (c *Cache) GetState() state.CacheState {
 	cState.PiecesCount = c.pieceCount
 	cState.Hash = c.hash.HexString()
 
-	stats := make([]state.ItemState, 0)
+	stats := make(map[int]state.ItemState, 0)
 	c.muPiece.Lock()
 	var fill int64 = 0
 	for _, value := range c.pieces {
 		stat := value.Stat()
 		if stat.BufferSize > 0 {
 			fill += stat.BufferSize
-			stats = append(stats, stat)
+			stats[stat.Id] = stat
 		}
 	}
 	c.filled = fill
 	c.muPiece.Unlock()
 	cState.Filled = c.filled
-	sort.Slice(stats, func(i, j int) bool {
-		return stats[i].Accessed.Before(stats[j].Accessed)
-	})
 	cState.Pieces = stats
 	return cState
 }
