@@ -18,6 +18,7 @@ func InitTemplate(e *echo.Echo) {
 	temp.parseSettingsPage()
 	temp.parseAboutPage()
 	temp.parseSearchPage()
+	temp.parseCachePage()
 
 	e.Renderer = temp
 }

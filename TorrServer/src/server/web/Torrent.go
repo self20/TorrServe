@@ -27,6 +27,7 @@ func initTorrent(e *echo.Echo) {
 	e.POST("/torrent/rem", torrentRem)
 	e.POST("/torrent/list", torrentList)
 	e.POST("/torrent/stat", torrentStat)
+	e.POST("/torrent/cache", torrentCache)
 	e.POST("/torrent/drop", torrentDrop)
 
 	e.GET("/torrent/restart", torrentRestart)
@@ -250,6 +251,24 @@ func torrentStat(c echo.Context) error {
 
 	hash := metainfo.NewHashFromHex(jreq.Hash)
 	stat := bts.GetTorrent(hash)
+	if stat == nil {
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+
+	return c.JSON(http.StatusOK, stat)
+}
+
+func torrentCache(c echo.Context) error {
+	jreq, err := getJsReqTorr(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if jreq.Hash == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Hash must be non-empty")
+	}
+
+	hash := metainfo.NewHashFromHex(jreq.Hash)
+	stat := bts.CacheState(hash)
 	if stat == nil {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}

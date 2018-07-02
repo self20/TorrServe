@@ -146,7 +146,6 @@ class SettingsActivity : AppCompatActivity() {
 
         editTextCacheSize.setText(sets.CacheSize.toString())
         editTextPreloadBufferSize.setText(sets.PreloadBufferSize.toString())
-        editTextReadahead.setText(sets.ReadAhead.toString())
         spinnerRetracker.setSelection(sets.RetrackersMode)
         spinnerRequestStrategy.setSelection(sets.RequestStrategy - 1)
 
@@ -178,7 +177,6 @@ class SettingsActivity : AppCompatActivity() {
             val sets = ServerSettings(
                     editTextCacheSize.text.toString().toInt(),
                     editTextPreloadBufferSize.text.toString().toInt(),
-                    editTextReadahead.text.toString().toInt(),
                     spinnerRetracker.selectedItemPosition,
                     checkBoxDisableTCP.isChecked,
                     checkBoxDisableUTP.isChecked,

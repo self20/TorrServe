@@ -52,13 +52,6 @@ var settingsPage = `
                 <input id="PreloadBufferSize" class="form-control" type="number" autocomplete="off">
             </div>
          	<small class="form-text text-muted">Cache and Preload Buffer size in megabyte</small>
-         <br>
-         	<div class="input-group">
-                <div class="input-group-prepend">
-                    <div class="input-group-text">Read ahead</div>
-                </div>
-                <input id="ReadAhead" class="form-control" type="number" autocomplete="off">
-            </div>
 		<br>
             <div class="form-check">
                 <input id="DisableTCP" class="form-check-input" type="checkbox" autocomplete="off">
@@ -129,9 +122,9 @@ var settingsPage = `
                     <div class="input-group-text">Request Strategy</div>
                 </div>
                 <select id="RequestStrategy" class="form-control">
-         			<option value="1">Fast speed, more traffic</option>
-         			<option value="2">Normal speed, normal traffic</option>
-                    <option value="3">Low speed, less traffic</option>
+         			<option value="1">1 More traffic</option>
+         			<option value="2">2 Normal traffic</option>
+                    <option value="3">3 Less traffic</option>
                 </select>
             </div>
         </form>
@@ -151,7 +144,6 @@ var settingsPage = `
             var data = {};
             data.CacheSize = Number($('#CacheSize').val())*(1024*1024);
 			data.PreloadBufferSize = Number($('#PreloadBufferSize').val())*(1024*1024);
-         	data.ReadAhead = Number($('#ReadAhead').val());
 			
 			data.DisableTCP = $('#DisableTCP').prop('checked');
 			data.DisableUTP = $('#DisableUTP').prop('checked');
@@ -183,7 +175,6 @@ var settingsPage = `
                 .done(function(data) {
          			$('#CacheSize').val(data.CacheSize/(1024*1024));
 					$('#PreloadBufferSize').val(data.PreloadBufferSize/(1024*1024));
-         			$('#ReadAhead').val(data.ReadAhead);
 					
          			$('#DisableTCP').prop('checked', data.DisableTCP);
 					$('#DisableUTP').prop('checked', data.DisableUTP);

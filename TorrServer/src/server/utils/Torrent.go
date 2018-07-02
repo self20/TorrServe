@@ -3,12 +3,10 @@ package utils
 import (
 	"encoding/base32"
 	"errors"
-	"fmt"
 	"math/rand"
 	"time"
 
 	"github.com/anacrolix/torrent"
-	"github.com/anacrolix/torrent/metainfo"
 )
 
 var trackers = []string{
@@ -27,16 +25,6 @@ var trackers = []string{
 
 func GetDefTrackers() []string {
 	return trackers
-}
-
-func RemoveRetracker(magnet string) string {
-	m, err := metainfo.ParseMagnetURI(magnet)
-	if err != nil {
-		fmt.Println("Error remove retracker:", err)
-		return magnet
-	}
-	m.Trackers = []string{}
-	return m.String()
 }
 
 func PeerIDRandom(peer string) string {

@@ -75,7 +75,6 @@ data class Info(
 
 data class ServerSettings(var CacheSize: Int,
                           var PreloadBufferSize: Int,
-                          var ReadAhead: Int,
                           var RetrackersMode: Int,
                           var DisableTCP: Boolean,
                           var DisableUTP: Boolean,
@@ -337,7 +336,6 @@ object ServerRequest {
         return ServerSettings(
                 js.getInt("CacheSize") / (1024 * 1024),
                 js.getInt("PreloadBufferSize") / (1024 * 1024),
-                js.getInt("ReadAhead"),
                 js.getInt("RetrackersMode"),
                 js.getBoolean("DisableTCP"),
                 js.getBoolean("DisableUTP"),
@@ -357,7 +355,6 @@ object ServerRequest {
         val js = JSONObject()
         js.put("CacheSize", sets.CacheSize * (1024 * 1024))
         js.put("PreloadBufferSize", sets.PreloadBufferSize * (1024 * 1024))
-        js.put("ReadAhead", sets.ReadAhead)
         js.put("RetrackersMode", sets.RetrackersMode)
         js.put("DisableTCP", sets.DisableTCP)
         js.put("DisableUTP", sets.DisableUTP)

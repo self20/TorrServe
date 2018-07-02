@@ -54,13 +54,26 @@ function statTorrent(hash, done, fail){
 	});
 }
 
+function cacheTorrent(hash, done, fail){
+	var reqJson = JSON.stringify({ Hash: hash});
+	$.post('/torrent/cache',reqJson)
+	.done(function( data ) {
+		done(data);
+	})
+	.fail(function( data ) {
+		if (fail)
+			fail(data);
+	});
+}
+
 function listTorrent(done, fail){
 	$.post('/torrent/list')
 	.done(function( data ) {
 		done(data);
 	})
 	.fail(function( data ) {
-		fail(data);
+		if (fail)
+			fail(data);
 	});
 }
 

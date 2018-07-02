@@ -54,8 +54,9 @@ var mainPage = `
 			<h3>Torrents: </h3>
 			<div id="torrents"></div>
 			<hr>
-			<div class="btn-group d-flex" role="group">
-				<a href="/settings" rel="external" class="btn btn-primary w-100" role="button" id="buttonSettings"><i class="fas fa-cog"></i> Settings</a>
+			<div class="btn-group-vertical d-flex" role="group">
+				<a href="/settings" rel="external" class="btn btn-primary w-100" role="button"><i class="fas fa-cog"></i> Settings</a>
+				<a href="/cache" rel="external" class="btn btn-primary w-100" role="button"><i class="fas fa-info"></i> Cache</a>
 				<button id="buttonShutdown" class="btn btn-primary w-100" onclick="shutdown()"><i class="fas fa-power-off"></i> Shutdown</button>
 			</div>
 			<form id="uploadForm" style="display:none" action="/torrent/upload" method="post">

@@ -17,17 +17,15 @@ func init() {
 	sets = new(Settings)
 	sets.CacheSize = 200 * 1024 * 1024
 	sets.PreloadBufferSize = 20 * 1024 * 1024
-	sets.ReadAhead = 33
-	sets.ConnectionsLimit = 150
+	sets.ConnectionsLimit = 100
 	sets.RetrackersMode = 1
-	sets.RequestStrategy = 2
+	sets.RequestStrategy = 3
 	StartTime = time.Now()
 }
 
 type Settings struct {
 	CacheSize         int64 // in byte, def 200 mb
 	PreloadBufferSize int64 // in byte, buffer for preload
-	ReadAhead         int   //def 33%
 
 	RetrackersMode int //0 - don`t add, 1 - add retrackers, 2 - remove retrackers
 

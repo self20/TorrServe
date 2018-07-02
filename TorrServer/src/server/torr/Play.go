@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"server/settings"
-	"server/utils"
 
+	"github.com/anacrolix/missinggo/httptoo"
 	"github.com/anacrolix/torrent"
 	"github.com/labstack/echo"
 )
@@ -15,8 +15,28 @@ import (
 func (bt *BTServer) Play(state *TorrentState, file *torrent.File, timestamp time.Time, c echo.Context) error {
 	bt.watcher()
 	go settings.SetViewed(state.Hash, file.Path())
-	reader := NewReader(file)
+	reader := file.NewReader()
+	reader.SetReadahead(getReadahead())
 
+	state.readers++
+
+	fmt.Println("Connect reader:", state.readers)
+	c.Response().Header().Set("Connection", "close")
+	c.Response().Header().Set("ETag", httptoo.EncodeQuotedString(fmt.Sprintf("%s/%s", state.Hash, file.Path())))
+
+	defer func() {
+		fmt.Println("Disconnect reader:", state.readers)
+		reader.Close()
+		state.expiredTime = time.Now().Add(time.Second * 20)
+		state.readers--
+		go bt.watcher()
+	}()
+
+	http.ServeContent(c.Response(), c.Request(), file.Path(), timestamp, reader)
+	return c.NoContent(http.StatusOK)
+}
+
+func getReadahead() int64 {
 	readahead := int64(float64(settings.Get().CacheSize) * 0.33)
 	if readahead < 66*1024*1024 {
 		readahead = int64(settings.Get().CacheSize)
@@ -24,21 +44,5 @@ func (bt *BTServer) Play(state *TorrentState, file *torrent.File, timestamp time
 			readahead = 66 * 1024 * 1024
 		}
 	}
-	reader.SetReadahead(readahead)
-
-	state.readers++
-	defer func() {
-		state.expiredTime = time.Now().Add(time.Second * 20)
-		state.readers--
-		go bt.watcher()
-	}()
-
-	fmt.Println("Connect reader:", state.readers)
-
-	utils.ServeContentTorrent(c.Response(), c.Request(), file.Path(), timestamp, file.Length(), reader)
-	reader.Close()
-
-	fmt.Println("Disconnect reader:", state.readers)
-
-	return c.NoContent(http.StatusOK)
+	return readahead
 }

@@ -13,6 +13,7 @@ import (
 )
 
 func initInfo(e *echo.Echo) {
+	server.GET("/cache", cachePage)
 	server.GET("/stat", statePage)
 	server.GET("/btstat", btStatePage)
 }
@@ -20,6 +21,10 @@ func initInfo(e *echo.Echo) {
 func btStatePage(c echo.Context) error {
 	bts.WriteState(c.Response())
 	return c.NoContent(http.StatusOK)
+}
+
+func cachePage(c echo.Context) error {
+	return c.Render(http.StatusOK, "cachePage", nil)
 }
 
 func statePage(c echo.Context) error {
