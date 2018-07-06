@@ -104,7 +104,7 @@ func discoverTv(page int, filter *Filter) (*tmdb.TvPagedResults, error) {
 
 func fixLinks(list []tmdb.MovieShort) {
 	wbs := tmCfg.Images.BackdropSizes[2]
-	wps := tmCfg.Images.PosterSizes[len(tmCfg.Images.PosterSizes)-1]
+	wps := tmCfg.Images.PosterSizes[2]
 	for i := 0; i < len(list); i++ {
 		if list[i].BackdropPath != "" {
 			list[i].BackdropPath = tmCfg.Images.BaseURL + wbs + list[i].BackdropPath

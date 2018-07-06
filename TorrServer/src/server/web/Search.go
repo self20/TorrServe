@@ -29,6 +29,8 @@ type SearchRequest struct {
 	Page         int
 	HideWTorrent bool
 	Filter       *tmdb.Filter `json:",omitempty"`
+	SearchMovie  bool
+	SearchTV     bool
 }
 
 func searchRequest(c echo.Context) error {
@@ -37,15 +39,22 @@ func searchRequest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	search := 0
+	if jreq.SearchMovie && !jreq.SearchTV {
+		search = 1
+	} else if !jreq.SearchMovie && jreq.SearchTV {
+		search = 2
+	}
+
 	var sResp *fdb.SearchResponce
 	switch jreq.Type {
 	case 1:
-		sResp, err = fdb.NowWatching(jreq.Page)
+		sResp, err = fdb.NowWatching(jreq.Page, search)
 	case 2:
-		sResp, err = fdb.SearchByFilter(jreq.Page, jreq.Filter)
+		sResp, err = fdb.SearchByFilter(jreq.Page, jreq.Filter, search)
 	default:
 		if jreq.Name != "" {
-			sResp, err = fdb.SearchByName(jreq.Page, jreq.Name)
+			sResp, err = fdb.SearchByName(jreq.Page, jreq.Name, search)
 		} else {
 			return echo.NewHTTPError(http.StatusNotFound, "Empty name")
 		}

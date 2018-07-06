@@ -86,15 +86,16 @@ func (bt *BTServer) configure() {
 		DisableEncryption: settings.Get().Encryption == 1,
 		ForceEncryption:   settings.Get().Encryption == 2,
 	}
-	bt.config.DownloadRateLimiter = rate.NewLimiter(rate.Inf, 2<<16)
-	bt.config.UploadRateLimiter = rate.NewLimiter(rate.Inf, 2<<16)
+	//bt.config.DownloadRateLimiter = rate.NewLimiter(rate.Inf, 2<<16)
+	//bt.config.UploadRateLimiter = rate.NewLimiter(rate.Inf, 2<<16)
 	bt.config.IPBlocklist = blocklist
 	bt.config.DefaultStorage = bt.storage
 	bt.config.Bep20 = peerID
 	bt.config.PeerID = utils.PeerIDRandom(peerID)
 	bt.config.HTTPUserAgent = userAgent
 	bt.config.EstablishedConnsPerTorrent = settings.Get().ConnectionsLimit
-	bt.config.HalfOpenConnsPerTorrent = int(float64(settings.Get().ConnectionsLimit) * 0.50)
+	bt.config.HalfOpenConnsPerTorrent = int(float64(settings.Get().ConnectionsLimit) * 0.65)
+	bt.config.HandshakesTimeout = time.Second * 60
 
 	if settings.Get().DownloadRateLimit > 0 {
 		bt.config.DownloadRateLimiter = rate.NewLimiter(rate.Limit(settings.Get().DownloadRateLimit*1024), 1024)
@@ -179,6 +180,7 @@ func (bt *BTServer) GetTorrent(hash metainfo.Hash) *TorrentState {
 	if st, ok := bt.states[hash]; ok {
 		return st
 	}
+
 	return nil
 }
 

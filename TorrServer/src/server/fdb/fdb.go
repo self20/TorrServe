@@ -54,7 +54,7 @@ func GetGenres() []struct {
 	return tmdb.GetGenres()
 }
 
-func SearchByName(page int, name string) (*SearchResponce, error) {
+func SearchByName(page int, name string, search int) (*SearchResponce, error) {
 	var err error
 	resp := new(SearchResponce)
 	list := make([]*Movie, 0)
@@ -63,7 +63,7 @@ func SearchByName(page int, name string) (*SearchResponce, error) {
 	for _, g := range tmdb.GetGenres() {
 		genres[g.ID] = g.Name
 	}
-	{
+	if search < 2 {
 		res, er := tmdb.SearchMovie(page, name)
 		if er != nil {
 			err = er
@@ -90,7 +90,7 @@ func SearchByName(page int, name string) (*SearchResponce, error) {
 			}
 		}
 	}
-	{
+	if search != 1 {
 		fmt.Println("Search tv")
 		res, er := tmdb.SearchTv(page, name)
 		if er != nil {
@@ -129,7 +129,7 @@ func SearchByName(page int, name string) (*SearchResponce, error) {
 	return resp, err
 }
 
-func NowWatching(page int) (*SearchResponce, error) {
+func NowWatching(page int, search int) (*SearchResponce, error) {
 	var err error
 	resp := new(SearchResponce)
 	list := make([]*Movie, 0)
@@ -138,7 +138,7 @@ func NowWatching(page int) (*SearchResponce, error) {
 	for _, g := range tmdb.GetGenres() {
 		genres[g.ID] = g.Name
 	}
-	{
+	if search < 2 {
 		res, er := tmdb.NowPlayingMovie(page)
 		if er != nil {
 			err = er
@@ -165,7 +165,7 @@ func NowWatching(page int) (*SearchResponce, error) {
 			}
 		}
 	}
-	{
+	if search != 1 {
 		fmt.Println("Search now watching tv")
 		res, er := tmdb.NowPlayingTv(page)
 		if er != nil {
@@ -204,7 +204,7 @@ func NowWatching(page int) (*SearchResponce, error) {
 	return resp, err
 }
 
-func SearchByFilter(page int, filter *tmdb.Filter) (*SearchResponce, error) {
+func SearchByFilter(page int, filter *tmdb.Filter, search int) (*SearchResponce, error) {
 	var err error
 	resp := new(SearchResponce)
 	list := make([]*Movie, 0)
@@ -213,7 +213,7 @@ func SearchByFilter(page int, filter *tmdb.Filter) (*SearchResponce, error) {
 	for _, g := range tmdb.GetGenres() {
 		genres[g.ID] = g.Name
 	}
-	{
+	if search < 2 {
 		res, er := tmdb.FilterMovie(page, filter)
 		if er != nil {
 			err = er
@@ -240,7 +240,7 @@ func SearchByFilter(page int, filter *tmdb.Filter) (*SearchResponce, error) {
 			}
 		}
 	}
-	{
+	if search != 1 {
 		fmt.Println("Search filter tv")
 		res, er := tmdb.FilterTv(page, filter)
 		if er != nil {

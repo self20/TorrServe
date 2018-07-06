@@ -202,7 +202,10 @@ var mainPage = `
 			
 				html += '<div class="btn-group d-flex" role="group">';
 				html += '	<button type="button" class="btn btn-secondary wrap w-100" data-toggle="collapse" data-target="#info_'+tor.Hash+'">'+name+'</button>';
-				if (!tor.IsGettingInfo) html += '	<a role="button" class="btn btn-secondary" href="'+tor.Playlist+'"><i class="fas fa-th-list"></i> Playlist</a>';
+				if (!tor.IsGettingInfo)
+					html += '	<a role="button" class="btn btn-secondary" href="'+tor.Playlist+'"><i class="fas fa-th-list"></i> Playlist</a>';
+				else
+					html += '	<button type="button" class="btn btn-secondary" onclick="showPreload(\'\', \''+ tor.Hash +'\');"><i class="fas fa-info"></i></a>';
 				html += '	<button type="button" class="btn btn-secondary" onclick="removeTorrent(\''+tor.Hash+'\');"><i class="fas fa-trash-alt"></i> Remove</button>';
 				html += '</div>';
 				html += '<div class="collapse" id="info_'+tor.Hash+'">';
@@ -243,15 +246,18 @@ var mainPage = `
 			}
 				
 			function showPreload(preloadlink, hash){
-				$('#preloadName').text('Buffering...');
 				$('#preloadProgress').width('100%');
-				preloadTorrent(preloadlink);
+				if (preloadlink!='')
+					preloadTorrent(preloadlink);
 				var ptimer = setInterval(function() {
 					statTorrent(hash,function(data){
 						if (data!=null){
 							$('#preloadName').text(data.Name);
 							$('#preloadPeers').text("Peers: [" + data.ConnectedSeeders + "] " + data.ActivePeers + " / " + data.TotalPeers);
-							$('#preloadSpeed').text("Speed: "+ humanizeSize(data.DownloadSpeed) + "/Sec");
+							if (data.DownloadSpeed>0)
+								$('#preloadSpeed').text("Speed: "+ humanizeSize(data.DownloadSpeed) + "/Sec");
+							else
+								$('#preloadSpeed').text("Speed:");
 							if (data.IsPreload){
 								$('#preloadBuffer').text("Buffer: " + humanizeSize(data.PreloadSize) + " / " + humanizeSize(data.PreloadLength));
 								if (data.PreloadSize>0){

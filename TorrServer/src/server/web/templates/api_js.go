@@ -28,7 +28,8 @@ function getTorrent(hash, done, fail){
 		done(data);
 	})
 	.fail(function( data ) {
-		fail(data);
+		if (fail)
+			fail(data);
 	});
 }
 

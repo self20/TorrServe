@@ -13,11 +13,11 @@ freeProperties.load(new FileInputStream(freeKeystorePropertiesFile))
 android {
     compileSdkVersion 26
     defaultConfig {
-        applicationId "ru.yourok.torrserve_test"
+        applicationId "ru.yourok.torrserve"
         minSdkVersion 15
         targetSdkVersion 26
         versionCode 60
-        versionName "1.0.60_test_15"
+        versionName "1.0.60"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {

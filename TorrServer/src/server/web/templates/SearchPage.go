@@ -24,16 +24,26 @@ var searchPage = `
         .movie {
             height: 150px;
             background: #ccc;
+        }
+    
+    	.torrList {
+    		text-shadow: -1px 0 #333, 0 1px #333, 1px 0 #333, 0 -1px #333, #000 0 0 5px;
+            color: #56ffaa;
+       		background: #ccc;
             background-repeat: no-repeat;
             background-size: cover;
             background-position: center center;
-        }
+    	}
+    	
+    	.button-text-shadow {
+	    	text-shadow: -1px 0 #333, 0 1px #333, 1px 0 #333, 0 -1px #333, #000 0 0 5px;
+            color: #56ffaa;
+    	}
         
         .poster {
             height: 100%;
             float: left;
             padding-right: 10px;
-            padding-bottom: 10px;
         }
         
         .description {
@@ -63,17 +73,34 @@ var searchPage = `
 			</span>
     </nav>
     <div class="content">
-
-        <div class="input-group">
-            <div class="input-group-prepend">
-                <div class="input-group-text">Type</div>
-            </div>
-            <select id="sType">
-                <option value="byName">Search by name</option>
-                <option value="byWatching">Now watching</option>
-                <option value="byFilter">Search by filter</option>
-            </select>
-        </div>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-sm-4">
+					<div class="input-group">
+						<div class="input-group-prepend">
+							<div class="input-group-text">Type</div>
+						</div>
+						<select id="sType">
+							<option value="byName">Search by name</option>
+							<option value="byWatching">Now watching</option>
+							<option value="byFilter">Search by filter</option>
+						</select>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="form-check">
+						<input id="SearchMovie" checked="checked" class="form-check-input" type="checkbox" autocomplete="off">
+						<label for="SearchMovie" class="active">Search movie</label>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="form-check">
+						<input id="SearchTV" checked="checked" class="form-check-input" type="checkbox" autocomplete="off">
+						<label for="SearchTV" class="active">Search TV</label>
+					</div>
+				</div>
+			</div>
+		</div>
         <br>
 
         <div id="sbName">
@@ -237,7 +264,9 @@ var searchPage = `
                 "Name": $('#sName').val(),
                 "Type": selectSearchType,
                 "Page": page,
-                "HideWTorrent": hide
+                "HideWTorrent": hide,
+				"SearchMovie": $("#SearchMovie").prop('checked'),
+				"SearchTV": $("#SearchTV").prop('checked')
             };
             if (selectSearchType == 2) {
                 SRequest.Filter = getFilter();
@@ -252,8 +281,8 @@ var searchPage = `
                     for (var key in data.Movies) {
                         var tor = data.Movies[key];
                         var html = '';
-                        html += '<div onclick="toggleInfo(\'#torr' + key + '\')" class="movie" style="background-image: url(' + tor.BackdropUrl + ');">';
-                        html += ' <img class="poster" src="' + tor.PosterUrl + '"/>';
+                        html += '<div onclick="toggleInfo(\'#torr' + key + '\')" class="movie">';
+                        html += ' <img class="poster rounded float-left" src="' + tor.PosterUrl + '"/>';
                         html += ' <div class="description">';
                         html += '  <h4 style="padding-top: 10px;">' + tor.Title + ' / ' + tor.OrigTitle + '</h4>';
                         html += '  <p style="float:left">' + tor.Date + '</p>';
@@ -265,7 +294,7 @@ var searchPage = `
                         html += ' </div>';
                         html += '</div>';
                         html += '<div style="clear:both"></div>';
-                        html += getTorrList(key, tor.Torrents, tor.Overview);
+                        html += getTorrList(key, tor.Torrents, tor.Overview, tor.BackdropUrl);
                         html += '<hr>';
                         $(html).appendTo(torrents);
                     }
@@ -315,9 +344,9 @@ var searchPage = `
             $(key).toggle(50);
         }
 
-        function getTorrList(key, torrList, torrOverview) {
+        function getTorrList(key, torrList, torrOverview, BackdropUrl) {
             var html = '';
-            html += '<div class="hidden" id="torr' + key + '">';
+            html += '<div style="background-image: url(' + BackdropUrl + ');" class="hidden torrList" id="torr' + key + '">';
             html += '<p>' + torrOverview + '</p>';
             html += '<div class="btn-group-vertical d-flex" role="group">';
             for (var key in torrList) {
@@ -327,7 +356,7 @@ var searchPage = `
                     dl = '| ▼ ' + torr.PeersDl;
                     dl += '| ▲ ' + torr.PeersUl;
                 }
-                html += '<button class="btn w-100" onclick="doTorrent(\'' + torr.Magnet + '\', this)"><i class="fas fa-plus"></i> ' + torr.Name + " " + torr.Size + dl + '</button>';
+                html += '<button class="btn-outline-primary button-text-shadow w-100" onclick="doTorrent(\'' + torr.Magnet + '\', this)"><i class="fas fa-plus"></i> ' + torr.Name + " " + torr.Size + dl + '</button>';
             }
             html += '</div>';
             html += '</div>';
