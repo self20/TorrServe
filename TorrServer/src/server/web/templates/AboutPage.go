@@ -7,28 +7,38 @@ var aboutPage = `
 <html lang="ru">
 <head>
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link href="` + faviconB64 + `" rel="icon" type="image/x-icon">
-	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
-	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
-	<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="` + faviconB64 + `" rel="icon" type="image/x-icon">
+    <script src="/js/api.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
 	<title>About</title>
 </head>
 <body>
 <style type="text/css">
-.inline{
-	display:inline;
-	padding-left: 2%;
-}
-.center {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
+	.inline{
+		display:inline;
+		padding-left: 2%;
+	}
+	.center {
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	.content {
+		padding: 20px;
+	}
 </style>
-<div data-role="page">
-	<div data-role="header"><h3>About</h3></div>
-	<div data-role="content">
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    	<a class="btn navbar-btn pull-left" href="/"><i class="fas fa-arrow-left"></i></a>
+        <span class="navbar-brand mx-auto">
+			About
+		</span>
+    </nav>
+	<div class="content">
 		<img class="center" src='` + faviconB64 + `'/>
 		<h3 align="middle">TorrServer</h3>
 		<h4 align="middle">` + version.Version + `</h4>
@@ -85,16 +95,21 @@ var aboutPage = `
 			<i class="inline">Site:</i>
 			<a target="_blank" class="inline" href="https://4pda.ru/forum/index.php?showuser=1195633">4pda.ru</a>
 			<a target="_blank" class="inline" href="http://forum.hdtv.ru/index.php?showtopic=19020">forum.hdtv.ru</a>
-		
 		<br>
 		<br>
-		<hr align="left" width="25%">
+			<b class="inline">Tw1cker Руслан Пахнев</b>
+			<br>
+			<i class="inline">Site:</i>
+			<a target="_blank" class="inline" href="https://4pda.ru/forum/index.php?showuser=2002724">4pda.ru</a>
+			<a target="_blank" class="inline" href="https://github.com/Nemiroff">GitHub.com/Nemiroff</a>
+		<br>
 		<br>
 	</div>
-	<div data-role="footer">
-		<center><h4>TorrServer ` + version.Version + `</h4></center>
-	</div>
-</div> 
+	<footer class="page-footer navbar-dark bg-dark">
+		<span class="navbar-brand d-flex justify-content-center">
+			<center><h4>TorrServer ` + version.Version + `</h4></center>
+		</span>
+    </footer>
 </body>
 </html>
 `

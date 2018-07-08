@@ -26,7 +26,7 @@ type Torrent struct {
 }
 
 type Provider interface {
-	Search(names, origNames string) ([]*Torrent, error)
+	Search(findString string) ([]*Torrent, error)
 	FindMirror()
 }
 

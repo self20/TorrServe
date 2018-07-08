@@ -103,7 +103,6 @@ func (bt *BTServer) configure() {
 	if settings.Get().UploadRateLimit > 0 {
 		bt.config.UploadRateLimiter = rate.NewLimiter(rate.Limit(settings.Get().UploadRateLimit*1024), 1024)
 	}
-	bt.config.RequestStrategy = settings.Get().RequestStrategy
 
 	fmt.Println("Configure client:", settings.Get())
 }
@@ -115,7 +114,7 @@ func (bt *BTServer) addTorrent(magnet *metainfo.Magnet) (*torrent.Torrent, error
 	case 2:
 		magnet.Trackers = nil
 	case 3:
-		magnet.Trackers = append(magnet.Trackers, utils.GetDefTrackers()...)
+		magnet.Trackers = utils.GetDefTrackers()
 	}
 	tor, _, err := bt.client.AddTorrentSpec(&torrent.TorrentSpec{
 		Trackers:    [][]string{magnet.Trackers},

@@ -81,20 +81,24 @@ function listTorrent(done, fail){
 function restartService(done, fail){
 	$.get('/torrent/restart')
 	.done(function( data ) {
-		done();
+		if (done)
+			done();
 	})
 	.fail(function( data ) {
-		fail(data);
+		if (fail)
+			fail(data);
 	});
 }
 
 function preloadTorrent(preloadLink, done, fail){
 	$.get(preloadLink)
 	.done(function( data ) {
-		done();
+		if (done)
+			done();
 	})
 	.fail(function( data ) {
-		fail(data);
+		if (fail)
+			fail(data);
 	});
 }
 

@@ -21,53 +21,77 @@ var searchPage = `
 
 <body>
     <style>
-        .movie {
-            height: 150px;
-            background: #ccc;
-        }
+		#movies {
+			display: grid; 
+			grid-template-columns: repeat(auto-fit, minmax(186px, 1fr));
+    		justify-items: center;
+		}
     
-    	.torrList {
-    		text-shadow: -1px 0 #333, 0 1px #333, 1px 0 #333, 0 -1px #333, #000 0 0 5px;
-            color: #56ffaa;
-       		background: #ccc;
-            background-repeat: no-repeat;
-            background-size: cover;
-            background-position: center center;
+		.thumbnail {
+			width: 185px;
+			margin-bottom: 3px;
+			line-height: 1.42857143;
+			background-color: #282828;
+			border: 1px solid #4a4a4a;
+			border-radius: 0;
+			transition: border .2s ease-in-out
+		}
+		
+		.thumbnail-mousey .thumbnail {
+			position: relative;
+			overflow: hidden
+		}
+		
+		.thumbnail-mousey .thumbnail h3 {
+			position: absolute;
+			bottom: 0;
+			font-family: noto sans, sans-serif;
+			font-weight: 400;
+			font-size: 16px;
+			text-shadow: 2px 2px 4px #000;
+			width: 100%;
+			margin: 0;
+			padding: 4px;
+			background-color: rgba(0, 0, 0, .6)
+		}
+		
+		.thumbnail-mousey .thumbnail h3 {
+			text-shadow: -1px 0 #333, 0 1px #333, 1px 0 #333, 0 -1px #333, #000 0 0 5px;
+			color: #fff;
+		}
+		
+		.thumbnail-mousey .thumbnail h3 small {
+			text-shadow: -1px 0 #333, 0 1px #333, 1px 0 #333, 0 -1px #333, #000 0 0 5px;
+			color: #ddd;
+		}
+		
+		.thumbnail-mousey .thumbnail>img {
+			width: 185px;
+    		height: 278px;
+		}
+    
+        .wrap {
+			white-space: normal;
+			word-wrap: break-word;
+			word-break: break-all;
+		}
+    	.content {
+    		padding: 20px;
     	}
-    	
-    	.button-text-shadow {
-	    	text-shadow: -1px 0 #333, 0 1px #333, 1px 0 #333, 0 -1px #333, #000 0 0 5px;
-            color: #56ffaa;
-    	}
-        
-        .poster {
-            height: 100%;
-            float: left;
-            padding-right: 10px;
-        }
-        
-        .description {
-            text-shadow: -1px 0 #333, 0 1px #333, 1px 0 #333, 0 -1px #333, #000 0 0 5px;
-            color: #56ffaa;
-            margin-right: 10px;
-            height: 100%;
-        }
-        
-        .ui-btn {
-            word-wrap: break-word !important;
-            white-space: normal !important;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .content {
-            margin: 1%;
-        }
+    	.modal-lg {
+			max-width: 90% !important;
+    		margin: 20px auto;
+		}
+    	.leftimg {
+    		float:left;
+    		margin: 7px 7px 7px 0;
+    		max-width: 300px;
+    		max-height: 170px;
+   		}
     </style>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    	<a class="btn navbar-btn pull-left" href="/"><i class="fas fa-arrow-left"></i></a>
         <span class="navbar-brand mx-auto">
 			TorrServer ` + version.Version + `
 			</span>
@@ -84,6 +108,7 @@ var searchPage = `
 							<option value="byName">Search by name</option>
 							<option value="byWatching">Now watching</option>
 							<option value="byFilter">Search by filter</option>
+							<option value="byTorrents">Search torrents</option>
 						</select>
 					</div>
 				</div>
@@ -130,32 +155,15 @@ var searchPage = `
         </div>
 
         <br>
-        <div class="form-check">
-            <input id="hideWOTorrents" class="form-check-input" type="checkbox" autocomplete="off">
-            <label for="hideWOTorrents">Hide without torrents</label>
-        </div>
 
         <button id="search" class="btn btn-primary w-100" type="button">Search</button>
         <br>
-        <div id="torrents"></div>
+		<br>
+        <div id="movies" class="thumbnail-mousey"></div>
+		<div id="torrents" class="content"></div>
         <br>
         <div id="pagesBlock">
             <ul id="pages" class="pagination justify-content-center flex-wrap">
-                <li class="page-item">
-                    <button class="page-link" href="#">Previous</button>
-                </li>
-                <li class="page-item active">
-                    <button class="page-link" href="#">1</button>
-                </li>
-                <li class="page-item">
-                    <button class="page-link" href="#">2</button>
-                </li>
-                <li class="page-item">
-                    <button class="page-link" href="#">3</button>
-                </li>
-                <li class="page-item">
-                    <button class="page-link" href="#">Next</button>
-                </li>
             </ul>
         </div>
     </div>
@@ -164,6 +172,29 @@ var searchPage = `
 			<a rel="external" style="text-decoration: none;" href="/about">About</a>
 			</span>
     </footer>
+			
+	<div class="modal fade" id="infoModal" role="dialog">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="infoName"></h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<small id="infoOverview"></small>
+					<div style="clear:both"></div>
+					<div id="seasonsButtons" class="btn-group flex-wrap"></div>
+					<div id="infoTorrents"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+			
     <script>
         $(document).ready(function() {
             updateGenres();
@@ -177,7 +208,7 @@ var searchPage = `
 
         $("#search").click(function() {
             page = 1;
-            searchTorrents();
+            search();
         });
 
         var selectSearchType = $('#sType')[0].selectedIndex;
@@ -192,18 +223,18 @@ var searchPage = `
             if (page == val)
                 return;
             page = val;
-            searchTorrents();
+            searchMovies();
         }
 
         function updateUI() {
             selectSearchType = $('#sType')[0].selectedIndex;
-            if (selectSearchType == 0) {
+            if (selectSearchType == 0 || selectSearchType == 3) {
                 $('#sbName').show(200);
                 $('#sbFilter').hide(200);
             } else if (selectSearchType == 1) {
                 $('#sbName').hide(200);
                 $('#sbFilter').hide(200);
-            } else {
+            } else if (selectSearchType == 2) {
                 $('#sbName').hide(200);
                 $('#sbFilter').show(200);
             }
@@ -251,12 +282,18 @@ var searchPage = `
                     alert(data.responseJSON.message);
                 });
         }
+			
+		function search(){
+			if (selectSearchType<3)
+				searchMovies();
+			else
+				searchTorrents();
+		}
 
-        function searchTorrents() {
+        function searchMovies() {
             $('#search').prop("disabled", true);
             $('#pagesBlock').prop("disabled", true);
 
-            var hide = $('#hideWOTorrents').prop('checked');
             if (typeof page != "number")
                 page = 1;
 
@@ -264,7 +301,6 @@ var searchPage = `
                 "Name": $('#sName').val(),
                 "Type": selectSearchType,
                 "Page": page,
-                "HideWTorrent": hide,
 				"SearchMovie": $("#SearchMovie").prop('checked'),
 				"SearchTV": $("#SearchTV").prop('checked')
             };
@@ -274,29 +310,33 @@ var searchPage = `
 
             $.post('/search/request', JSON.stringify(SRequest))
                 .done(function(data) {
-                    var torrents = $("#torrents");
-                    torrents.empty();
-                    $('<hr>').appendTo(torrents);
+                    var movies = $("#movies");
+					$("#torrents").empty();
+                    movies.empty();
                     pages = data.Pages;
                     for (var key in data.Movies) {
                         var tor = data.Movies[key];
-                        var html = '';
-                        html += '<div onclick="toggleInfo(\'#torr' + key + '\')" class="movie">';
-                        html += ' <img class="poster rounded float-left" src="' + tor.PosterUrl + '"/>';
-                        html += ' <div class="description">';
-                        html += '  <h4 style="padding-top: 10px;">' + tor.Title + ' / ' + tor.OrigTitle + '</h4>';
-                        html += '  <p style="float:left">' + tor.Date + '</p>';
-                        var movtype = "Фильм";
+						var movtype = "Фильм";
                         if (tor.IsTv)
                             movtype = "Сериал";
-                        html += '  <p style="float:right">' + movtype + '</p>';
-                        html += '  <br><p style="float:right">' + tor.Genres + '</p>';
-                        html += ' </div>';
-                        html += '</div>';
-                        html += '<div style="clear:both"></div>';
-                        html += getTorrList(key, tor.Torrents, tor.Overview, tor.BackdropUrl);
-                        html += '<hr>';
-                        $(html).appendTo(torrents);
+						var name = tor.Title;
+						if (!name)
+							name = tor.OrigTitle;
+						var year = tor.Date.substring(0,4);
+						var overview = tor.Overview.replace(/"/g, '&quot;');
+						overview = overview.replace(/'/g, '&apos;');
+						overview = overview.replace(/\n/g, "<br>");
+                        var html = '';
+						html+= '<div id="m'+tor.Id+'" onclick="showModal(\''+name+'\',\''+overview+'\',\''+year+'\','+tor.Seasons+',\'\', \''+tor.BackdropUrl+'\')">';
+						html+= '	<div class="thumbnail shadow">';
+						html+= '		<h3>';
+						html+= 				name + ' ('+ year +')<br>';
+					    html+= '			<small>'+ movtype +'<br>'+ tor.Genres.join(", ")+'</small>';
+						html+= '		</h3>';
+						html+= '		<img class="img-responsive" src="'+ tor.PosterUrl +'">';
+						html+= '	</div>';
+						html+= '</div>';
+                        $(html).appendTo(movies);
                     }
                     $('#search').prop("disabled", false);
                     $('#pagesBlock').prop("disabled", false);
@@ -309,6 +349,68 @@ var searchPage = `
                     alert(data.responseJSON.message);
                 });
         }
+			
+		function searchTorrents(){
+			$.post('/search/torrents', $('#sName').val())
+			.done(function(torrList) {
+				$("#movies").empty();
+				var html = '<div class="btn-group-vertical d-flex" role="group">';
+				for (var key in torrList) {
+					torr = torrList[key];
+					var dl = '';
+					if (torr.PeersDl >= 0) {
+						dl = '| ▼ ' + torr.PeersDl;
+						dl += '| ▲ ' + torr.PeersUl;
+					}
+					html += '<button type="button" class="btn btn-secondary wrap w-100" onclick="doTorrent(\'' + torr.Magnet + '\', this)"><i class="fas fa-plus"></i> ' + torr.Name + " " + torr.Size + dl +'</button>';
+				}
+				html += '</div>';
+				$('#torrents').html(html);
+			})
+			.fail(function(data) {
+				$('#torrents').text(data.responseJSON.message);
+			});
+		}
+			
+		function showModal(Name, Overview, Year, SeasonsCount, Season, Backdrop){
+			$('#infoModal').modal('show');
+			$('#infoName').text(Name+ ' ' +Year);
+			var img = '<img src="'+Backdrop+'" class="leftimg">';
+			$('#infoOverview').html(img + Overview);
+			var fndStr = Name;
+			if (Year && !Season && !SeasonsCount)
+				fndStr += ' '+Year;
+			if (Season)
+				fndStr += ' S'+Season;
+			if (SeasonsCount>0){
+				var html = '<button type="button" class="btn btn-primary" onclick="showModal(\''+Name+'\',\''+Overview+'\',\''+Year+'\','+SeasonsCount+',\'\', \''+Backdrop+'\')">All</button>';
+				for (var i = 1; i < SeasonsCount; i++){
+					var ses = ('0' + i).slice(-2)
+					html += '<button type="button" class="btn btn-primary" onclick="showModal(\''+Name+'\',\''+Overview+'\',\''+Year+'\','+SeasonsCount+',\''+ses+'\', \''+Backdrop+'\')">S'+ses+'</button>';
+				}
+				$('#seasonsButtons').html(html);
+			}else{
+				$('#seasonsButtons').empty();
+			}
+			$.post('/search/torrents', fndStr)
+                .done(function(torrList) {
+					var html = '<div class="btn-group-vertical d-flex" role="group">';
+					for (var key in torrList) {
+						torr = torrList[key];
+						var dl = '';
+						if (torr.PeersDl >= 0) {
+							dl = '| ▼ ' + torr.PeersDl;
+							dl += '| ▲ ' + torr.PeersUl;
+						}
+						html += '<button type="button" class="btn btn-secondary wrap w-100" onclick="doTorrent(\'' + torr.Magnet + '\', this)"><i class="fas fa-plus"></i> ' + torr.Name + " " + torr.Size + dl +'</button>';
+					}
+					html += '</div>';
+					$('#infoTorrents').html(html);
+				})
+				.fail(function(data) {
+					$('#infoTorrents').text(data.responseJSON.message);
+				});
+		}
 
         function getFilter() {
             var asc = $("#asc").prop("checked");
@@ -346,7 +448,7 @@ var searchPage = `
 
         function getTorrList(key, torrList, torrOverview, BackdropUrl) {
             var html = '';
-            html += '<div style="background-image: url(' + BackdropUrl + ');" class="hidden torrList" id="torr' + key + '">';
+            html += '<div style="background-image: url(' + BackdropUrl + ');" class="hidden torrList shadow-text" id="torr' + key + '">';
             html += '<p>' + torrOverview + '</p>';
             html += '<div class="btn-group-vertical d-flex" role="group">';
             for (var key in torrList) {
@@ -356,7 +458,7 @@ var searchPage = `
                     dl = '| ▼ ' + torr.PeersDl;
                     dl += '| ▲ ' + torr.PeersUl;
                 }
-                html += '<button class="btn-outline-primary button-text-shadow w-100" onclick="doTorrent(\'' + torr.Magnet + '\', this)"><i class="fas fa-plus"></i> ' + torr.Name + " " + torr.Size + dl + '</button>';
+                html += '<button class="btn-outline-primary w-100 wrap" onclick="doTorrent(\'' + torr.Magnet + '\', this)"><i class="fas fa-plus"></i> ' + torr.Name + " " + torr.Size + dl + '</button>';
             }
             html += '</div>';
             html += '</div>';
@@ -369,9 +471,6 @@ var searchPage = `
                 Link: magnet
             });
             $.post('/torrent/add', magJS)
-                .done(function(data) {
-                    $(elem).prop("disabled", false);
-                })
                 .fail(function(data) {
                     $(elem).prop("disabled", false);
                     alert(data.responseJSON.message);

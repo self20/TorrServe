@@ -18,8 +18,8 @@ type Movie struct {
 	PosterUrl   string
 	Overview    string
 	IsTv        bool
-	Torrents    []*provider.Torrent
 	Genres      []string
+	Seasons     int
 }
 
 type SearchResponce struct {
@@ -117,14 +117,12 @@ func SearchByName(page int, name string, search int) (*SearchResponce, error) {
 						mov.Genres = append(mov.Genres, gn)
 					}
 				}
+				mov.Seasons = tmdb.GetSeasons(mov.Id)
 				list = append(list, mov)
 			}
 		}
 	}
 
-	if len(list) > 0 {
-		findTorrents(list)
-	}
 	resp.Movies = list
 	return resp, err
 }
@@ -192,14 +190,12 @@ func NowWatching(page int, search int) (*SearchResponce, error) {
 						mov.Genres = append(mov.Genres, gn)
 					}
 				}
+				mov.Seasons = tmdb.GetSeasons(mov.Id)
 				list = append(list, mov)
 			}
 		}
 	}
 
-	if len(list) > 0 {
-		findTorrents(list)
-	}
 	resp.Movies = list
 	return resp, err
 }
@@ -267,27 +263,31 @@ func SearchByFilter(page int, filter *tmdb.Filter, search int) (*SearchResponce,
 						mov.Genres = append(mov.Genres, gn)
 					}
 				}
+				mov.Seasons = tmdb.GetSeasons(mov.Id)
 				list = append(list, mov)
 			}
 		}
-	}
-	if len(list) > 0 {
-		findTorrents(list)
 	}
 	resp.Movies = list
 	return resp, err
 }
 
-func findTorrents(movies []*Movie) {
-	utils.ParallelFor(0, len(movies), func(i int) {
-		movie := movies[i]
-		var torList []*provider.Torrent
-		for _, p := range providers {
-			res, err := p.Search(movie.Title, movie.OrigTitle)
-			if err == nil {
-				torList = append(torList, res...)
-			}
+func FindTorrents(findString string) ([]*provider.Torrent, error) {
+	var torList []*provider.Torrent
+	var err error
+	var mu sync.Mutex
+	utils.ParallelFor(0, len(providers), func(i int) {
+		res, er := providers[i].Search(findString)
+		if err == nil {
+			mu.Lock()
+			torList = append(torList, res...)
+			mu.Unlock()
+		} else {
+			err = er
 		}
-		movie.Torrents = torList
 	})
+	if len(torList) == 0 && err != nil {
+		return nil, err
+	}
+	return torList, nil
 }

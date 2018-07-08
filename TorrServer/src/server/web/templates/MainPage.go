@@ -82,6 +82,8 @@ var mainPage = `
 						<div class="progress">
 							<div id="preloadProgress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
 						</div>
+						<br>
+						<a id="preloadFileLink" role="button" href="" class="btn btn-secondary wrap w-100"></a>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
@@ -216,7 +218,7 @@ var mainPage = `
 				  		ico = '<i class="far fa-eye"></i> ';
 					html += '	<div class="btn-group d-flex" role="group">';
 					html += '		<a role="button" href="'+file.Link+'" class="btn btn-secondary wrap w-100">'+ico+file.Name+" "+humanizeSize(file.Size)+'</a>';
-					html += '		<button type="button" class="btn btn-secondary" onclick="showPreload(\''+ file.Preload +'\', \''+ tor.Hash +'\');"><i class="fas fa-info"></i></a>';
+					html += '		<button type="button" class="btn btn-secondary" onclick="showPreload(\''+ file.Preload +'\', \''+ file.Link +'\', \''+ tor.Hash +'\');"><i class="fas fa-info"></i></button>';
 					html += '	</div>';
 				}
 				html += '</div>';
@@ -245,7 +247,9 @@ var mainPage = `
 				}, 1000);
 			}
 				
-			function showPreload(preloadlink, hash){
+			function showPreload(preloadlink, fileLink, hash){
+				$('#preloadFileLink').hide(0);
+				$('#preloadFileLink').attr("href","");
 				$('#preloadProgress').width('100%');
 				if (preloadlink!='')
 					preloadTorrent(preloadlink);
@@ -268,6 +272,11 @@ var mainPage = `
 							}else{
 								$('#preloadBuffer').text("Loaded: " + humanizeSize(data.BytesReadUsefulData));
 								$('#preloadProgress').width('100%');
+								if (fileLink && !$('#preloadFileLink').attr("href")){
+									$('#preloadFileLink').text(data.Name);
+									$('#preloadFileLink').attr("href", fileLink);
+									$('#preloadFileLink').show();
+								}
 							}
 						}
 					},function(){

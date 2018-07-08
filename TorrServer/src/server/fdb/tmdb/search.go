@@ -102,8 +102,18 @@ func discoverTv(page int, filter *Filter) (*tmdb.TvPagedResults, error) {
 	return res, nil
 }
 
+func getSeasons(id int) int {
+	var opt = make(map[string]string)
+	opt["language"] = "ru"
+	res, err := tm.GetTvInfo(id, opt)
+	if err != nil {
+		return 0
+	}
+	return res.NumberOfSeasons
+}
+
 func fixLinks(list []tmdb.MovieShort) {
-	wbs := tmCfg.Images.BackdropSizes[2]
+	wbs := tmCfg.Images.BackdropSizes[0]
 	wps := tmCfg.Images.PosterSizes[2]
 	for i := 0; i < len(list); i++ {
 		if list[i].BackdropPath != "" {

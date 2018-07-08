@@ -4,10 +4,10 @@ import (
 	"sync"
 )
 
-func ParallelFor(f, t int, fn func(i int)) {
+func ParallelFor(begin, end int, fn func(i int)) {
 	var wg sync.WaitGroup
-	wg.Add(t - f)
-	for i := f; i < t; i++ {
+	wg.Add(end - begin)
+	for i := begin; i < end; i++ {
 		go func(i int) {
 			fn(i)
 			wg.Done()

@@ -23,13 +23,9 @@ func NewYHH(opt Options) *YoHoHo {
 	return p
 }
 
-func (p *YoHoHo) Search(name, oname string) ([]*Torrent, error) {
-	fmt.Println("Find torrents:", name, "/", oname)
-	tors, err := p.findTorrents(name)
-	if len(tors) == 0 {
-		tors, err = p.findTorrents(oname)
-	}
-	return tors, err
+func (p *YoHoHo) Search(findString string) ([]*Torrent, error) {
+	fmt.Println("Find torrents:", findString)
+	return p.findTorrents(findString)
 }
 
 func (p *YoHoHo) FindMirror() {

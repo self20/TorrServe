@@ -42,6 +42,7 @@ var cachePage = `
 		</style>
 		
 		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+			<a class="btn navbar-btn pull-left" href="/"><i class="fas fa-arrow-left"></i></a>
 			<span class="navbar-brand mx-auto">
 			TorrServer ` + version.Version + `
 			</span>

@@ -16,6 +16,7 @@ import (
 func initSearch(e *echo.Echo) {
 	e.GET("/search", searchPage)
 	e.POST("/search/request", searchRequest)
+	e.POST("/search/torrents", searchTorrents)
 	e.POST("/search/genres", genresRequest)
 }
 
@@ -24,13 +25,12 @@ func searchPage(c echo.Context) error {
 }
 
 type SearchRequest struct {
-	Name         string
-	Type         int
-	Page         int
-	HideWTorrent bool
-	Filter       *tmdb.Filter `json:",omitempty"`
-	SearchMovie  bool
-	SearchTV     bool
+	Name        string
+	Type        int
+	Page        int
+	Filter      *tmdb.Filter `json:",omitempty"`
+	SearchMovie bool
+	SearchTV    bool
 }
 
 func searchRequest(c echo.Context) error {
@@ -64,17 +64,21 @@ func searchRequest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	if jreq.HideWTorrent {
-		var filtered = make([]*fdb.Movie, 0)
-		for _, m := range sResp.Movies {
-			if len(m.Torrents) > 0 {
-				filtered = append(filtered, m)
-			}
-		}
-		sResp.Movies = filtered
-		return c.JSON(http.StatusOK, sResp)
-	}
 	return c.JSON(http.StatusOK, sResp)
+}
+
+func searchTorrents(c echo.Context) error {
+	buf, err := ioutil.ReadAll(c.Request().Body)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	strReq := string(buf)
+
+	torrents, err := fdb.FindTorrents(strReq)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, torrents)
 }
 
 func genresRequest(c echo.Context) error {

@@ -151,3 +151,12 @@ func FilterTv(page int, filter *Filter) (*tmdb.TvPagedResults, error) {
 
 	return res, nil
 }
+
+func GetSeasons(id int) int {
+	err := initDb()
+	if err != nil {
+		return 0
+	}
+
+	return getSeasons(id)
+}

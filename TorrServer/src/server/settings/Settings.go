@@ -19,7 +19,6 @@ func init() {
 	sets.PreloadBufferSize = 20 * 1024 * 1024
 	sets.ConnectionsLimit = 100
 	sets.RetrackersMode = 1
-	sets.RequestStrategy = 3
 	StartTime = time.Now()
 }
 
@@ -39,8 +38,6 @@ type Settings struct {
 	DownloadRateLimit int // in kb, 0 - inf
 	UploadRateLimit   int // in kb, 0 - inf
 	ConnectionsLimit  int
-
-	RequestStrategy int
 }
 
 func Get() *Settings {
@@ -79,10 +76,6 @@ func ReadSettings() error {
 	}
 	if sets.CacheSize <= 0 {
 		sets.CacheSize = 200 * 1024 * 1024
-	}
-
-	if sets.RequestStrategy < 1 || sets.RequestStrategy > 3 {
-		sets.RequestStrategy = 2
 	}
 	return nil
 }

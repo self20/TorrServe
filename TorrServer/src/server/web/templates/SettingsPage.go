@@ -32,6 +32,7 @@ var settingsPage = `
         }
     </style>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    	<a class="btn navbar-btn pull-left" href="/"><i class="fas fa-arrow-left"></i></a>
         <span class="navbar-brand mx-auto">
          TorrServer ` + version.Version + `
          </span>
@@ -116,17 +117,6 @@ var settingsPage = `
                     <option value="2">Remove retrackers</option>
                 </select>
             </div>
-        <br>
-         	<div class="input-group">
-                <div class="input-group-prepend">
-                    <div class="input-group-text">Request Strategy</div>
-                </div>
-                <select id="RequestStrategy" class="form-control">
-         			<option value="1">1 More traffic</option>
-         			<option value="2">2 Normal traffic</option>
-                    <option value="3">3 Less traffic</option>
-                </select>
-            </div>
         </form>
         <br>
         <div class="btn-group d-flex" role="group">
@@ -159,8 +149,6 @@ var settingsPage = `
 			
 			data.RetrackersMode = Number($('#RetrackersMode').val());
          
-         	data.RequestStrategy = Number($('#RequestStrategy').val());
-
             $.post("/settings/write", JSON.stringify(data))
                 .done(function(data) {
                     alert(data);
@@ -189,8 +177,6 @@ var settingsPage = `
 					$('#UploadRateLimit').val(data.UploadRateLimit);
 					
          			$('#RetrackersMode').val(data.RetrackersMode);
-         
-         			$('#RequestStrategy').val(data.RequestStrategy);
                 });
         };
 
