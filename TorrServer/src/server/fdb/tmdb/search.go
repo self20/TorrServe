@@ -113,8 +113,8 @@ func getSeasons(id int) int {
 }
 
 func fixLinks(list []tmdb.MovieShort) {
-	wbs := tmCfg.Images.BackdropSizes[0]
-	wps := tmCfg.Images.PosterSizes[2]
+	wbs := tmCfg.Images.BackdropSizes[len(tmCfg.Images.BackdropSizes)-1]
+	wps := tmCfg.Images.PosterSizes[len(tmCfg.Images.PosterSizes)-1]
 	for i := 0; i < len(list); i++ {
 		if list[i].BackdropPath != "" {
 			list[i].BackdropPath = tmCfg.Images.BaseURL + wbs + list[i].BackdropPath
@@ -126,7 +126,7 @@ func fixLinks(list []tmdb.MovieShort) {
 }
 
 func fixLinksTv(list []tmdb.TvShort) {
-	wbs := tmCfg.Images.BackdropSizes[2]
+	wbs := tmCfg.Images.BackdropSizes[len(tmCfg.Images.BackdropSizes)-1]
 	wps := tmCfg.Images.PosterSizes[len(tmCfg.Images.PosterSizes)-1]
 	for i := 0; i < len(list); i++ {
 		if list[i].BackdropPath != "" {

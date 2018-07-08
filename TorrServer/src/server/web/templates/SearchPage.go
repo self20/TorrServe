@@ -243,22 +243,18 @@ var searchPage = `
 
         function updatePages() {
             if (pages == 1) {
-                $('#pagesBlock').addClass('hidden');
+                $('#pagesBlock').hide(0);
                 return;
             } else
-                $('#pagesBlock').removeClass('hidden');
+                $('#pagesBlock').show(0);
             $('#pages').empty();
             var html = "";
-            if (page > 1)
-                html += '<li class="page-item"><button class="page-link" onclick="goPage(' + 1 + ')">Previous</button></li>';
             for (i = 1; i <= pages; i++) {
                 if (i == page)
                     html += '<li class="page-item active"><button class="page-link">' + i + '</button></li>';
                 else
                     html += '<li class="page-item"><button class="page-link" onclick="goPage(' + i + ')">' + i + '</button></li>';
             }
-            if (page < pages)
-                html += '<li class="page-item"><button class="page-link" onclick="goPage(' + pages + ')">Next</button></li>';
             $(html).appendTo("#pages");
         }
 
@@ -326,12 +322,15 @@ var searchPage = `
 						var overview = tor.Overview.replace(/"/g, '&quot;');
 						overview = overview.replace(/'/g, '&apos;');
 						overview = overview.replace(/\n/g, "<br>");
+						var genres = "";
+						if (tor.Genres)
+							genres = tor.Genres.join(", ");
                         var html = '';
 						html+= '<div id="m'+tor.Id+'" onclick="showModal(\''+name+'\',\''+overview+'\',\''+year+'\','+tor.Seasons+',\'\', \''+tor.BackdropUrl+'\')">';
 						html+= '	<div class="thumbnail shadow">';
 						html+= '		<h3>';
 						html+= 				name + ' ('+ year +')<br>';
-					    html+= '			<small>'+ movtype +'<br>'+ tor.Genres.join(", ")+'</small>';
+					    html+= '			<small>'+ movtype +'<br>'+ genres +'</small>';
 						html+= '		</h3>';
 						html+= '		<img class="img-responsive" src="'+ tor.PosterUrl +'">';
 						html+= '	</div>';
@@ -351,6 +350,8 @@ var searchPage = `
         }
 			
 		function searchTorrents(){
+			$('#search').prop("disabled", true);
+            $('#pagesBlock').prop("disabled", true);
 			$.post('/search/torrents', $('#sName').val())
 			.done(function(torrList) {
 				$("#movies").empty();
@@ -366,16 +367,20 @@ var searchPage = `
 				}
 				html += '</div>';
 				$('#torrents').html(html);
+				$('#search').prop("disabled", false);
+            	$('#pagesBlock').prop("disabled", false);
 			})
 			.fail(function(data) {
 				$('#torrents').text(data.responseJSON.message);
+				$('#search').prop("disabled", false);
+            	$('#pagesBlock').prop("disabled", false);
 			});
 		}
 			
 		function showModal(Name, Overview, Year, SeasonsCount, Season, Backdrop){
 			$('#infoModal').modal('show');
 			$('#infoName').text(Name+ ' ' +Year);
-			var img = '<img src="'+Backdrop+'" class="leftimg">';
+			var img = '<img src="'+Backdrop+'" class="rounded leftimg">';
 			$('#infoOverview').html(img + Overview);
 			var fndStr = Name;
 			if (Year && !Season && !SeasonsCount)
@@ -440,29 +445,6 @@ var searchPage = `
                 "WithGenres": withg,
                 "WithoutGenres": withoutg
             };
-        }
-
-        function toggleInfo(key) {
-            $(key).toggle(50);
-        }
-
-        function getTorrList(key, torrList, torrOverview, BackdropUrl) {
-            var html = '';
-            html += '<div style="background-image: url(' + BackdropUrl + ');" class="hidden torrList shadow-text" id="torr' + key + '">';
-            html += '<p>' + torrOverview + '</p>';
-            html += '<div class="btn-group-vertical d-flex" role="group">';
-            for (var key in torrList) {
-                torr = torrList[key];
-                var dl = '';
-                if (torr.PeersDl >= 0) {
-                    dl = '| ▼ ' + torr.PeersDl;
-                    dl += '| ▲ ' + torr.PeersUl;
-                }
-                html += '<button class="btn-outline-primary w-100 wrap" onclick="doTorrent(\'' + torr.Magnet + '\', this)"><i class="fas fa-plus"></i> ' + torr.Name + " " + torr.Size + dl + '</button>';
-            }
-            html += '</div>';
-            html += '</div>';
-            return html;
         }
 
         function doTorrent(magnet, elem) {
