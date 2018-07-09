@@ -507,7 +507,7 @@ func torrentPlay(c echo.Context) error {
 	}
 
 	if qsave == "true" {
-		if torr, err := settings.LoadTorrentDB(magnet.InfoHash.HexString()); torr == nil && err == nil {
+		if t, err := settings.LoadTorrentDB(magnet.InfoHash.HexString()); t == nil && err == nil {
 			torrDb := toTorrentDB(tor)
 			if torrDb != nil {
 				settings.SaveTorrentDB(torrDb)
@@ -542,8 +542,8 @@ func torrentView(c echo.Context) error {
 	}
 
 	hash := metainfo.NewHashFromHex(hashHex)
-	st := bts.GetTorrent(hash)
-	if st == nil {
+	tor := bts.GetTorrent(hash)
+	if tor == nil {
 		torrDb, err := settings.LoadTorrentDB(hashHex)
 		if err != nil || torrDb == nil {
 			return echo.NewHTTPError(http.StatusBadRequest, "Torrent not found: "+hashHex)
@@ -554,16 +554,21 @@ func torrentView(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, "Error parser magnet in db: "+hashHex)
 		}
 
-		st, err = bts.AddTorrent(m, nil)
+		tor, err = bts.AddTorrent(m, nil)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 	}
-	file := helpers.FindFile(fileLink, st.Torrent)
+
+	if !tor.WaitInfo() {
+		return echo.NewHTTPError(http.StatusBadRequest, "torrent closed befor get info")
+	}
+
+	file := helpers.FindFile(fileLink, tor.Torrent)
 	if file == nil {
 		return echo.NewHTTPError(http.StatusNotFound, "File in torrent not found: "+fileLink)
 	}
-	return bts.View(st, file, c)
+	return bts.View(tor, file, c)
 }
 
 func toTorrentDB(t *torr.Torrent) *settings.Torrent {

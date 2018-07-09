@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"server/settings"
-	"server/utils"
 
 	"github.com/anacrolix/missinggo/httptoo"
 	"github.com/anacrolix/torrent"
@@ -15,8 +14,7 @@ import (
 
 func (bt *BTServer) View(torr *Torrent, file *torrent.File, c echo.Context) error {
 	go settings.SetViewed(torr.Hash().HexString(), file.Path())
-	reader := file.NewReader()
-	reader.SetReadahead(utils.GetReadahead())
+	reader := torr.NewReader(file, 0)
 
 	fmt.Println("Connect reader:", len(torr.readers))
 	c.Response().Header().Set("Connection", "close")
