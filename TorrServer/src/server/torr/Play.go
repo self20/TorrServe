@@ -17,7 +17,7 @@ func (bt *BTServer) View(torr *Torrent, file *torrent.File, c echo.Context) erro
 
 	fmt.Println("Connect reader:", len(torr.readers))
 	c.Response().Header().Set("Connection", "close")
-	c.Response().Header().Set("ETag", httptoo.EncodeQuotedString(fmt.Sprintf("%s/%s", torr.Hash, file.Path())))
+	c.Response().Header().Set("ETag", httptoo.EncodeQuotedString(fmt.Sprintf("%s/%s", torr.Hash().HexString(), file.Path())))
 
 	http.ServeContent(c.Response(), c.Request(), file.Path(), settings.StartTime, reader)
 
