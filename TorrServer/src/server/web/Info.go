@@ -50,7 +50,7 @@ func statePage(c echo.Context) error {
 	})
 	msg += "Torrents:<br>\n"
 	for _, t := range state.Torrents {
-		st := t.Stats()
+		st := t.Stats(false)
 		msg += fmt.Sprintf("Name: %v<br>\n", st.Name)
 		msg += fmt.Sprintf("Hash: %v<br>\n", st.Hash)
 		msg += fmt.Sprintf("Status: %v<br>\n", st.TorrentStatus)
@@ -83,7 +83,7 @@ func statePage(c echo.Context) error {
 		if len(st.FileStats) > 0 {
 			msg += fmt.Sprintf("\t&emsp;Files:<br>\n")
 			for _, f := range st.FileStats {
-				msg += fmt.Sprintf("\t&emsp;\t&emsp;%v Off:%v Size:%v<br>\n", f.Path, bytes.Format(f.Offset), bytes.Format(f.Length))
+				msg += fmt.Sprintf("\t&emsp;\t&emsp;%v Size:%v<br>\n", f.Path, bytes.Format(f.Length))
 			}
 		}
 

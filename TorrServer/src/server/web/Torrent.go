@@ -283,7 +283,7 @@ func torrentStat(c echo.Context) error {
 	if tor == nil {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
-	stat := tor.Stats()
+	stat := tor.Stats(false)
 
 	return c.JSON(http.StatusOK, stat)
 }
@@ -502,7 +502,7 @@ func torrentPlay(c echo.Context) error {
 	}
 
 	if stat {
-		return c.JSON(http.StatusOK, tor.Stats())
+		return c.JSON(http.StatusOK, tor.Stats(true))
 	}
 
 	if !tor.WaitInfo() {
@@ -519,18 +519,20 @@ func torrentPlay(c echo.Context) error {
 	}
 
 	files := utils.GetPlayableFiles(tor.Torrent)
-	if qfile == "" && len(files) > 1 {
-		return c.JSON(http.StatusOK, tor.Stats())
-	}
 
 	if len(files) == 1 {
 		return bts.Play(tor, files[0], preload, c)
 	}
 
+	if qfile == "" && len(files) > 1 {
+		return c.JSON(http.StatusOK, tor.Stats(true))
+	}
+
 	file, _ := strconv.Atoi(qfile)
 	if file < 0 || file >= len(files) {
-		return c.JSON(http.StatusOK, tor.Stats())
+		return c.JSON(http.StatusOK, tor.Stats(true))
 	}
+
 	return bts.Play(tor, files[file], preload, c)
 }
 

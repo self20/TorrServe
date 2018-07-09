@@ -51,7 +51,7 @@ type TorrentStats struct {
 }
 
 type TorrentFileStat struct {
+	Id     int
 	Path   string
-	Offset int64
 	Length int64
 }

@@ -183,7 +183,13 @@ func (t *Torrent) expired() bool {
 
 func (t *Torrent) Files() []*torrent.File {
 	if t.Torrent != nil && t.Torrent.Info() != nil {
-		return t.Torrent.Files()
+		files := t.Torrent.Files()
+		if len(files) > 1 {
+			sort.Slice(files, func(i, j int) bool {
+				return files[i].Path() < files[j].Path()
+			})
+		}
+		return files
 	}
 	return nil
 }
@@ -338,7 +344,7 @@ func (t *Torrent) Close() {
 	t.drop()
 }
 
-func (t *Torrent) Stats() TorrentStats {
+func (t *Torrent) Stats(filterFiles bool) TorrentStats {
 	t.muTorrent.Lock()
 	defer t.muTorrent.Unlock()
 
@@ -376,16 +382,25 @@ func (t *Torrent) Stats() TorrentStats {
 		st.HalfOpenPeers = tst.HalfOpenPeers
 
 		for _, f := range t.Files() {
-			st.FileStats = append(st.FileStats, TorrentFileStat{
-				Path:   f.Path(),
-				Offset: f.Offset(),
-				Length: f.Length(),
-			})
+			filterFile := false
+			if filterFiles && utils.GetMimeType(f.Path()) == "*/*" {
+				filterFile = true
+			}
+			if !filterFile {
+				st.FileStats = append(st.FileStats, TorrentFileStat{
+					Id:     0,
+					Path:   f.Path(),
+					Length: f.Length(),
+				})
+			}
 		}
-		if len(st.FileStats) > 1 {
-			sort.Slice(st.FileStats, func(i, j int) bool {
-				return st.FileStats[i].Path < st.FileStats[j].Path
-			})
+		//if len(st.FileStats) > 1 {
+		//	sort.Slice(st.FileStats, func(i, j int) bool {
+		//		return st.FileStats[i].Path < st.FileStats[j].Path
+		//	})
+		//}
+		for i := range st.FileStats {
+			st.FileStats[i].Id = i
 		}
 	}
 	return st
