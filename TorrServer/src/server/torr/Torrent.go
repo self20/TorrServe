@@ -228,6 +228,10 @@ func (t *Torrent) CloseReader(reader torrent.Reader) {
 }
 
 func (t *Torrent) Preload(file *torrent.File, size int64) {
+	if size <= 0 {
+		return
+	}
+
 	if t.status == TorrentGettingInfo {
 		t.WaitInfo()
 	}

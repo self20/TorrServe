@@ -482,6 +482,9 @@ func torrentPlay(c echo.Context) error {
 
 	if qpreload != "" {
 		preload, _ = strconv.ParseInt(qpreload, 10, 64)
+		if preload > 0 {
+			preload *= 1024 * 1024
+		}
 	}
 
 	magnet, err := helpers.GetMagnet(link)
