@@ -3,6 +3,7 @@ package torr
 import (
 	"fmt"
 	"io"
+	"sort"
 	"sync"
 	"time"
 
@@ -379,6 +380,11 @@ func (t *Torrent) Stats() TorrentStats {
 				Path:   f.Path(),
 				Offset: f.Offset(),
 				Length: f.Length(),
+			})
+		}
+		if len(st.FileStats) > 1 {
+			sort.Slice(st.FileStats, func(i, j int) bool {
+				return st.FileStats[i].Path < st.FileStats[j].Path
 			})
 		}
 	}

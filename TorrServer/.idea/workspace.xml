@@ -18,8 +18,18 @@
       <file leaf-file-name="Torrent.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/server/web/Torrent.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="830">
-              <caret line="526" column="0" lean-forward="false" selection-start-line="526" selection-start-column="0" selection-end-line="526" selection-end-column="0" />
+            <state relative-caret-position="17">
+              <caret line="522" column="43" lean-forward="false" selection-start-line="522" selection-start-column="43" selection-end-line="522" selection-end-column="43" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Mime.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/server/utils/Mime.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="68">
+              <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -28,7 +38,7 @@
       <file leaf-file-name="Play.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/server/torr/Play.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
+            <state relative-caret-position="484">
               <caret line="42" column="0" lean-forward="false" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
               <folding>
                 <element signature="e#14#174#0" expanded="true" />
@@ -40,8 +50,8 @@
       <file leaf-file-name="Torrent.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/server/torr/Torrent.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="381">
-              <caret line="293" column="69" lean-forward="false" selection-start-line="293" selection-start-column="69" selection-end-line="293" selection-end-column="69" />
+            <state relative-caret-position="402">
+              <caret line="387" column="14" lean-forward="false" selection-start-line="387" selection-start-column="14" selection-end-line="387" selection-end-column="14" />
               <folding />
             </state>
           </provider>
@@ -187,15 +197,15 @@
         <option value="$PROJECT_DIR$/src/server/web/templates/SettingsPage.go" />
         <option value="$PROJECT_DIR$/src/server/torr/State.go" />
         <option value="$PROJECT_DIR$/src/server/fdb/fdb.go" />
-        <option value="$PROJECT_DIR$/src/server/utils/Mime.go" />
         <option value="$PROJECT_DIR$/src/server/web/helpers/Magnet.go" />
         <option value="$PROJECT_DIR$/src/server/web/templates/MainPage.go" />
         <option value="$PROJECT_DIR$/src/main/test.go" />
         <option value="$PROJECT_DIR$/src/main/main.go" />
         <option value="$PROJECT_DIR$/src/server/web/helpers/Torrent.go" />
-        <option value="$PROJECT_DIR$/src/server/web/Torrent.go" />
         <option value="$PROJECT_DIR$/src/server/torr/Play.go" />
+        <option value="$PROJECT_DIR$/src/server/web/Torrent.go" />
         <option value="$PROJECT_DIR$/src/server/torr/Torrent.go" />
+        <option value="$PROJECT_DIR$/src/server/utils/Mime.go" />
         <option value="$PROJECT_DIR$/src/server/version/Version.go" />
       </list>
     </option>
@@ -759,16 +769,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/server/utils/Mime.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="359">
-          <caret line="91" column="48" lean-forward="false" selection-start-line="91" selection-start-column="48" selection-end-line="91" selection-end-column="48" />
-          <folding>
-            <element signature="e#15#83#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/local/go/src/strconv/atoi.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-328">
@@ -907,7 +907,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/server/torr/Play.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
+        <state relative-caret-position="484">
           <caret line="42" column="0" lean-forward="false" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
           <folding>
             <element signature="e#14#174#0" expanded="true" />
@@ -915,18 +915,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/server/torr/Torrent.go">
+    <entry file="file://$PROJECT_DIR$/src/server/web/Torrent.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="381">
-          <caret line="293" column="69" lean-forward="false" selection-start-line="293" selection-start-column="69" selection-end-line="293" selection-end-column="69" />
+        <state relative-caret-position="17">
+          <caret line="522" column="43" lean-forward="false" selection-start-line="522" selection-start-column="43" selection-end-line="522" selection-end-column="43" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/server/web/Torrent.go">
+    <entry file="file://$PROJECT_DIR$/src/server/torr/Torrent.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="830">
-          <caret line="526" column="0" lean-forward="false" selection-start-line="526" selection-start-column="0" selection-end-line="526" selection-end-column="0" />
+        <state relative-caret-position="402">
+          <caret line="387" column="14" lean-forward="false" selection-start-line="387" selection-start-column="14" selection-end-line="387" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/server/utils/Mime.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
           <folding />
         </state>
       </provider>

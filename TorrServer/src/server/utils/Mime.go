@@ -2,7 +2,6 @@ package utils
 
 import (
 	"path/filepath"
-	"sort"
 
 	"github.com/anacrolix/torrent"
 )
@@ -86,11 +85,6 @@ func GetPlayableFiles(torr *torrent.Torrent) []*torrent.File {
 			if GetMimeType(f.Path()) != "*/*" {
 				files = append(files, f)
 			}
-		}
-		if len(files) > 1 {
-			sort.Slice(files, func(i, j int) bool {
-				return files[i].Path() < files[j].Path()
-			})
 		}
 		return files
 	}
