@@ -99,6 +99,7 @@ var settingsPage = `
                 </div>
                 <input id="DownloadRateLimit" class="form-control" type="number" autocomplete="off">
             </div>
+		<br>
             <div class="input-group">
                 <div class="input-group-prepend">
                     <div class="input-group-text">Upload Rate Limit</div>

@@ -6,43 +6,44 @@ import (
 	"time"
 
 	"server/settings"
+	"server/utils"
 
 	"github.com/anacrolix/missinggo/httptoo"
 	"github.com/anacrolix/torrent"
 	"github.com/labstack/echo"
 )
 
-func (bt *BTServer) Play(state *TorrentState, file *torrent.File, timestamp time.Time, c echo.Context) error {
-	bt.watcher()
-	go settings.SetViewed(state.Hash, file.Path())
+func (bt *BTServer) View(torr *Torrent, file *torrent.File, c echo.Context) error {
+	go settings.SetViewed(torr.Hash().HexString(), file.Path())
 	reader := file.NewReader()
-	reader.SetReadahead(getReadahead())
+	reader.SetReadahead(utils.GetReadahead())
 
-	state.readers++
-
-	fmt.Println("Connect reader:", state.readers)
+	fmt.Println("Connect reader:", len(torr.readers))
 	c.Response().Header().Set("Connection", "close")
-	c.Response().Header().Set("ETag", httptoo.EncodeQuotedString(fmt.Sprintf("%s/%s", state.Hash, file.Path())))
+	c.Response().Header().Set("ETag", httptoo.EncodeQuotedString(fmt.Sprintf("%s/%s", torr.Hash, file.Path())))
 
-	defer func() {
-		fmt.Println("Disconnect reader:", state.readers)
-		reader.Close()
-		state.expiredTime = time.Now().Add(time.Second * 20)
-		state.readers--
-		go bt.watcher()
-	}()
+	http.ServeContent(c.Response(), c.Request(), file.Path(), time.Time{}, reader)
 
-	http.ServeContent(c.Response(), c.Request(), file.Path(), timestamp, reader)
+	fmt.Println("Disconnect reader:", len(torr.readers))
+	torr.CloseReader(reader)
 	return c.NoContent(http.StatusOK)
 }
 
-func getReadahead() int64 {
-	readahead := int64(float64(settings.Get().CacheSize) * 0.33)
-	if readahead < 66*1024*1024 {
-		readahead = int64(settings.Get().CacheSize)
-		if readahead > 66*1024*1024 {
-			readahead = 66 * 1024 * 1024
+func (bt *BTServer) Play(torr *Torrent, file *torrent.File, preload int64, c echo.Context) error {
+	if torr.status == TorrentAdded {
+		if !torr.GotInfo() {
+			return echo.NewHTTPError(http.StatusBadRequest, "torrent closed befor get info")
 		}
 	}
-	return readahead
+	if torr.status == TorrentGettingInfo {
+		if !torr.WaitInfo() {
+			return echo.NewHTTPError(http.StatusBadRequest, "torrent closed befor get info")
+		}
+	}
+
+	if torr.PreloadedBytes == 0 {
+		torr.Preload(file, preload)
+	}
+
+	return bt.View(torr, file, c)
 }

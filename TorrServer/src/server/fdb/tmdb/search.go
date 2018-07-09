@@ -114,7 +114,7 @@ func getSeasons(id int) int {
 
 func fixLinks(list []tmdb.MovieShort) {
 	wbs := tmCfg.Images.BackdropSizes[len(tmCfg.Images.BackdropSizes)-1]
-	wps := tmCfg.Images.PosterSizes[len(tmCfg.Images.PosterSizes)-1]
+	wps := tmCfg.Images.PosterSizes[len(tmCfg.Images.PosterSizes)-2]
 	for i := 0; i < len(list); i++ {
 		if list[i].BackdropPath != "" {
 			list[i].BackdropPath = tmCfg.Images.BaseURL + wbs + list[i].BackdropPath
@@ -127,7 +127,7 @@ func fixLinks(list []tmdb.MovieShort) {
 
 func fixLinksTv(list []tmdb.TvShort) {
 	wbs := tmCfg.Images.BackdropSizes[len(tmCfg.Images.BackdropSizes)-1]
-	wps := tmCfg.Images.PosterSizes[len(tmCfg.Images.PosterSizes)-1]
+	wps := tmCfg.Images.PosterSizes[len(tmCfg.Images.PosterSizes)-2]
 	for i := 0; i < len(list); i++ {
 		if list[i].BackdropPath != "" {
 			list[i].BackdropPath = tmCfg.Images.BaseURL + wbs + list[i].BackdropPath
@@ -137,30 +137,3 @@ func fixLinksTv(list []tmdb.TvShort) {
 		}
 	}
 }
-
-//func removeDuplicateMovies(elements []tmdb.MovieShort) []tmdb.MovieShort {
-//	encountered := map[tmdb.MovieShort]bool{}
-//	var result []tmdb.MovieShort
-//
-//	for v := range elements {
-//		if !encountered[elements[v]] {
-//			encountered[elements[v]] = true
-//			result = append(result, elements[v])
-//		}
-//	}
-//	return result
-//}
-
-//
-//func removeDuplicateTv(elements []tmdb.TvShort) []tmdb.TvShort {
-//	encountered := make(map[tmdb.TvShort]bool, 0)
-//	var result []tmdb.TvShort
-//
-//	for v := range elements {
-//		if !encountered[elements[v]] {
-//			encountered[elements[v]] = true
-//			result = append(result, elements[v])
-//		}
-//	}
-//	return result
-//}

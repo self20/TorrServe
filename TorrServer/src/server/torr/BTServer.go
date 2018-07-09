@@ -1,7 +1,6 @@
 package torr
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -17,7 +16,6 @@ import (
 	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/iplist"
 	"github.com/anacrolix/torrent/metainfo"
-	"github.com/labstack/gommon/bytes"
 	"golang.org/x/time/rate"
 )
 
@@ -27,7 +25,7 @@ type BTServer struct {
 
 	storage storage.Storage
 
-	states map[metainfo.Hash]*TorrentState
+	torrents map[metainfo.Hash]*Torrent
 
 	mu  sync.Mutex
 	wmu sync.Mutex
@@ -37,7 +35,7 @@ type BTServer struct {
 
 func NewBTS() *BTServer {
 	bts := new(BTServer)
-	bts.states = make(map[metainfo.Hash]*TorrentState)
+	bts.torrents = make(map[metainfo.Hash]*Torrent)
 	return bts
 }
 
@@ -47,7 +45,7 @@ func (bt *BTServer) Connect() error {
 	var err error
 	bt.configure()
 	bt.client, err = torrent.NewClient(bt.config)
-	bt.states = make(map[metainfo.Hash]*TorrentState)
+	bt.torrents = make(map[metainfo.Hash]*Torrent)
 	return err
 }
 
@@ -107,86 +105,50 @@ func (bt *BTServer) configure() {
 	fmt.Println("Configure client:", settings.Get())
 }
 
-func (bt *BTServer) addTorrent(magnet *metainfo.Magnet) (*torrent.Torrent, error) {
-	switch settings.Get().RetrackersMode {
-	case 1:
-		magnet.Trackers = append(magnet.Trackers, utils.GetDefTrackers()...)
-	case 2:
-		magnet.Trackers = nil
-	case 3:
-		magnet.Trackers = utils.GetDefTrackers()
-	}
-	tor, _, err := bt.client.AddTorrentSpec(&torrent.TorrentSpec{
-		Trackers:    [][]string{magnet.Trackers},
-		DisplayName: magnet.DisplayName,
-		InfoHash:    magnet.InfoHash,
-	})
-
+func (bt *BTServer) AddTorrent(magnet metainfo.Magnet, onAdd func(*Torrent)) (*Torrent, error) {
+	torr, err := NewTorrent(magnet, bt)
 	if err != nil {
 		return nil, err
 	}
 
-	return tor, nil
-}
-
-func (bt *BTServer) AddTorrentQueue(magnet *metainfo.Magnet, onAdd func(*TorrentState)) error {
-	tor, err := bt.addTorrent(magnet)
-	if err != nil {
-		return err
+	if onAdd != nil {
+		go func() {
+			if torr.GotInfo() {
+				onAdd(torr)
+			}
+		}()
+	} else {
+		go torr.GotInfo()
 	}
 
-	bt.addQueue(tor, onAdd)
-	return nil
+	return torr, nil
 }
 
-func (bt *BTServer) AddTorrent(magnet *metainfo.Magnet) (*TorrentState, error) {
-	tor, err := bt.addTorrent(magnet)
-	if err != nil {
-		return nil, err
-	}
-
-	fmt.Println("Geting torrent info:", magnet.String())
-	st := NewState(tor)
-	st.IsGettingInfo = true
-	bt.Watching(st)
-
-	select {
-	case <-tor.GotInfo():
-		fmt.Println("Torrent received info:", st.Name)
-		st.updateTorrentState()
-		st.IsGettingInfo = false
-		return st, nil
-	case <-tor.Closed():
-		bt.removeState(st.Hash)
-		return nil, errors.New("Torrent closed: " + st.Name)
-	}
-}
-
-func (bt *BTServer) List() []*TorrentState {
+func (bt *BTServer) List() []*Torrent {
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
-	list := make([]*TorrentState, 0)
-	for _, st := range bt.states {
-		list = append(list, st)
+	list := make([]*Torrent, 0)
+	for _, t := range bt.torrents {
+		list = append(list, t)
 	}
 	return list
 }
 
-func (bt *BTServer) GetTorrent(hash metainfo.Hash) *TorrentState {
+func (bt *BTServer) GetTorrent(hash metainfo.Hash) *Torrent {
 	bt.mu.Lock()
 	defer bt.mu.Unlock()
 
-	if st, ok := bt.states[hash]; ok {
-		return st
+	if t, ok := bt.torrents[hash]; ok {
+		return t
 	}
 
 	return nil
 }
 
-func (bt *BTServer) RemoveTorrent(hashHex string) {
-	bt.wmu.Lock()
-	defer bt.wmu.Unlock()
-	bt.removeState(hashHex)
+func (bt *BTServer) RemoveTorrent(hash torrent.InfoHash) {
+	if torr, ok := bt.torrents[hash]; ok {
+		torr.Close()
+	}
 }
 
 func (bt *BTServer) BTState() *BTState {
@@ -200,8 +162,8 @@ func (bt *BTServer) BTState() *BTState {
 	for _, dht := range bt.client.DhtServers() {
 		state.DHTs = append(state.DHTs, dht)
 	}
-	for _, st := range bt.states {
-		state.Torrents = append(state.Torrents, st)
+	for _, t := range bt.torrents {
+		state.Torrents = append(state.Torrents, t)
 	}
 	return state
 }
@@ -218,80 +180,4 @@ func (bt *BTServer) CacheState(hash metainfo.Hash) *state.CacheState {
 
 func (bt *BTServer) WriteState(w io.Writer) {
 	bt.client.WriteStatus(w)
-}
-
-func (bt *BTServer) Preload(hash metainfo.Hash, file *torrent.File, size int64) error {
-	if size == 0 {
-		size = settings.Get().PreloadBufferSize
-	}
-	if size == 0 {
-		return nil
-	}
-
-	state, ok := bt.states[hash]
-	if !ok {
-		return errors.New("File in Torrent not found: " + hash.HexString() + " | " + file.Path())
-	}
-
-	if !state.IsPreload {
-		state.IsPreload = true
-		buff5mb := int64(5 * 1024 * 1024)
-		startPreloadLength := size
-		endPreloadOffset := int64(0)
-		if startPreloadLength > buff5mb {
-			endPreloadOffset = file.Offset() + file.Length() - buff5mb
-		}
-
-		state.readers++
-		readerPre := file.NewReader()
-		readerPre.SetReadahead(startPreloadLength)
-		defer func() {
-			readerPre.Close()
-			state.readers--
-		}()
-
-		if endPreloadOffset > 0 {
-			state.readers++
-			readerPost := file.NewReader()
-			readerPost.SetReadahead(1)
-			readerPost.Seek(endPreloadOffset, io.SeekStart)
-			readerPost.SetReadahead(buff5mb)
-			defer func() {
-				readerPost.Close()
-				state.readers--
-				state.IsPreload = false
-			}()
-		}
-
-		state.PreloadLength = size
-		go bt.watcher()
-		cl := state.Torrent.Closed()
-		var lastSize int64 = 0
-		errCount := 0
-		for {
-			select {
-			case <-cl:
-				return nil
-			default:
-			}
-			state.expiredTime = time.Now().Add(time.Minute)
-			state.PreloadSize = state.LoadedSize
-			fmt.Println("Preload:", bytes.Format(state.PreloadSize), "/", bytes.Format(state.PreloadLength), "Speed:", utils.Format(state.DownloadSpeed), "Peers:[", state.ConnectedSeeders, "]", state.ActivePeers, "/", state.TotalPeers)
-			if state.PreloadSize >= state.PreloadLength {
-				return nil
-			}
-
-			if lastSize == state.PreloadSize {
-				errCount++
-			} else {
-				lastSize = state.PreloadSize
-				errCount = 0
-			}
-			if errCount > 60 {
-				return errors.New("long time no progress download")
-			}
-			time.Sleep(time.Second)
-		}
-	}
-	return nil
 }

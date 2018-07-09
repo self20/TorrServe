@@ -12,18 +12,16 @@ import (
 	"github.com/anacrolix/torrent/metainfo"
 )
 
-func Add(bts *torr.BTServer, magnet *metainfo.Magnet, save bool) error {
-	magnet.Trackers = append(magnet.Trackers, utils.GetDefTrackers()...)
-
+func Add(bts *torr.BTServer, magnet metainfo.Magnet, save bool) error {
 	fmt.Println("Adding torrent", magnet.String())
-	err := bts.AddTorrentQueue(magnet, func(torrState *torr.TorrentState) {
+	_, err := bts.AddTorrent(magnet, func(torr *torr.Torrent) {
 		torDb := new(settings.Torrent)
-		torDb.Name = torrState.Name
-		torDb.Hash = torrState.Hash
-		torDb.Size = torrState.TorrentSize
+		torDb.Name = torr.Name()
+		torDb.Hash = torr.Hash().HexString()
+		torDb.Size = torr.Length()
 		torDb.Magnet = magnet.String()
 		torDb.Timestamp = time.Now().Unix()
-		files := torrState.Torrent.Files()
+		files := torr.Files()
 		for _, f := range files {
 			ff := settings.File{
 				f.Path(),

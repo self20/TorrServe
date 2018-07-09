@@ -6,10 +6,13 @@ import (
 	"math/rand"
 	"time"
 
+	"server/settings"
+
 	"github.com/anacrolix/torrent"
 )
 
 var trackers = []string{
+	"http://bt4.t-ru.org/ann?magnet",
 	"http://retracker.mgts.by:80/announce",
 	"http://tracker.city9x.com:2710/announce",
 	"http://tracker.electro-torrent.pl:80/announce",
@@ -44,4 +47,15 @@ func GotInfo(t *torrent.Torrent, timeout int) error {
 	case <-time.Tick(time.Second * time.Duration(timeout)):
 		return errors.New("timeout load torrent info")
 	}
+}
+
+func GetReadahead() int64 {
+	readahead := int64(float64(settings.Get().CacheSize) * 0.33)
+	if readahead < 66*1024*1024 {
+		readahead = int64(settings.Get().CacheSize)
+		if readahead > 66*1024*1024 {
+			readahead = 66 * 1024 * 1024
+		}
+	}
+	return readahead
 }

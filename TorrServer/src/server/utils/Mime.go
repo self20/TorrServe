@@ -1,6 +1,11 @@
 package utils
 
-import "path/filepath"
+import (
+	"path/filepath"
+	"sort"
+
+	"github.com/anacrolix/torrent"
+)
 
 var extVideo = map[string]interface{}{
 	".3g2":   nil,
@@ -72,4 +77,22 @@ func GetMimeType(filename string) string {
 		return "audio/*"
 	}
 	return "*/*"
+}
+
+func GetPlayableFiles(torr *torrent.Torrent) []*torrent.File {
+	if torr != nil && torr.Info() != nil && len(torr.Files()) > 0 {
+		files := make([]*torrent.File, 0)
+		for _, f := range torr.Files() {
+			if GetMimeType(f.Path()) != "*/*" {
+				files = append(files, f)
+			}
+		}
+		if len(files) > 1 {
+			sort.Slice(files, func(i, j int) bool {
+				return files[i].Path() < files[j].Path()
+			})
+		}
+		return files
+	}
+	return nil
 }

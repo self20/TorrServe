@@ -76,6 +76,7 @@ var mainPage = `
 						<h4 class="modal-title wrap" id="preloadName"></h4>
 					</div>
 					<div class="modal-body">
+						<p id="preloadStatus"></p>
 						<p id="preloadBuffer"></p>
 						<p id="preloadPeers"></p>
 						<p id="preloadSpeed"></p>
@@ -174,7 +175,7 @@ var mainPage = `
 						var queueInfo = [];
 						for(var key in data) {
 							var tor = data[key];
-							if (tor.IsGettingInfo){
+							if (tor.Status==1){
 								queueInfo.push(tor);
 								continue;
 							}
@@ -197,14 +198,14 @@ var mainPage = `
 			function tor2Html(tor){
 				var html = '<hr>';
 				var name = "";
-				if (tor.IsGettingInfo)
+				if (tor.Status==1)
 					name = tor.Name+' '+humanizeSize(tor.Size)+' '+tor.Hash;
 				else
 					name = tor.Name+' '+humanizeSize(tor.Size);
 			
 				html += '<div class="btn-group d-flex" role="group">';
 				html += '	<button type="button" class="btn btn-secondary wrap w-100" data-toggle="collapse" data-target="#info_'+tor.Hash+'">'+name+'</button>';
-				if (!tor.IsGettingInfo)
+				if (tor.Status!=1)
 					html += '	<a role="button" class="btn btn-secondary" href="'+tor.Playlist+'"><i class="fas fa-th-list"></i> Playlist</a>';
 				else
 					html += '	<button type="button" class="btn btn-secondary" onclick="showPreload(\'\', \''+ tor.Hash +'\');"><i class="fas fa-info"></i></a>';
@@ -234,7 +235,7 @@ var mainPage = `
 						var gettingInfo = 0;
 						for(var key in data) {
 							var tor = data[key];
-							if (tor.IsGettingInfo)
+							if (tor.Status==1)
 								gettingInfo++;
 						}
 			
@@ -256,23 +257,24 @@ var mainPage = `
 				var ptimer = setInterval(function() {
 					statTorrent(hash,function(data){
 						if (data!=null){
+							$('#preloadStatus').text("Status: " + data.TorrentStatusString);
 							$('#preloadName').text(data.Name);
 							$('#preloadPeers').text("Peers: [" + data.ConnectedSeeders + "] " + data.ActivePeers + " / " + data.TotalPeers);
 							if (data.DownloadSpeed>0)
 								$('#preloadSpeed').text("Speed: "+ humanizeSize(data.DownloadSpeed) + "/Sec");
 							else
 								$('#preloadSpeed').text("Speed:");
-							if (data.IsPreload){
-								$('#preloadBuffer').text("Buffer: " + humanizeSize(data.PreloadSize) + " / " + humanizeSize(data.PreloadLength));
-								if (data.PreloadSize>0){
-									var prc = data.PreloadSize * 100 / data.PreloadLength;
-									if (prc>100) prc = 100;
-									$('#preloadProgress').width(prc+'%');
-								}
+			
+							if (data.PreloadedBytes>0 && data.PreloadedBytes<data.PreloadSize){
+								var prc = data.PreloadedBytes * 100 / data.PreloadSize;
+								if (prc>100) prc = 100;
+								$('#preloadProgress').width(prc+'%');
+								$('#preloadBuffer').text("Loaded: " + humanizeSize(data.PreloadSize) + " / " + humanizeSize(data.PreloadLength)+" "+prc+"%");
 							}else{
+								$('#preloadProgress').width('100%');
 								$('#preloadBuffer').text("Loaded: " + humanizeSize(data.BytesReadUsefulData));
 								$('#preloadProgress').width('100%');
-								if (fileLink && !$('#preloadFileLink').attr("href")){
+								if (data.BytesReadUsefulData>0 && fileLink && !$('#preloadFileLink').attr("href")){
 									$('#preloadFileLink').text(data.Name);
 									$('#preloadFileLink').attr("href", fileLink);
 									$('#preloadFileLink').show();

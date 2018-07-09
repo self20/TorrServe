@@ -100,7 +100,7 @@ func SearchByName(page int, name string, search int) (*SearchResponce, error) {
 				resp.Pages = res.TotalPages
 			}
 			for _, m := range res.Results {
-				if m.Name == m.OriginalName {
+				if m.Name == m.OriginalName && !utils.IsCyrillic(m.OriginalName) {
 					continue
 				}
 				mov := new(Movie)
@@ -143,7 +143,7 @@ func NowWatching(page int, search int) (*SearchResponce, error) {
 		} else {
 			resp.Pages = res.TotalPages
 			for _, m := range res.Results {
-				if m.Title == m.OriginalTitle {
+				if m.Title == m.OriginalTitle && !utils.IsCyrillic(m.OriginalTitle) {
 					continue
 				}
 				mov := new(Movie)
@@ -173,7 +173,7 @@ func NowWatching(page int, search int) (*SearchResponce, error) {
 				resp.Pages = res.TotalPages
 			}
 			for _, m := range res.Results {
-				if m.Name == m.OriginalName {
+				if m.Name == m.OriginalName && !utils.IsCyrillic(m.OriginalName) {
 					continue
 				}
 				mov := new(Movie)
@@ -216,7 +216,7 @@ func SearchByFilter(page int, filter *tmdb.Filter, search int) (*SearchResponce,
 		} else {
 			resp.Pages = res.TotalPages
 			for _, m := range res.Results {
-				if m.Title == m.OriginalTitle {
+				if m.Title == m.OriginalTitle && !utils.IsCyrillic(m.OriginalTitle) {
 					continue
 				}
 				mov := new(Movie)
@@ -246,7 +246,7 @@ func SearchByFilter(page int, filter *tmdb.Filter, search int) (*SearchResponce,
 				resp.Pages = res.TotalPages
 			}
 			for _, m := range res.Results {
-				if m.Name == m.OriginalName {
+				if m.Name == m.OriginalName && !utils.IsCyrillic(m.OriginalName) {
 					continue
 				}
 				mov := new(Movie)

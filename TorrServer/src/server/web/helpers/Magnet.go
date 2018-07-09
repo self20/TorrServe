@@ -19,9 +19,11 @@ func GetMagnet(link string) (*metainfo.Magnet, error) {
 	var mag *metainfo.Magnet
 	switch strings.ToLower(url.Scheme) {
 	case "magnet":
-		mag, err = getMag(url)
+		mag, err = getMag(url.String())
 	case "http", "https":
 		mag, err = getMagFromHttp(url.String())
+	case "":
+		mag, err = getMag("magnet:?xt=urn:btih:" + url.Path)
 	default:
 		mag, err = getMagFromFile(url.Path)
 	}
@@ -32,8 +34,8 @@ func GetMagnet(link string) (*metainfo.Magnet, error) {
 	return mag, nil
 }
 
-func getMag(link *url.URL) (*metainfo.Magnet, error) {
-	mag, err := metainfo.ParseMagnetURI(link.String())
+func getMag(link string) (*metainfo.Magnet, error) {
+	mag, err := metainfo.ParseMagnetURI(link)
 	return &mag, err
 }
 
