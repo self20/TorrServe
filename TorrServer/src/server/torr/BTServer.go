@@ -5,7 +5,6 @@ import (
 	"io"
 	"path/filepath"
 	"sync"
-	"time"
 
 	"server/settings"
 	"server/torr/storage"
@@ -93,7 +92,7 @@ func (bt *BTServer) configure() {
 	bt.config.HTTPUserAgent = userAgent
 	bt.config.EstablishedConnsPerTorrent = settings.Get().ConnectionsLimit
 	bt.config.HalfOpenConnsPerTorrent = int(float64(settings.Get().ConnectionsLimit) * 0.65)
-	bt.config.HandshakesTimeout = time.Second * 60
+	//bt.config.HandshakesTimeout = time.Second * 120
 
 	if settings.Get().DownloadRateLimit > 0 {
 		bt.config.DownloadRateLimiter = rate.NewLimiter(rate.Limit(settings.Get().DownloadRateLimit*1024), 1024)

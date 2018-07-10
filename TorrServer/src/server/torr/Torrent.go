@@ -67,6 +67,8 @@ type Torrent struct {
 
 	expiredTime time.Time
 
+	closed <-chan struct{}
+
 	progressTicker *time.Ticker
 }
 
@@ -102,6 +104,7 @@ func NewTorrent(magnet metainfo.Magnet, bt *BTServer) (*Torrent, error) {
 	torr.bt = bt
 	torr.readers = make(map[torrent.Reader]struct{})
 	torr.hash = magnet.InfoHash
+	torr.closed = goTorrent.Closed()
 
 	go torr.watch()
 
@@ -116,7 +119,7 @@ func (t *Torrent) WaitInfo() bool {
 	select {
 	case <-t.Torrent.GotInfo():
 		return true
-	case <-t.Torrent.Closed():
+	case <-t.closed:
 		return false
 	}
 }
@@ -144,7 +147,7 @@ func (t *Torrent) watch() {
 		select {
 		case <-t.progressTicker.C:
 			go t.progressEvent()
-		case <-t.Torrent.Closed():
+		case <-t.closed:
 			t.Close()
 			return
 		}
@@ -344,7 +347,7 @@ func (t *Torrent) Close() {
 	t.drop()
 }
 
-func (t *Torrent) Stats(filterFiles bool) TorrentStats {
+func (t *Torrent) Stats() TorrentStats {
 	t.muTorrent.Lock()
 	defer t.muTorrent.Unlock()
 
@@ -381,26 +384,12 @@ func (t *Torrent) Stats(filterFiles bool) TorrentStats {
 		st.ConnectedSeeders = tst.ConnectedSeeders
 		st.HalfOpenPeers = tst.HalfOpenPeers
 
-		for _, f := range t.Files() {
-			filterFile := false
-			if filterFiles && utils.GetMimeType(f.Path()) == "*/*" {
-				filterFile = true
-			}
-			if !filterFile {
-				st.FileStats = append(st.FileStats, TorrentFileStat{
-					Id:     0,
-					Path:   f.Path(),
-					Length: f.Length(),
-				})
-			}
-		}
-		//if len(st.FileStats) > 1 {
-		//	sort.Slice(st.FileStats, func(i, j int) bool {
-		//		return st.FileStats[i].Path < st.FileStats[j].Path
-		//	})
-		//}
-		for i := range st.FileStats {
-			st.FileStats[i].Id = i
+		for i, f := range t.Files() {
+			st.FileStats = append(st.FileStats, TorrentFileStat{
+				Id:     i,
+				Path:   f.Path(),
+				Length: f.Length(),
+			})
 		}
 	}
 	return st

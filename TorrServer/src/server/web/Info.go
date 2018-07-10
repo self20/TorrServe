@@ -50,7 +50,7 @@ func statePage(c echo.Context) error {
 	})
 	msg += "Torrents:<br>\n"
 	for _, t := range state.Torrents {
-		st := t.Stats(false)
+		st := t.Stats()
 		msg += fmt.Sprintf("Name: %v<br>\n", st.Name)
 		msg += fmt.Sprintf("Hash: %v<br>\n", st.Hash)
 		msg += fmt.Sprintf("Status: %v<br>\n", st.TorrentStatus)

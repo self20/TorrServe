@@ -44,11 +44,19 @@ func Add(bts *torr.BTServer, magnet metainfo.Magnet, save bool) error {
 	return nil
 }
 
-func FindFile(fileLink string, torr *torrent.Torrent) *torrent.File {
+func FindFileLink(fileLink string, torr *torrent.Torrent) *torrent.File {
 	for _, f := range torr.Files() {
 		if utils.FileToLink(f.Path()) == fileLink {
 			return f
 		}
 	}
 	return nil
+}
+
+func FindFile(fileInd int, tor *torr.Torrent) *torrent.File {
+	files := tor.Files()
+	if len(files) == 0 || fileInd < 0 || fileInd >= len(files) {
+		return nil
+	}
+	return files[fileInd]
 }

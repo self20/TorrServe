@@ -283,7 +283,7 @@ func torrentStat(c echo.Context) error {
 	if tor == nil {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
-	stat := tor.Stats(false)
+	stat := tor.Stats()
 
 	return c.JSON(http.StatusOK, stat)
 }
@@ -329,7 +329,7 @@ func preload(hashHex, fileLink string, size int64) *echo.HTTPError {
 			return echo.NewHTTPError(http.StatusBadRequest, "torrent closed befor get info")
 		}
 
-		file := helpers.FindFile(fileLink, tor.Torrent)
+		file := helpers.FindFileLink(fileLink, tor.Torrent)
 		if file == nil {
 			return echo.NewHTTPError(http.StatusNotFound, "file in torrent not found: "+fileLink)
 		}
@@ -437,7 +437,7 @@ func torrentPlayList(c echo.Context) error {
 	m3u := "#EXTM3U\n"
 
 	for _, f := range torr.Files {
-		if utils.GetMimeType(f.Name) != "*/*" {
+		if GetMimeType(f.Name) != "*/*" {
 			m3u += "#EXTINF:-1," + f.Name + "\n"
 			m3u += c.Scheme() + "://" + c.Request().Host + "/torrent/view/" + hash + "/" + utils.FileToLink(f.Name) + "\n\n"
 		}
@@ -502,7 +502,7 @@ func torrentPlay(c echo.Context) error {
 	}
 
 	if stat {
-		return c.JSON(http.StatusOK, tor.Stats(true))
+		return c.JSON(http.StatusOK, getTorPlayState(tor))
 	}
 
 	if !tor.WaitInfo() {
@@ -518,22 +518,31 @@ func torrentPlay(c echo.Context) error {
 		}
 	}
 
-	files := utils.GetPlayableFiles(tor.Torrent)
+	files := GetPlayableFiles(tor.Stats())
 
 	if len(files) == 1 {
-		return bts.Play(tor, files[0], preload, c)
+		file := helpers.FindFile(files[0].Id, tor)
+		if file == nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprint("File", files[0], "not found in torrent", tor.Name()))
+		}
+
+		return bts.Play(tor, file, preload, c)
 	}
 
 	if qfile == "" && len(files) > 1 {
-		return c.JSON(http.StatusOK, tor.Stats(true))
+		return c.JSON(http.StatusOK, getTorPlayState(tor))
 	}
 
-	file, _ := strconv.Atoi(qfile)
-	if file < 0 || file >= len(files) {
-		return c.JSON(http.StatusOK, tor.Stats(true))
+	fileInd, _ := strconv.Atoi(qfile)
+	if fileInd < 0 || fileInd >= len(files) {
+		return c.JSON(http.StatusOK, getTorPlayState(tor))
 	}
 
-	return bts.Play(tor, files[file], preload, c)
+	file := helpers.FindFile(files[fileInd].Id, tor)
+	if file == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprint("File", files[fileInd], "not found in torrent", tor.Name()))
+	}
+	return bts.Play(tor, file, preload, c)
 }
 
 func torrentView(c echo.Context) error {
@@ -569,7 +578,7 @@ func torrentView(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "torrent closed befor get info")
 	}
 
-	file := helpers.FindFile(fileLink, tor.Torrent)
+	file := helpers.FindFileLink(fileLink, tor.Torrent)
 	if file == nil {
 		return echo.NewHTTPError(http.StatusNotFound, "File in torrent not found: "+fileLink)
 	}
