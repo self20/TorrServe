@@ -2,6 +2,7 @@ package server
 
 import (
 	"server/torr"
+	"server/web/helpers"
 )
 
 type TorrentStat struct {
@@ -52,7 +53,7 @@ func getTorPlayState(tor *torr.Torrent) TorrentStat {
 	ts.ActivePeers = tst.ActivePeers
 	ts.ConnectedSeeders = tst.ConnectedSeeders
 
-	files := GetPlayableFiles(tst)
+	files := helpers.GetPlayableFiles(tst)
 	ts.FileStats = make([]FileStat, len(files))
 	for i, f := range files {
 		ts.FileStats[i] = FileStat{

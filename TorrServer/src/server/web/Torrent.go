@@ -434,17 +434,11 @@ func torrentPlayList(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	m3u := "#EXTM3U\n"
-
-	for _, f := range torr.Files {
-		if GetMimeType(f.Name) != "*/*" {
-			m3u += "#EXTINF:-1," + f.Name + "\n"
-			m3u += c.Scheme() + "://" + c.Request().Host + "/torrent/view/" + hash + "/" + utils.FileToLink(f.Name) + "\n\n"
-		}
-	}
+	m3u := helpers.MakeM3UTorrent(torr, c.Scheme()+"://"+c.Request().Host)
 
 	c.Response().Header().Set("Content-Type", "audio/x-mpegurl")
-	http.ServeContent(c.Response(), c.Request(), torr.Name+".m3u", time.Now(), bytes.NewReader([]byte(m3u)))
+	c.Response().Header().Set("Content-Disposition", `attachment; filename="`+utils.FileToLink(torr.Name)+".m3u"+`"`)
+	http.ServeContent(c.Response(), c.Request(), utils.FileToLink(torr.Name)+".m3u", time.Now(), bytes.NewReader([]byte(m3u)))
 	return c.NoContent(http.StatusOK)
 }
 
@@ -454,14 +448,10 @@ func torrentPlayListAll(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	m3u := "#EXTM3U\n"
-
-	for _, t := range list {
-		m3u += "#EXTINF:0," + t.Name + "\n"
-		m3u += c.Scheme() + "://" + c.Request().Host + "/torrent/playlist/" + t.Hash + "/" + utils.FileToLink(t.Name) + ".m3u" + "\n\n"
-	}
+	m3u := helpers.MakeM3ULists(list, c.Scheme()+"://"+c.Request().Host)
 
 	c.Response().Header().Set("Content-Type", "audio/x-mpegurl")
+	c.Response().Header().Set("Content-Disposition", `attachment; filename="playlist.m3u"`)
 	http.ServeContent(c.Response(), c.Request(), "playlist.m3u", time.Now(), bytes.NewReader([]byte(m3u)))
 	return c.NoContent(http.StatusOK)
 }
@@ -476,6 +466,7 @@ func torrentPlay(c echo.Context) error {
 	qpreload := c.QueryParam("preload")
 	qfile := c.QueryParam("file")
 	qstat := c.QueryParam("stat")
+	mm3u := c.QueryParam("m3u")
 
 	preload := int64(0)
 	stat := qstat == "true"
@@ -518,7 +509,16 @@ func torrentPlay(c echo.Context) error {
 		}
 	}
 
-	files := GetPlayableFiles(tor.Stats())
+	if mm3u == "true" {
+		m3u := helpers.MakeM3UPlayList(tor.Stats(), c.Scheme()+"://"+c.Request().Host)
+		c.Response().Header().Set("Content-Type", "audio/x-mpegurl")
+		name := utils.FileToLink(tor.Name()) + ".m3u"
+		c.Response().Header().Set("Content-Disposition", `attachment; filename="`+name+`"`)
+		http.ServeContent(c.Response(), c.Request(), name, time.Now(), bytes.NewReader([]byte(m3u)))
+		return c.NoContent(http.StatusOK)
+	}
+
+	files := helpers.GetPlayableFiles(tor.Stats())
 
 	if len(files) == 1 {
 		file := helpers.FindFile(files[0].Id, tor)
