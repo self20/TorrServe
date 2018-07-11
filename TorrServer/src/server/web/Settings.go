@@ -32,8 +32,6 @@ func settingsWrite(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	settings.SaveSettings()
-	fmt.Println("Restart torrent engine")
-	err = bts.Reconnect()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
