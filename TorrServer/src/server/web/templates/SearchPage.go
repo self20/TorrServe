@@ -99,30 +99,39 @@ var searchPage = `
     <div class="content">
 		<div class="container-fluid">
 			<div class="row">
-				<div class="col-sm-4">
-					<div class="input-group">
-						<div class="input-group-prepend">
-							<div class="input-group-text">Type</div>
-						</div>
-						<select id="sType">
-							<option value="byName">Search by name</option>
-							<option value="byWatching">Now watching</option>
-							<option value="byFilter">Search by filter</option>
-							<option value="byTorrents">Search torrents</option>
-						</select>
-					</div>
+			{{if not .IsTorrent}}
+				<div class="col-auto">
+					<div class="btn-group btn-group-toggle" data-toggle="buttons">
+						<label class="btn btn-secondary" onclick="update_search(0)">
+							<input type="radio" name="stype">Find by name
+						</label>
+						<label class="btn btn-secondary" onclick="update_search(1)">
+							<input type="radio" name="stype">Discover
+						</label>
+                	</div>
 				</div>
-				<div class="col-sm-4">
-					<div class="form-check">
-						<input id="SearchMovie" checked="checked" class="form-check-input" type="checkbox" autocomplete="off">
-						<label for="SearchMovie" class="active">Search movie</label>
-					</div>
+			{{end}}
+			{{if .IsTorrent}}
+				<div class="col-auto">
+					<div class="btn-group btn-group-toggle" data-toggle="buttons">
+						<label class="btn btn-secondary" onclick="update_parser('yohoho')">
+							<input type="radio" name="stype">YoHoHo
+						</label>
+						<label class="btn btn-secondary" onclick="update_parser('rutor')">
+							<input type="radio" name="stype">Rutor
+						</label>
+						<label class="btn btn-secondary" onclick="update_parser('tparser')">
+							<input type="radio" name="stype">TParser
+						</label>
+                	</div>
 				</div>
-				<div class="col-sm-4">
-					<div class="form-check">
-						<input id="SearchTV" checked="checked" class="form-check-input" type="checkbox" autocomplete="off">
-						<label for="SearchTV" class="active">Search TV</label>
-					</div>
+			{{end}}
+				<div class="col-auto">
+					<div class="btn-group">
+						<a class="btn btn-secondary" href="?vt=movie">Movies</a>
+						<a class="btn btn-secondary" href="?vt=show">Shows</a>
+						<a class="btn btn-secondary" href="?vt=torrent">Torrents</a>
+                	</div>
 				</div>
 			</div>
 		</div>
@@ -138,20 +147,42 @@ var searchPage = `
         </div>
 
         <div id="sbFilter">
-            <button class="btn btn-primary w-100" type="button" data-toggle="collapse" data-target="#filter">
-                Filter
-            </button>
-            <div class="collapse" id="filter">
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    <label class="btn btn-secondary active">
-                        <input type="radio" name="options" id="asc" autocomplete="off" checked>Ascend &lt;
-                    </label>
-                    <label class="btn btn-secondary">
-                        <input type="radio" name="options" id="desc" autocomplete="off">Descend &gt;
-                    </label>
-                </div>
-                <div class="container" id="genres"></div>
-            </div>
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-auto">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Year</div>
+							</div>
+							<select id="fYear">
+								<option></option>
+								{{range .Years}}<option>{{.}}</option>{{end}}
+							</select>
+						</div>
+					</div>
+					<div class="col-auto">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Sort</div>
+							</div>
+							<select id="fSort">
+								<option></option>
+								{{range .Sorts}}<option>{{.}}</option>{{end}}
+							</select>
+						</div>
+					</div>
+					<div class="col w-100">
+						<button class="btn btn-primary w-100" type="button" data-toggle="collapse" data-target="#fGenres">
+							Genres
+						</button>
+						<div class="collapse" id="fGenres">
+							{{range .Genres}}
+								<label><input class="gcheckbox" type="checkbox" id="g{{.ID}}">{{.Name}}</label>
+							{{end}}
+						</div>
+					</div>
+				</div>
+			</div>
         </div>
 
         <br>
@@ -159,8 +190,31 @@ var searchPage = `
         <button id="search" class="btn btn-primary w-100" type="button">Search</button>
         <br>
 		<br>
-        <div id="movies" class="thumbnail-mousey"></div>
-		<div id="torrents" class="content"></div>
+		{{if not .IsTorrent}}
+        <div id="movies" class="thumbnail-mousey">
+		{{range .Items}}
+			<div id="m{{.ID}}" onclick="showModal('{{.Name}}','{{.Overview}}','{{.Year}}','{{.Seasons}}','', '{{.Backdrop}}')">
+				<div class="thumbnail shadow">
+					<h3>
+						{{.Name}} ({{.Year}})<br>
+						<small>{{range $index, $gen := .Genres}}{{if $index}},{{end}} {{$gen.Name}}{{end}}</small>
+					</h3>
+					<img class="img-responsive" src="{{.Poster}}">
+				</div>
+			</div>
+    	{{end}}	
+		</div>
+		{{end}}
+		{{if .IsTorrent}}
+		<div id="torrents" class="content">
+			{{range .Items}}
+			<div class="btn-group d-flex" role="group">
+				<button type="button" class="btn btn-secondary wrap w-100" onclick="doTorrent('{{.OriginalName}}', this)"><i class="fas fa-plus"></i>{{.Name}} {{.Year}}{{if gt .Seasons -1}} | ▲ {{.Seasons}} | ▼ {{.Episodes}}{{end}}</button>
+				<a type="button" class="btn btn-secondary" href="/torrent/play?link={{.OriginalName}}&m3u=true">...</a>
+			</div>
+			{{end}}
+		</div>
+		{{end}}
         <br>
         <div id="pagesBlock">
             <ul id="pages" class="pagination justify-content-center flex-wrap">
@@ -185,6 +239,18 @@ var searchPage = `
 				<div class="modal-body">
 					<small id="infoOverview"></small>
 					<div style="clear:both"></div>
+					<div class="btn-group btn-group-toggle" data-toggle="buttons">
+						<label class="btn btn-primary" onclick="update_parser('yohoho')">
+							<input type="radio" name="stype">YoHoHo
+						</label>
+						<label class="btn btn-primary" onclick="update_parser('rutor')">
+							<input type="radio" name="stype">Rutor
+						</label>
+						<label class="btn btn-primary" onclick="update_parser('tparser')">
+							<input type="radio" name="stype">TParser
+						</label>
+					</div>
+					<br>
 					<div id="seasonsButtons" class="btn-group flex-wrap"></div>
 					<div id="infoTorrents"></div>
 				</div>
@@ -197,50 +263,116 @@ var searchPage = `
 			
     <script>
         $(document).ready(function() {
-            updateGenres();
-            updateUI();
+            $('#sbName').show(0);
+			$('#sbFilter').hide(0);
+			
+			var params = new URLSearchParams(document.location.search.substring(1));
+			
+			if (params.get('type')=='discover')
+				update_search(1);
+			
+			if (params.get('sort_by'))
+				$('#fSort').val(params.get('sort_by'));
+			
+			if (params.get('primary_release_year'))
+				$('#fYear').val(params.get('primary_release_year'));
+			
+			if (params.get('with_genres')){
+				var genres = params.get('with_genres').split(',');
+				genres.forEach(function(genre){
+					$('#g'+genre).prop("checked", true);
+				});
+			}
+			
+			if (params.get('query'))
+				$('#sName').val(params.get('query'));
+			
+			{{if .IsTorrent}}
+			if (params.get('parser'))
+				parser = params.get('parser');
+			{{end}}
         });
-
+			
+		{{if not .IsTorrent}}
+		var searchType = 0;
+			
+		function update_search(stype){
+			searchType = stype;
+			if (stype==1){
+				$('#sbName').hide(200);
+				$('#sbFilter').show(200);
+			}else{
+				$('#sbName').show(200);
+				$('#sbFilter').hide(200);
+			}
+		}
+		{{end}}
+		var parser= "yohoho";
+			
+		function update_parser(pars){
+			parser = pars;
+		}
+		
         $("#sName").keyup(function(event) {
             if (event.keyCode === 13)
                 $("#search").click();
         });
 
         $("#search").click(function() {
-            page = 1;
             search();
         });
-
-        var selectSearchType = $('#sType')[0].selectedIndex;
-        $('#sType').on('change', function() {
-            updateUI();
-        });
-
-        var page = 1;
-        var pages = 1;
-
-        function goPage(val) {
-            if (page == val)
-                return;
-            page = val;
-            searchMovies();
-        }
-
-        function updateUI() {
-            selectSearchType = $('#sType')[0].selectedIndex;
-            if (selectSearchType == 0 || selectSearchType == 3) {
-                $('#sbName').show(200);
-                $('#sbFilter').hide(200);
-            } else if (selectSearchType == 1) {
-                $('#sbName').hide(200);
-                $('#sbFilter').hide(200);
-            } else if (selectSearchType == 2) {
-                $('#sbName').hide(200);
-                $('#sbFilter').show(200);
-            }
-            updatePages();
-        }
-
+		
+		function search(){
+			var params = new URLSearchParams(document.location.search.substring(1));
+			var qparam = [];
+			var vt = params.get("vt");
+			if (vt != null)
+				qparam.push('vt='+vt);
+			{{if not .IsTorrent}}
+			var lang = params.get("language");
+			if (lang != null) 
+				qparam.push('language='+lang);
+			
+			if (searchType==1){
+				qparam.push('type=discover');
+				var year = $("#fYear option:selected").text();
+				var sort = $("#fSort option:selected").text();
+			
+				var genres = [];
+				$('.gcheckbox').each(function(i,obj) {
+					if ($(obj).prop("checked")){
+       					var gid = $(obj).attr('id').substring(1);
+						genres.push(gid);
+					}
+  				});
+			
+				if (year)
+					qparam.push('primary_release_year='+year);
+				if (sort)
+					qparam.push('sort_by='+sort);
+				if (genres.length>0)
+					qparam.push('with_genres='+genres.join(","));
+				window.location.href = '/search?'+qparam.join('&');
+			}else{
+				qparam.push('type=search');
+				var query = $('#sName').val();
+				if (query){
+					qparam.push('query='+query);
+					window.location.href = '/search?'+qparam.join('&');
+				}
+			}
+			{{end}}
+			{{if .IsTorrent}}
+				if (parser)
+					qparam.push('parser='+parser);
+				var query = $('#sName').val();
+				if (query){
+					qparam.push('query='+query);
+					window.location.href = '/search?'+qparam.join('&');
+				}
+			{{end}}
+		}
+			
         function updatePages() {
             if (pages == 1) {
                 $('#pagesBlock').hide(0);
@@ -249,7 +381,7 @@ var searchPage = `
                 $('#pagesBlock').show(0);
             $('#pages').empty();
             var html = "";
-            for (i = 1; i <= pages; i++) {
+            for (i = 1; i <= {{.Pages}}; i++) {
                 if (i == page)
                     html += '<li class="page-item active"><button class="page-link">' + i + '</button></li>';
                 else
@@ -257,125 +389,6 @@ var searchPage = `
             }
             $(html).appendTo("#pages");
         }
-
-        function updateGenres() {
-            $.post('/search/genres')
-                .done(function(data) {
-                    $('#genres').empty();
-                    var html = '<div class="row"><div class="col">With genre</div><div class="col">Without genre</div></div>';
-                    for (var key in data) {
-                        var gen = data[key];
-                        html += '<div class="row"><div class="col">';
-                        html += '<input id="wg' + gen.ID + '" class="form-check-input with_genre" type="checkbox" autocomplete="off">';
-                        html += '<label for="wg' + gen.ID + '">' + gen.Name + '</label>';
-                        html += '</div><div class="col">';
-                        html += '<input id="wog' + gen.ID + '" class="form-check-input without_genre" type="checkbox" autocomplete="off">';
-                        html += '<label for="wog' + gen.ID + '">' + gen.Name + '</label>';
-                        html += '</div></div>';
-                    }
-                    $(html).appendTo('#genres');
-                }).fail(function(data) {
-                    alert(data.responseJSON.message);
-                });
-        }
-			
-		function search(){
-			if (selectSearchType<3)
-				searchMovies();
-			else
-				searchTorrents();
-		}
-
-        function searchMovies() {
-            $('#search').prop("disabled", true);
-            $('#pagesBlock').prop("disabled", true);
-
-            if (typeof page != "number")
-                page = 1;
-
-            var SRequest = {
-                "Name": $('#sName').val(),
-                "Type": selectSearchType,
-                "Page": page,
-				"SearchMovie": $("#SearchMovie").prop('checked'),
-				"SearchTV": $("#SearchTV").prop('checked')
-            };
-            if (selectSearchType == 2) {
-                SRequest.Filter = getFilter();
-            }
-
-            $.post('/search/request', JSON.stringify(SRequest))
-                .done(function(data) {
-                    var movies = $("#movies");
-					$("#torrents").empty();
-                    movies.empty();
-                    pages = data.Pages;
-                    for (var key in data.Movies) {
-                        var tor = data.Movies[key];
-						var movtype = "Фильм";
-                        if (tor.IsTv)
-                            movtype = "Сериал";
-						var name = tor.Title;
-						if (!name)
-							name = tor.OrigTitle;
-						var year = tor.Date.substring(0,4);
-						var overview = tor.Overview.replace(/"/g, '&quot;');
-						overview = overview.replace(/'/g, '&apos;');
-						overview = overview.replace(/\n/g, "<br>");
-						var genres = "";
-						if (tor.Genres)
-							genres = tor.Genres.join(", ");
-                        var html = '';
-						html+= '<div id="m'+tor.Id+'" onclick="showModal(\''+name+'\',\''+overview+'\',\''+year+'\','+tor.Seasons+',\'\', \''+tor.BackdropUrl+'\')">';
-						html+= '	<div class="thumbnail shadow">';
-						html+= '		<h3>';
-						html+= 				name + ' ('+ year +')<br>';
-					    html+= '			<small>'+ movtype +'<br>'+ genres +'</small>';
-						html+= '		</h3>';
-						html+= '		<img class="img-responsive" src="'+ tor.PosterUrl +'">';
-						html+= '	</div>';
-						html+= '</div>';
-                        $(html).appendTo(movies);
-                    }
-                    $('#search').prop("disabled", false);
-                    $('#pagesBlock').prop("disabled", false);
-                    updateUI();
-                })
-                .fail(function(data) {
-                    $('#search').prop("disabled", false);
-                    $('#pagesBlock').prop("disabled", false);
-                    updateUI();
-                    alert(data.responseJSON.message);
-                });
-        }
-			
-		function searchTorrents(){
-			$('#search').prop("disabled", true);
-            $('#pagesBlock').prop("disabled", true);
-			$.post('/search/torrents', $('#sName').val())
-			.done(function(torrList) {
-				$("#movies").empty();
-				var html = '<div class="btn-group-vertical d-flex" role="group">';
-				for (var key in torrList) {
-					torr = torrList[key];
-					var dl = '';
-					if (torr.PeersDl >= 0) {
-						dl = '| ▼ ' + torr.PeersDl;
-						dl += '| ▲ ' + torr.PeersUl;
-					}
-					html += '<button type="button" class="btn btn-secondary wrap w-100" onclick="doTorrent(\'' + torr.Magnet + '\', this)"><i class="fas fa-plus"></i> ' + torr.Name + " " + torr.Size + dl +'</button>';
-				}
-				html += '</div>';
-				$('#torrents').html(html);
-				$('#search').prop("disabled", false);
-            	$('#pagesBlock').prop("disabled", false);
-			})
-			.fail(function(data) {
-				$('#torrents').text(data.responseJSON.message);
-				$('#search').prop("disabled", false);
-            	$('#pagesBlock').prop("disabled", false);
-			});
-		}
 			
 		function showModal(Name, Overview, Year, SeasonsCount, Season, Backdrop){
 			$('#infoModal').modal('show');
@@ -397,55 +410,27 @@ var searchPage = `
 			}else{
 				$('#seasonsButtons').empty();
 			}
-			$.post('/search/torrents', fndStr)
+			$.get('/search/torrent?query='+fndStr+'&parser='+parser)
                 .done(function(torrList) {
-					var html = '<div class="btn-group-vertical d-flex" role="group">';
+					var html = '';
 					for (var key in torrList) {
 						torr = torrList[key];
 						var dl = '';
 						if (torr.PeersDl >= 0) {
-							dl = '| ▼ ' + torr.PeersDl;
 							dl += '| ▲ ' + torr.PeersUl;
+							dl += '| ▼ ' + torr.PeersDl;
 						}
+						html += '<div class="btn-group d-flex" role="group">'
 						html += '<button type="button" class="btn btn-secondary wrap w-100" onclick="doTorrent(\'' + torr.Magnet + '\', this)"><i class="fas fa-plus"></i> ' + torr.Name + " " + torr.Size + dl +'</button>';
+						html += '<a type="button" class="btn btn-secondary" href="/torrent/play?link='+encodeURIComponent(torr.Magnet)+'&m3u=true">...</a>'
+						html += '</div>';
 					}
-					html += '</div>';
 					$('#infoTorrents').html(html);
 				})
 				.fail(function(data) {
 					$('#infoTorrents').text(data.responseJSON.message);
 				});
 		}
-
-        function getFilter() {
-            var asc = $("#asc").prop("checked");
-            var withg = [];
-            var withoutg = [];
-            $('.with_genre').each(function() {
-                switch ($(this).prop("type")) {
-                    case "checkbox":
-                        if ($(this).prop("checked"))
-                            withg.push(+$(this).prop("id").replace('wg', ''));
-                        break;
-                }
-            });
-            $('.without_genre').each(function() {
-                switch ($(this).prop("type")) {
-                    case "checkbox":
-                        if ($(this).prop("checked"))
-                            withoutg.push(+$(this).prop("id").replace('wog', ''));
-                        break;
-                }
-            });
-            return {
-                "SortAsc": asc,
-                "SortBy": "popularity",
-                "DateLte": "",
-                "DateGte": "",
-                "WithGenres": withg,
-                "WithoutGenres": withoutg
-            };
-        }
 
         function doTorrent(magnet, elem) {
             $(elem).prop("disabled", true);

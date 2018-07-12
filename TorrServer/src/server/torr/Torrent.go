@@ -187,11 +187,6 @@ func (t *Torrent) expired() bool {
 func (t *Torrent) Files() []*torrent.File {
 	if t.Torrent != nil && t.Torrent.Info() != nil {
 		files := t.Torrent.Files()
-		if len(files) > 1 {
-			sort.Slice(files, func(i, j int) bool {
-				return files[i].Path() < files[j].Path()
-			})
-		}
 		return files
 	}
 	return nil
@@ -391,6 +386,9 @@ func (t *Torrent) Stats() TorrentStats {
 				Length: f.Length(),
 			})
 		}
+		sort.Slice(st.FileStats, func(i, j int) bool {
+			return st.FileStats[i].Path < st.FileStats[j].Path
+		})
 	}
 	return st
 }

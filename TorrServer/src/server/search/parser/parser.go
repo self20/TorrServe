@@ -1,4 +1,4 @@
-package provider
+package parser
 
 import (
 	"fmt"
@@ -12,11 +12,6 @@ import (
 	"golang.org/x/text/transform"
 )
 
-type Options struct {
-	BaseUrl string
-	Mirrors []string
-}
-
 type Torrent struct {
 	Name    string
 	Magnet  string
@@ -25,9 +20,8 @@ type Torrent struct {
 	PeersDl int
 }
 
-type Provider interface {
+type Parser interface {
 	Search(findString string) ([]*Torrent, error)
-	FindMirror()
 }
 
 func readPage(url string) (string, int, error) {

@@ -152,6 +152,7 @@ var settingsPage = `
          
             $.post("/settings/write", JSON.stringify(data))
                 .done(function(data) {
+         			restartService();
                     alert(data);
                 })
                 .fail(function(data) {

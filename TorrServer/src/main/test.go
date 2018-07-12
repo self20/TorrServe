@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"sync"
 	"time"
+
+	"server/utils"
 
 	"github.com/anacrolix/torrent"
 )
@@ -47,12 +50,22 @@ func test() {
 
 	go func() {
 		cl := t.Closed()
+		lastTimeSpeed := time.Now()
+		DownloadSpeed := 0.0
+		BytesReadUsefulData := int64(0)
 		for {
 			select {
 			case <-cl:
 				return
 			default:
 				client.WriteStatus(os.Stdout)
+				st := t.Stats()
+				deltaDlBytes := st.BytesReadUsefulData.Int64() - BytesReadUsefulData
+				deltaTime := time.Since(lastTimeSpeed).Seconds()
+				DownloadSpeed = float64(deltaDlBytes) / deltaTime
+				BytesReadUsefulData = st.BytesReadUsefulData.Int64()
+				lastTimeSpeed = time.Now()
+				fmt.Println("DL speed:", utils.Format(DownloadSpeed))
 			}
 			time.Sleep(time.Second)
 		}

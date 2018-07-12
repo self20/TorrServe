@@ -29,6 +29,15 @@ var params args
 func main() {
 	//test()
 	//return
+	//for _, g := range tmdb.GetMovieGenres("ru") {
+	//	fmt.Println(g.Name, g.ID)
+	//}
+	//return
+
+	//movs, _ := tmdb.DiscoverShows(map[string]string{}, 1)
+	//js, _ := json.MarshalIndent(movs, "", " ")
+	//fmt.Println(string(js))
+	//return
 
 	arg.MustParse(&params)
 

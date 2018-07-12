@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"fmt"
+	"net/url"
 
 	"server/settings"
 	"server/torr"
@@ -30,13 +31,14 @@ func MakeM3UTorrent(tor *settings.Torrent, host string) string {
 	return m3u
 }
 
-func MakeM3UPlayList(tor torr.TorrentStats, host string) string {
+func MakeM3UPlayList(tor torr.TorrentStats, magnet string, host string) string {
 	m3u := "#EXTM3U\n"
 
 	for _, f := range tor.FileStats {
 		if GetMimeType(f.Path) != "*/*" {
 			m3u += "#EXTINF:-1," + f.Path + "\n"
-			m3u += host + "/torrent/play?link=" + tor.Hash + "&file=" + fmt.Sprint(f.Id) + "\n\n"
+			mag := url.QueryEscape(magnet)
+			m3u += host + "/torrent/play?link=" + mag + "&file=" + fmt.Sprint(f.Id) + "\n\n"
 		}
 	}
 	return m3u

@@ -511,7 +511,8 @@ func torrentPlay(c echo.Context) error {
 	}
 
 	if mm3u == "true" {
-		m3u := helpers.MakeM3UPlayList(tor.Stats(), c.Scheme()+"://"+c.Request().Host)
+		mt := tor.Torrent.Metainfo()
+		m3u := helpers.MakeM3UPlayList(tor.Stats(), mt.Magnet(tor.Name(), tor.Hash()).String(), c.Scheme()+"://"+c.Request().Host)
 		c.Response().Header().Set("Content-Type", "audio/x-mpegurl")
 		name := utils.FileToLink(tor.Name()) + ".m3u"
 		c.Response().Header().Set("Content-Disposition", `attachment; filename="`+name+`"`)
@@ -535,11 +536,7 @@ func torrentPlay(c echo.Context) error {
 	}
 
 	fileInd, _ := strconv.Atoi(qfile)
-	if fileInd < 0 || fileInd >= len(files) {
-		return c.JSON(http.StatusOK, getTorPlayState(tor))
-	}
-
-	file := helpers.FindFile(files[fileInd].Id, tor)
+	file := helpers.FindFile(fileInd, tor)
 	if file == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprint("File", files[fileInd], "not found in torrent", tor.Name()))
 	}

@@ -1,25 +1,19 @@
-package provider
+package parser
 
 import (
 	"fmt"
-	"math/rand"
 	"net/url"
 	"regexp"
 	"strings"
-	"time"
 )
 
 type YoHoHo struct {
-	opt     Options
-	antiBan bool
+	url string
 }
 
-func NewYHH(opt Options) *YoHoHo {
+func NewYHH() *YoHoHo {
 	p := new(YoHoHo)
-	p.opt = opt
-	if p.opt.BaseUrl == "" {
-		p.opt.BaseUrl = "https://4h0y.yohoho.cc"
-	}
+	p.url = "https://4h0y.yohoho.cc"
 	return p
 }
 
@@ -28,22 +22,17 @@ func (p *YoHoHo) Search(findString string) ([]*Torrent, error) {
 	return p.findTorrents(findString)
 }
 
-func (p *YoHoHo) FindMirror() {
-
-}
+func (p *YoHoHo) FindMirror() {}
 
 func (p *YoHoHo) findTorrents(name string) ([]*Torrent, error) {
 	t := &url.URL{Path: name}
 	ename := t.String()
-	url := fmt.Sprintf("%s/?title=%s", p.opt.BaseUrl, ename)
+	url := fmt.Sprintf("%s/?title=%s", p.url, ename)
 	body, _, err := readPage(url)
 	if err != nil {
 		return nil, err
 	}
-	if p.antiBan {
-		sp := rand.Intn(int(time.Millisecond * 600))
-		time.Sleep(time.Millisecond*500 + time.Duration(sp))
-	}
+
 	return p.parse(body)
 }
 

@@ -32,9 +32,6 @@ func settingsWrite(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	settings.SaveSettings()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
 	return c.JSON(http.StatusOK, "Ok")
 }
 

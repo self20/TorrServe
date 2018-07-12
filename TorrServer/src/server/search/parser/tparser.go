@@ -1,4 +1,4 @@
-package provider
+package parser
 
 import (
 	"encoding/json"
@@ -14,8 +14,6 @@ import (
 )
 
 type TParser struct {
-	opt     Options
-	antiBan bool
 }
 
 var jsNum = map[string]string{
@@ -27,30 +25,21 @@ var jsNum = map[string]string{
 	"10": "5",
 }
 
-func NewTParser(opt Options) *TParser {
+func NewTParser() *TParser {
 	p := new(TParser)
-	p.opt = opt
-	if p.opt.BaseUrl == "" {
-		p.opt.BaseUrl = "http://js$.tparser.org/js$/$$.tor.php?callback=one&jsonpx=$$$&s=1"
-	}
 	return p
 }
 
 func (p *TParser) FindMirror() {}
 
-func (p *TParser) Search(name, oname string) ([]*Torrent, error) {
-	fmt.Println("Find torrents:", name, "/", oname)
+func (p *TParser) Search(findString string) ([]*Torrent, error) {
+	fmt.Println("Find torrents:", findString)
 	urls := make([]string, 0)
 
 	for k, v := range jsNum {
 		nurl := fmt.Sprintf("http://js%v.tparser.org/js%v/%v.tor.php?callback=one&jsonpx=%v&s=1",
-			v, v, k, url.PathEscape(name))
+			v, v, k, url.PathEscape(findString))
 		urls = append(urls, nurl)
-		if name != oname {
-			nourl := fmt.Sprintf("http://js%v.tparser.org/js%v/%v.tor.php?callback=one&jsonpx=%v&s=1",
-				v, v, k, url.PathEscape(oname))
-			urls = append(urls, nourl)
-		}
 	}
 
 	return p.findTorrents(urls)
@@ -99,20 +88,6 @@ type tparserJS struct {
 		D    string `json:"d"`
 	} `json:"sr"`
 }
-
-/*
-"name": "<b>Место</b> <b>встречи</b> / The Place (Паоло Дженовезе / Paolo Genovese) [2017 г., драма, BDRip 720p] Dub (iTunes) + Original (Ita) + Sub (Eng)",
-"size": "4.72",
-"s": "351",
-"l": "6",
-"link": "http://underverse.me/viewtopic.php?t=98911",
-"t": "GB",
-"sk": "4949278,72",
-"img": "9",
-"k": "Зарубежное кино [HDDVDRip / BDRip / WEB-DL / HDTV 1080/720р]",
-"z": "1",
-"d": "98911"
-*/
 
 func (p *TParser) parse(buf string) ([]*Torrent, error) {
 	buf = buf[4 : len(buf)-1]
