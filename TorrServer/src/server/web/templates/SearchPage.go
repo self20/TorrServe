@@ -102,10 +102,10 @@ var searchPage = `
 			{{if not .IsTorrent}}
 				<div class="col-auto">
 					<div class="btn-group btn-group-toggle" data-toggle="buttons">
-						<label class="btn btn-secondary" onclick="update_search(0)">
+						<label id="stFBN" class="btn btn-secondary" onclick="update_search(0)">
 							<input type="radio" name="stype">Find by name
 						</label>
-						<label class="btn btn-secondary" onclick="update_search(1)">
+						<label id="stDiscover" class="btn btn-secondary" onclick="update_search(1)">
 							<input type="radio" name="stype">Discover
 						</label>
                 	</div>
@@ -128,9 +128,9 @@ var searchPage = `
 			{{end}}
 				<div class="col-auto">
 					<div class="btn-group">
-						<a class="btn btn-secondary" href="?vt=movie">Movies</a>
-						<a class="btn btn-secondary" href="?vt=show">Shows</a>
-						<a class="btn btn-secondary" href="?vt=torrent">Torrents</a>
+						<a id="stMovies" class="btn btn-secondary" href="?vt=movie">Movies</a>
+						<a id="stShows" class="btn btn-secondary" href="?vt=show">Shows</a>
+						<a id="stTorrents" class="btn btn-secondary" href="?vt=torrent">Torrents</a>
                 	</div>
 				</div>
 			</div>
@@ -262,6 +262,7 @@ var searchPage = `
 	</div>
 			
     <script>
+		var currentPage = 1;
         $(document).ready(function() {
             $('#sbName').show(0);
 			$('#sbFilter').hide(0);
@@ -291,6 +292,24 @@ var searchPage = `
 			if (params.get('parser'))
 				parser = params.get('parser');
 			{{end}}
+			
+			{{if not .IsTorrent}}
+			if (params.get('page'))
+				currentPage = params.get('page');
+			updatePages();
+			{{end}}
+			
+			if (params.get('vt')=="movie" || !params.get('vt'))
+				$('#stMovies').addClass("active");
+			if (params.get('vt')=="show")
+				$('#stShows').addClass("active");
+			if (params.get('vt')=="torrent")
+				$('#stTorrents').addClass("active");
+			
+			if (params.get('type')=="discover" || !params.get('type'))
+				$('#stDiscover').click();
+			if (params.get('type')=="search")
+				$('#stFBN').click();
         });
 			
 		{{if not .IsTorrent}}
@@ -372,6 +391,15 @@ var searchPage = `
 				}
 			{{end}}
 		}
+		
+		{{if not .IsTorrent}}
+		function goPage(page){
+			var params = new URLSearchParams(document.location.search.substring(1));
+			if (params.get('page')!=page){
+				params.set('page', page);
+				window.location.href = '/search?'+params.toString();
+			}
+		}
 			
         function updatePages() {
             if (pages == 1) {
@@ -382,13 +410,14 @@ var searchPage = `
             $('#pages').empty();
             var html = "";
             for (i = 1; i <= {{.Pages}}; i++) {
-                if (i == page)
+                if (i == currentPage)
                     html += '<li class="page-item active"><button class="page-link">' + i + '</button></li>';
                 else
                     html += '<li class="page-item"><button class="page-link" onclick="goPage(' + i + ')">' + i + '</button></li>';
             }
             $(html).appendTo("#pages");
         }
+		{{end}}
 			
 		function showModal(Name, Overview, Year, SeasonsCount, Season, Backdrop){
 			$('#infoModal').modal('show');

@@ -270,7 +270,10 @@ func movToPageInfo(c echo.Context, movies tmdb.Movies, all int) *PageInfo {
 	}
 
 	limit := tmdb.ResultsPerPage * tmdb.PagesAtOnce
-	pi.Pages = all / limit
+	pi.Pages = all/limit + 1
+	if pi.Pages > 1000 {
+		pi.Pages = 1000
+	}
 
 	for _, m := range movies {
 		ii := new(ItemInfo)
@@ -305,9 +308,12 @@ func tvToPageInfo(c echo.Context, shows tmdb.Shows, all int) *PageInfo {
 	pi := new(PageInfo)
 	pi.Genres = tmdb.GetTVGenres(c.QueryParam("language"))
 	pi.Sorts = []string{"vote_average.asc", "vote_average.desc", "vote_average.asc", "first_air_date.desc", "first_air_date.asc", "popularity.desc", "popularity.asc"}
-	limit := tmdb.ResultsPerPage * tmdb.PagesAtOnce
-	pi.Pages = all / limit
 
+	limit := tmdb.ResultsPerPage * tmdb.PagesAtOnce
+	pi.Pages = all/limit + 1
+	if pi.Pages > 1000 {
+		pi.Pages = 1000
+	}
 	for _, s := range shows {
 		ii := new(ItemInfo)
 		ii.ID = s.ID

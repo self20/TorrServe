@@ -275,6 +275,7 @@ func listMovies(endpoint string, params napping.Params, page int) (Movies, int) 
 				return nil
 			})
 			if results != nil {
+				totalResults = results.TotalResults
 				var wgItems sync.WaitGroup
 				wgItems.Add(len(results.Results))
 				for m, movie := range results.Results {
