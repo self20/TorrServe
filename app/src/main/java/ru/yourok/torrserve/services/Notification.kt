@@ -14,6 +14,7 @@ import ru.yourok.torrserve.activitys.MainActivity
 import ru.yourok.torrserve.activitys.ViewActivity
 import ru.yourok.torrserve.serverhelper.Preferences
 import ru.yourok.torrserve.serverhelper.ServerApi
+import ru.yourok.torrserve.serverhelper.server.TorrentPreload
 import ru.yourok.torrserve.utils.Utils
 import kotlin.concurrent.thread
 
@@ -78,15 +79,15 @@ object NotificationServer {
         thread {
             var isShow = false
             while (update) {
-                val info = ServerApi.info(this.hash)
-                info?.let {
-                    var msg = context.getString(R.string.peers) + ": [" + it.ConnectedSeeders.toString() + "] " + it.ActivePeers.toString() + " / " + it.TotalPeers.toString() + "\n" +
-                            context.getString(R.string.download_speed) + ": " + Utils.byteFmt(it.DownloadSpeed)
-                    if (it.UploadSpeed > 0)
-                        msg += "\n" + context.getString(R.string.upload_speed) + ": " + Utils.byteFmt(it.UploadSpeed)
+                try {
+                    val info = ServerApi.stat(this.hash)
+                    var msg = context.getString(R.string.peers) + ": [" + info.ConnectedSeeders().toString() + "] " + info.ActivePeers().toString() + " / " + info.TotalPeers().toString() + "\n" +
+                            context.getString(R.string.download_speed) + ": " + Utils.byteFmt(info.DownloadSpeed())
+                    if (info.UploadSpeed() > 0)
+                        msg += "\n" + context.getString(R.string.upload_speed) + ": " + Utils.byteFmt(info.UploadSpeed())
 
-                    if (info.IsPreload && !isShow && info.PreloadLength > 0) {
-                        msg += "\n" + context.getString(R.string.buffer) + ": " + (info.PreloadSize * 100 / info.PreloadLength).toString() + "% " + Utils.byteFmt(info.PreloadSize) + "/" + Utils.byteFmt(info.PreloadLength)
+                    if (info.TorrentStatus() == TorrentPreload && !isShow && info.PreloadSize() > 0) {
+                        msg += "\n" + context.getString(R.string.buffer) + ": " + (info.PreloadedBytes() * 100 / info.PreloadSize()).toString() + "% " + Utils.byteFmt(info.PreloadedBytes()) + "/" + Utils.byteFmt(info.PreloadSize())
                         if (Preferences.isShowPreloadWnd()) {
                             val intent = Intent(App.getContext(), ViewActivity::class.java)
                             intent.putExtra("Preload", this.hash)
@@ -96,8 +97,7 @@ object NotificationServer {
                         }
                     }
                     build(context, msg)
-
-                } ?: let {
+                } catch (e: Exception) {
                     build(context, context.getText(R.string.stat_server_is_running).toString())
                 }
                 Thread.sleep(1000)

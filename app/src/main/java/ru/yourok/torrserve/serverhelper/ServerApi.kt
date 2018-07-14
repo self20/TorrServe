@@ -3,10 +3,11 @@ package ru.yourok.torrserve.serverhelper
 import android.content.Intent
 import android.net.Uri
 import ru.yourok.torrserve.App
-import ru.yourok.torrserve.R
+import ru.yourok.torrserve.serverhelper.server.Settings
+import ru.yourok.torrserve.serverhelper.server.Torrent
+import ru.yourok.torrserve.serverhelper.server.TorrentStats
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import kotlin.concurrent.thread
 
@@ -17,24 +18,22 @@ import kotlin.concurrent.thread
 
 
 object ServerApi {
-    fun add(link: String, save: Boolean): List<Torrent> {
+    fun add(link: String, save: Boolean): String {
         if (link.startsWith("magnet:", true))
-            return listOf(addLink(fixLink(link), save))
+            return addLink(ServerRequests.fixLink(link), save)
         else if (
                 link.startsWith("http:", true) ||
                 link.startsWith("https:", true))
-            return listOf(addLink(link, save))
+            return addLink(link, save)
         else
             return addFile(link, save)
     }
 
-    private fun addLink(link: String, save: Boolean): Torrent {
-        val addr = Preferences.getServerAddress()
-        val tor = ServerRequest.serverAdd(addr, link, save)
-        return tor
+    private fun addLink(link: String, save: Boolean): String {
+        return ServerRequests.addTorrent(link, save)
     }
 
-    private fun addFile(path: String, save: Boolean): List<Torrent> {
+    private fun addFile(path: String, save: Boolean): String {
         var link = path
         var isRemove = false
         if (link.startsWith("content://", true)) {
@@ -55,86 +54,45 @@ object ServerApi {
         if (link.startsWith("file://", true))
             link = Uri.parse(link).path
 
-        val addr = Preferences.getServerAddress()
-        val tor = ServerRequest.serverAddFile(addr, link, save)
+        val hash = ServerRequests.uploadFile(link, save)
         if (isRemove)
             File(link).delete()
-        return tor
+        return hash
     }
 
-    fun rem(hash: String): String {
-        var addr = Preferences.getServerAddress()
-        try {
-            ServerRequest.serverRem(addr, hash)
-            return ""
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return e.message ?: "Error remove torrent"
-        }
+    fun rem(hash: String) {
+        ServerRequests.removeTorrent(hash)
     }
 
-    fun get(hash: String): Torrent? {
-        val addr = Preferences.getServerAddress()
-        try {
-            return ServerRequest.serverGet(addr, hash)
-        } catch (e: Exception) {
-        }
-        return null
+    fun get(hash: String): Torrent {
+        return ServerRequests.getTorrent(hash)
     }
 
     fun list(): List<Torrent> {
-        val retArr = mutableListOf<Torrent>()
-        try {
-            val addr = Preferences.getServerAddress()
-            return ServerRequest.serverList(addr)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return retArr
+        return ServerRequests.listTorrent()
     }
 
-    fun info(hash: String): Info? {
-        if (hash.isEmpty())
-            return null
-        try {
-            val addr = Preferences.getServerAddress()
-            return ServerRequest.serverInfo(addr, hash)
-        } catch (e: Exception) {
-        }
-        return null
+    fun stat(hash: String): TorrentStats {
+        return ServerRequests.statTorrent(hash)
     }
 
     fun drop(hash: String) {
         if (hash.isEmpty())
             return
-        try {
-            val addr = Preferences.getServerAddress()
-            ServerRequest.serverDrop(addr, hash)
-        } catch (e: Exception) {
-        }
+        ServerRequests.dropTorrent(hash)
     }
 
-    fun preload(hash: String, fileLink: String): String {
-        if (hash.isEmpty() || fileLink.isEmpty())
-            return "empty torrent or file"
-        try {
-            val addr = Preferences.getServerAddress()
-            ServerRequest.serverPreload(addr, fileLink)
-            return ""
-        } catch (e: FileNotFoundException) {
-            return App.getContext().getString(R.string.error_torrent_not_found) + ": $hash | $fileLink"
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return e.message ?: "error preload torrent"
-        }
+    fun preload(fileLink: String) {
+        if (fileLink.isEmpty())
+            return
+        ServerRequests.preloadTorrent(fileLink)
     }
 
     fun echo(): Boolean {
-        var addr = Preferences.getServerAddress()
         var echo = false
         thread {
             try {
-                ServerRequest.serverEcho(addr)
+                ServerRequests.echo()
                 echo = true
             } catch (e: Exception) {
             }
@@ -142,49 +100,36 @@ object ServerApi {
         return echo
     }
 
-    fun readSettings(): ServerSettings? {
-        var sets: ServerSettings? = null
-        thread {
-            try {
-                sets = ServerRequest.readSettings()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }.join()
-        return sets
+    fun readSettings(): Settings {
+        return ServerRequests.readSettings()
     }
 
-    fun writeSettings(sets: ServerSettings): String {
-        var err = ""
-        thread {
-            try {
-                ServerRequest.writeSettings(sets)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                err = e.message ?: "error parse settings"
-            }
-        }.join()
-        return err
+    fun writeSettings(sets: Settings) {
+        ServerRequests.writeSettings(sets)
+    }
+
+    fun restartTorrentClient() {
+        ServerRequests.restartTorrentClient()
     }
 
     fun openPlayList(torrent: Torrent) {
-        if (torrent.Playlist.isEmpty()) {
+        if (torrent.Hash().isEmpty())
             return
-        }
-        val addr = Preferences.getServerAddress()
+
         val intent = Intent(Intent.ACTION_VIEW)
-        val url = Uri.parse(ServerRequest.joinUrl(addr, torrent.Playlist))
+        val url = Uri.parse(ServerRequests.getHostUrl(torrent.Hash()))
         intent.setDataAndType(url, "audio/x-mpegurl")
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra("title", torrent.Name)
-        intent.putExtra("name", torrent.Name)
+        if (torrent.Name().isNotEmpty()) {
+            intent.putExtra("title", torrent.Name())
+            intent.putExtra("name", torrent.Name())
+        }
         App.getContext().startActivity(intent)
     }
 
     fun openPlayList() {
-        val addr = Preferences.getServerAddress()
         val intent = Intent(Intent.ACTION_VIEW)
-        val url = Uri.parse(ServerRequest.joinUrl(addr, "/torrent/playlist.m3u"))
+        val url = Uri.parse(ServerRequests.getHostUrl("/torrent/playlist.m3u"))
         intent.setDataAndType(url, "audio/x-mpegurl")
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         intent.putExtra("title", "TorrServePlaylist")

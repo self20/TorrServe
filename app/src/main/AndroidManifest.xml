@@ -17,21 +17,21 @@
         android:name="android.hardware.touchscreen"
         android:required="false" />
 
-    <!--<application-->
-    <!--android:name=".App"-->
-    <!--android:allowBackup="true"-->
-    <!--android:icon="@drawable/torrserve_t"-->
-    <!--android:label="@string/app_name_test"-->
-    <!--android:supportsRtl="true"-->
-    <!--android:theme="@style/AppThemeDark">-->
-
     <application
         android:name=".App"
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
+        android:icon="@drawable/torrserve_t"
+        android:label="@string/app_name_test"
         android:supportsRtl="true"
         android:theme="@style/AppThemeDark">
+
+        <!--<application-->
+        <!--android:name=".App"-->
+        <!--android:allowBackup="true"-->
+        <!--android:icon="@drawable/ic_launcher"-->
+        <!--android:label="@string/app_name"-->
+        <!--android:supportsRtl="true"-->
+        <!--android:theme="@style/AppThemeDark">-->
         <receiver android:name=".services.BootCompletedReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -221,24 +221,24 @@
                 <data android:pathPattern=".*..*..*..*..*..*..*..*..*..*..*..*..*..*..*.torrent.*" />
             </intent-filter>
         </activity>
-        <!--<activity-->
-        <!--android:name=".activitys.AddDSActivity"-->
-        <!--android:excludeFromRecents="true"-->
-        <!--android:launchMode="singleInstance"-->
-        <!--android:label="@string/label_play"-->
-        <!--android:icon="@drawable/torrserve_p_t"-->
-        <!--android:configChanges="mcc|mnc|locale|orientation|screenLayout|screenSize|layoutDirection|fontScale"-->
-        <!--android:noHistory="true"-->
-        <!--android:theme="@style/MyDialog">-->
         <activity
             android:name=".activitys.AddDSActivity"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
             android:label="@string/label_play"
-            android:icon="@drawable/ic_launcher_p"
+            android:icon="@drawable/torrserve_p_t"
             android:configChanges="mcc|mnc|locale|orientation|screenLayout|screenSize|layoutDirection|fontScale"
             android:noHistory="true"
             android:theme="@style/MyDialog">
+            <!--<activity-->
+            <!--android:name=".activitys.AddDSActivity"-->
+            <!--android:excludeFromRecents="true"-->
+            <!--android:launchMode="singleInstance"-->
+            <!--android:label="@string/label_play"-->
+            <!--android:icon="@drawable/ic_launcher_p"-->
+            <!--android:configChanges="mcc|mnc|locale|orientation|screenLayout|screenSize|layoutDirection|fontScale"-->
+            <!--android:noHistory="true"-->
+            <!--android:theme="@style/MyDialog">-->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 

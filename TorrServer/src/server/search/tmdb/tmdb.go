@@ -452,7 +452,7 @@ func Find(externalID string, externalSource string) *FindResult {
 			rl.CoolDown(resp.HttpResponse().Header)
 			return ErrExceeded
 		} else if resp.Status() != 200 {
-			fmt.Println("Bad status finding tmdb item: %d", resp.Status())
+			fmt.Println("Bad status finding tmdb item:", resp.Status())
 		}
 
 		return nil

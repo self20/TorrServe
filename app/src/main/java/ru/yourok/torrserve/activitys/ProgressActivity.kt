@@ -9,10 +9,11 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import ru.yourok.torrserve.App
 import ru.yourok.torrserve.R
-import ru.yourok.torrserve.serverhelper.File
 import ru.yourok.torrserve.serverhelper.Preferences
 import ru.yourok.torrserve.serverhelper.ServerApi
-import ru.yourok.torrserve.serverhelper.Torrent
+import ru.yourok.torrserve.serverhelper.server.File
+import ru.yourok.torrserve.serverhelper.server.Torrent
+import ru.yourok.torrserve.serverhelper.server.TorrentWorking
 import ru.yourok.torrserve.services.NotificationServer
 import ru.yourok.torrserve.utils.Mime
 import ru.yourok.torrserve.utils.Utils
@@ -48,7 +49,7 @@ class ProgressActivity : AppCompatActivity() {
         thread {
             isClosed = false
             torrent?.let {
-                NotificationServer.Show(this, it.Hash)
+                NotificationServer.Show(this, it.Hash())
             }
 
             if (!isClosed && Preferences.isShowPreloadWnd()) {
@@ -73,49 +74,41 @@ class ProgressActivity : AppCompatActivity() {
         if (isPreload)
             torrent?.let {
                 thread {
-                    ServerApi.drop(it.Hash)
+                    ServerApi.drop(it.Hash())
                 }
             }
     }
 
 
     private fun waitPreload(): String {
-        var errMsg = ""
         torrent?.let { torrent ->
             file?.let { file ->
                 isPreload = true
                 val th = thread {
-                    errMsg = ServerApi.preload(torrent.Hash, file.Link)
-                    isPreload = false
+                    ServerApi.preload(file.Link)
                 }
+                Thread.sleep(1000)
                 while (isPreload) {
-                    Thread.sleep(1000)
-                    val info = ServerApi.info(torrent.Hash)
-                    if (info == null) {
+                    try {
+                        val stat = ServerApi.stat(torrent.Hash())
+                        if (stat.TorrentStatus() == TorrentWorking || stat.PreloadedBytes() > stat.PreloadSize())
+                            break
+
+                        var msg = ""
+                        var prc = 0
+                        if (stat.PreloadSize() > 0) {
+                            prc = (stat.PreloadedBytes() * 100 / stat.PreloadSize()).toInt()
+                            msg += getString(R.string.buffer) + ": " + (prc).toString() + "% " + Utils.byteFmt(stat.PreloadedBytes()) + "/" + Utils.byteFmt(stat.PreloadSize()) + "\n"
+                        }
+                        msg += getString(R.string.peers) + ": [" + stat.ConnectedSeeders().toString() + "] " + stat.ActivePeers().toString() + "/" + stat.TotalPeers().toString() + "\n"
+                        msg += getString(R.string.download_speed) + ": " + Utils.byteFmt(stat.DownloadSpeed()) + "/Sec"
+                        setMessage(msg, prc)
+                        Thread.sleep(100)
+                    } catch (e: Exception) {
                         Thread.sleep(1000)
-                        continue
                     }
-
-                    if (!info.IsGettingInfo && (!info.IsPreload || info.PreloadSize >= info.PreloadLength))
-                        return errMsg
-
-                    var msg = ""
-                    var prc = 0
-                    if (info.PreloadLength > 0) {
-                        prc = (info.PreloadSize * 100 / info.PreloadLength).toInt()
-                        msg += getString(R.string.buffer) + ": " + (prc).toString() + "% " + Utils.byteFmt(info.PreloadSize) + "/" + Utils.byteFmt(info.PreloadLength) + "\n"
-                    }
-                    msg += getString(R.string.peers) + ": [" + info.ConnectedSeeders.toString() + "] " + info.ActivePeers.toString() + "/" + info.TotalPeers.toString() + "\n"
-                    msg += getString(R.string.download_speed) + ": " + Utils.byteFmt(info.DownloadSpeed) + "/Sec"
-                    setMessage(msg, prc)
                 }
                 th.join(15000)
-                if (ServerApi.get(torrent.Hash) == null) {
-                    if (errMsg.isNotEmpty())
-                        return errMsg
-                    else
-                        return getString(R.string.error_open_torrent)
-                }
                 return ""
             }
         }

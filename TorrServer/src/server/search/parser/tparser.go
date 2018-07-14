@@ -33,7 +33,7 @@ func NewTParser() *TParser {
 func (p *TParser) FindMirror() {}
 
 func (p *TParser) Search(findString string) ([]*Torrent, error) {
-	fmt.Println("Find torrents:", findString)
+	fmt.Println("TParser finding:", findString)
 	urls := make([]string, 0)
 
 	for k, v := range jsNum {
@@ -54,7 +54,7 @@ func (p *TParser) findTorrents(urls []string) ([]*Torrent, error) {
 		if er != nil {
 			err = er
 		} else {
-			fmt.Println("Parse:", u)
+			//fmt.Println("Parse:", u)
 			tors, er := p.parse(body)
 			if err != nil {
 				err = er
@@ -125,7 +125,7 @@ func (p *TParser) parse(buf string) ([]*Torrent, error) {
 
 func (p *TParser) getMagnet(img, d string) (string, error) {
 	link := "http://tparser.org/magnet.php?t=" + strconv.Itoa(len(img)) + img + d
-	fmt.Println("Get magnet:", link)
+	//fmt.Println("Get magnet:", link)
 
 	req, err := http.NewRequest("GET", link, nil)
 	if err != nil {
@@ -147,7 +147,7 @@ func (p *TParser) getMagnet(img, d string) (string, error) {
 			mag = resp.Header.Get("Content-Location")
 		}
 		if mag != "" {
-			fmt.Println("Found magnet:", mag)
+			//fmt.Println("Found magnet:", mag)
 			return mag, nil
 		}
 	}

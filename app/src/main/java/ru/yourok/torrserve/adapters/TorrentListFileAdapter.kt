@@ -10,7 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import ru.yourok.torrserve.R
 import ru.yourok.torrserve.serverhelper.ServerApi
-import ru.yourok.torrserve.serverhelper.Torrent
+import ru.yourok.torrserve.serverhelper.server.Torrent
 import ru.yourok.torrserve.utils.Utils
 import kotlin.concurrent.thread
 
@@ -41,7 +41,7 @@ class TorrentListFileAdapter(val activity: Activity, val torrId: String) : BaseA
     override fun getView(index: Int, convertView: View?, viewGroup: ViewGroup): View {
         val vi: View = convertView ?: (activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.adapter_torrent_item_files, null)
         torrent?.let {
-            val file = it.Files[index]
+            val file = it.Files()[index]
             vi.findViewById<TextView>(R.id.textViewFileName).text = file.Name
             vi.findViewById<TextView>(R.id.textViewFileSize).text = Utils.byteFmt(file.Size)
             if (file.Viewed)
@@ -54,7 +54,7 @@ class TorrentListFileAdapter(val activity: Activity, val torrId: String) : BaseA
 
     override fun getItem(p0: Int): Any? {
         torrent?.let {
-            return it.Files[p0]
+            return it.Files()[p0]
         }
         return null
     }
@@ -64,6 +64,6 @@ class TorrentListFileAdapter(val activity: Activity, val torrId: String) : BaseA
     }
 
     override fun getCount(): Int {
-        return torrent?.Files?.size ?: 0
+        return torrent?.Files()?.size ?: 0
     }
 }

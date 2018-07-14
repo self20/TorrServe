@@ -9,7 +9,8 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import ru.yourok.torrserve.R
 import ru.yourok.torrserve.serverhelper.ServerApi
-import ru.yourok.torrserve.serverhelper.Torrent
+import ru.yourok.torrserve.serverhelper.server.Torrent
+import ru.yourok.torrserve.serverhelper.server.TorrentPreload
 import ru.yourok.torrserve.utils.Utils
 import kotlin.concurrent.thread
 
@@ -33,26 +34,33 @@ class TorrentListAdapter(val activity: Activity) : BaseAdapter() {
     }
 
     fun checkList() {
-        val tmpList = ServerApi.list()
-        if (tmpList != torrList) {
-            torrList = tmpList
-            activity.runOnUiThread {
-                notifyDataSetChanged()
+        try {
+            while (!ServerApi.echo()) {
+                Thread.sleep(1000)
             }
+            val tmpList = ServerApi.list()
+            if (tmpList != torrList) {
+                torrList = tmpList
+                activity.runOnUiThread {
+                    notifyDataSetChanged()
+                }
+            }
+        } catch (e: Exception) {
+
         }
     }
 
     override fun getView(index: Int, convertView: View?, viewGroup: ViewGroup): View {
         val vi: View = convertView ?: (activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.adapter_torrent_item, null)
         if (index in 0 until torrList.size) {
-            if (torrList[index].IsGettingInfo) {
-                vi.findViewById<TextView>(R.id.textViewTorrName).text = torrList[index].Name + " " + torrList[index].Hash
-                vi.findViewById<TextView>(R.id.textViewTorrSize).text = Utils.byteFmt(torrList[index].Length)
+            if (torrList[index].Status() == TorrentPreload) {
+                vi.findViewById<TextView>(R.id.textViewTorrName).text = torrList[index].Name() + " " + torrList[index].Hash()
+                vi.findViewById<TextView>(R.id.textViewTorrSize).text = Utils.byteFmt(torrList[index].Length())
                 vi.findViewById<TextView>(R.id.textViewTorrMagnet).text = activity.getText(R.string.connects_to_torrent)
             } else {
-                vi.findViewById<TextView>(R.id.textViewTorrName).text = torrList[index].Name
-                vi.findViewById<TextView>(R.id.textViewTorrSize).text = Utils.byteFmt(torrList[index].Length)
-                vi.findViewById<TextView>(R.id.textViewTorrMagnet).text = torrList[index].Magnet
+                vi.findViewById<TextView>(R.id.textViewTorrName).text = torrList[index].Name()
+                vi.findViewById<TextView>(R.id.textViewTorrSize).text = Utils.byteFmt(torrList[index].Length())
+                vi.findViewById<TextView>(R.id.textViewTorrMagnet).text = torrList[index].Magnet()
             }
         }
         return vi

@@ -90,11 +90,4 @@
         <item>Сейчас смотрят</item>
         <item>Искать по фильтру</item>
     </string-array>
-
-    <string name="strategy">Стратегия запроса</string>
-    <string-array name="strategy_num">
-        <item>1 Больше трафика</item>
-        <item>2 Средне трафика</item>
-        <item>3 Меньше трафика</item>
-    </string-array>
 </resources>

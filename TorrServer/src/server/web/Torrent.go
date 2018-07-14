@@ -33,6 +33,7 @@ func initTorrent(e *echo.Echo) {
 	e.GET("/torrent/restart", torrentRestart)
 
 	e.GET("/torrent/playlist/:hash/*", torrentPlayList)
+	e.GET("/torrent/playlist/:hash", torrentPlayList)
 	e.GET("/torrent/playlist.m3u", torrentPlayListAll)
 
 	e.GET("/torrent/play", torrentPlay)
@@ -52,21 +53,19 @@ type TorrentJsonResponse struct {
 	Name     string
 	Magnet   string
 	Hash     string
-	Length   int64
 	AddTime  int64
-	Size     int64
+	Length   int64
 	Status   torr.TorrentStatus
 	Playlist string
 	Files    []TorFile `json:",omitempty"`
 }
 
 type TorFile struct {
-	Name     string
-	Link     string
-	Preload  string
-	Playlist string
-	Size     int64
-	Viewed   bool
+	Name    string
+	Link    string
+	Preload string
+	Size    int64
+	Viewed  bool
 }
 
 func torrentAdd(c echo.Context) error {
@@ -611,7 +610,7 @@ func getTorrentJS(tor *settings.Torrent) (*TorrentJsonResponse, error) {
 	js.Magnet = tor.Magnet
 	js.Hash = tor.Hash
 	js.AddTime = tor.Timestamp
-	js.Size = tor.Size
+	js.Length = tor.Size
 	js.Playlist = "/torrent/playlist/" + tor.Hash + "/" + utils.FileToLink(tor.Name) + ".m3u"
 	var size int64 = 0
 	for _, f := range tor.Files {
@@ -625,7 +624,9 @@ func getTorrentJS(tor *settings.Torrent) (*TorrentJsonResponse, error) {
 		}
 		js.Files = append(js.Files, tf)
 	}
-	js.Length = size
+	if tor.Size == 0 {
+		js.Length = size
+	}
 	return js, nil
 }
 

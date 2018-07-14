@@ -29,18 +29,20 @@ object Utils {
     }
 
     fun getAppPath(): String {
-        val state = Environment.getExternalStorageState()
-        var filesDir: File?
-        if (Environment.MEDIA_MOUNTED.equals(state))
-            filesDir = App.getContext().getExternalFilesDir(null)
-        else
-            filesDir = App.getContext().getFilesDir()
+        return App.getContext().filesDir.path
 
-        if (filesDir == null)
-            filesDir = App.getContext().cacheDir
-
-        if (!filesDir.exists())
-            filesDir.mkdirs()
-        return filesDir.path
+//        val state = Environment.getExternalStorageState()
+//        var filesDir: File?
+//        if (Environment.MEDIA_MOUNTED.equals(state))
+//            filesDir = App.getContext().getExternalFilesDir(null)
+//        else
+//            filesDir = App.getContext().getFilesDir()
+//
+//        if (filesDir == null)
+//            filesDir = App.getContext().cacheDir
+//
+//        if (!filesDir.exists())
+//            filesDir.mkdirs()
+//        return filesDir.path
     }
 }

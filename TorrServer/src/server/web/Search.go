@@ -19,6 +19,10 @@ func initSearch(e *echo.Echo) {
 
 	e.GET("/search/movie", searchMovie)
 	e.GET("/search/show", searchShow)
+
+	e.GET("/search/movie/:id", getMovie)
+	e.GET("/search/show/:id", getShow)
+
 	e.GET("/search/config", searchConfig)
 	e.GET("/search/torrent", searchTorrent)
 }
@@ -72,6 +76,54 @@ func searchShow(c echo.Context) error {
 	return c.JSON(http.StatusOK, s)
 }
 
+func getMovie(c echo.Context) error {
+	ids := c.Param("id")
+	if ids == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "empty id")
+	}
+	id, err := strconv.Atoi(ids)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	ln := c.QueryParam("lanuage")
+	if ln == "" {
+		ln = "ru"
+	}
+
+	mov := tmdb.GetMovie(id, ln)
+	if mov == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "ids")
+	}
+	fixMovies(tmdb.Movies{mov})
+	return c.JSON(http.StatusOK, mov)
+}
+
+func getShow(c echo.Context) error {
+	ids := c.Param("id")
+	if ids == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "empty id")
+	}
+	id, err := strconv.Atoi(ids)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	ln := c.QueryParam("lanuage")
+	if ln == "" {
+		ln = "ru"
+	}
+
+	show := tmdb.GetShow(id, ln)
+	if show == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "ids")
+	}
+
+	fixShows(tmdb.Shows{show})
+
+	return c.JSON(http.StatusOK, show)
+}
+
 func searchConfig(c echo.Context) error {
 	_, typeReq, _, language, _ := getParams(c)
 	switch typeReq {
@@ -100,16 +152,13 @@ func searchTorrent(c echo.Context) error {
 }
 
 func getTorrent(c echo.Context) ([]*parser.Torrent, error) {
-	provider := c.QueryParam("parser")
+	filter, _ := c.QueryParams()["ft"]
 	query := c.QueryParam("query")
-	if provider == "" {
-		provider = "yohoho"
+
+	if query == "" {
+		return nil, nil
 	}
-	pars := torrent.GetParser(provider)
-	torrs, err := pars.Search(query)
-	if err != nil {
-		return nil, err
-	}
+	torrs := torrent.Search(query, filter)
 	sort.Slice(torrs, func(i, j int) bool {
 		return torrs[i].PeersUl > torrs[j].PeersUl
 	})

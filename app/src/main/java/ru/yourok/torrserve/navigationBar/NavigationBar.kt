@@ -42,7 +42,7 @@ object NavigationBar {
                         thread {
                             val torrList = ServerApi.list()
                             torrList.forEach {
-                                ServerApi.rem(it.Hash)
+                                ServerApi.rem(it.Hash())
                             }
                             runOnUiThread {
                                 val ada = activity.findViewById<ListView>(R.id.listViewTorrent).adapter

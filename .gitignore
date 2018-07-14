@@ -12,6 +12,7 @@ out/
 TorrServer/src/github.com/
 TorrServer/src/golang.org/
 TorrServer/src/bazil.org/
+TorrServer/src/gopkg.in/
 TorrServer/pkg/
 TorrServer/bin/
 dist/ru.yourok.torrserve_pay/

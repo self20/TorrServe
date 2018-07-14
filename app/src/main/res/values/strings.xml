@@ -96,11 +96,4 @@
         <item>Search now watching</item>
         <item>Search by filter</item>
     </string-array>
-
-    <string name="strategy">Request strategy</string>
-    <string-array name="strategy_num">
-        <item>1 More traffic</item>
-        <item>2 Normal traffic</item>
-        <item>3 Less traffic</item>
-    </string-array>
 </resources>

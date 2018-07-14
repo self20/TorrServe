@@ -15,7 +15,6 @@ import ru.yourok.torrserve.BuildConfig
 import ru.yourok.torrserve.R
 import ru.yourok.torrserve.serverhelper.Preferences
 import ru.yourok.torrserve.serverhelper.ServerApi
-import ru.yourok.torrserve.serverhelper.ServerSettings
 import ru.yourok.torrserve.utils.Player
 import ru.yourok.torrserve.utils.Players
 import kotlin.concurrent.thread
@@ -76,10 +75,6 @@ class SettingsActivity : AppCompatActivity() {
         adp2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerRetracker.setAdapter(adp2)
 
-        val adp3 = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.strategy_num))
-        adp3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerRequestStrategy.setAdapter(adp3)
-
         textViewVersion.setText("YouROK " + getText(R.string.app_name) + " ${BuildConfig.FLAVOR} ${BuildConfig.VERSION_NAME}")
 
         loadSettings(false)
@@ -116,7 +111,7 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    fun loadSettings(fromServer: Boolean): Boolean {
+    fun loadSettings(fromServer: Boolean) {
         if (!fromServer) {
             val addr = Preferences.getServerAddress()
             editTextServerAddr.setText(addr)
@@ -137,30 +132,31 @@ class SettingsActivity : AppCompatActivity() {
                 spinnerPlayer.setSelection(ind + 2)
             }
         }
+        thread {
+            try {
+                val sets = ServerApi.readSettings()
+                Handler(Looper.getMainLooper()).post {
+                    editTextCacheSize.setText((sets.cacheSize / (1024 * 1024)).toString())
+                    editTextPreloadBufferSize.setText((sets.preloadBufferSize / (1024 * 1024)).toString())
+                    spinnerRetracker.setSelection(sets.retrackersMode)
 
-        val sets = ServerApi.readSettings()
-        if (sets == null) {
-            Toast.makeText(this, R.string.error_retrieving_settings, Toast.LENGTH_SHORT).show()
-            return false
+                    checkBoxDisableTCP.setChecked(sets.disableTCP)
+                    checkBoxDisableUTP.setChecked(sets.disableUTP)
+                    checkBoxDisableUPNP.setChecked(sets.disableUPNP)
+                    checkBoxDisableDHT.setChecked(sets.disableDHT)
+                    checkBoxDisableUpload.setChecked(sets.disableUpload)
+
+                    editTextEncryption.setText(sets.encryption.toString())
+                    editTextConnectionsLimit.setText(sets.connectionsLimit.toString())
+                    editTextDownloadRateLimit.setText(sets.downloadRateLimit.toString())
+                    editTextUploadRateLimit.setText(sets.uploadRateLimit.toString())
+                }
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    Toast.makeText(this, R.string.error_retrieving_settings, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
-
-        editTextCacheSize.setText(sets.CacheSize.toString())
-        editTextPreloadBufferSize.setText(sets.PreloadBufferSize.toString())
-        spinnerRetracker.setSelection(sets.RetrackersMode)
-        spinnerRequestStrategy.setSelection(sets.RequestStrategy - 1)
-
-        checkBoxDisableTCP.setChecked(sets.DisableTCP)
-        checkBoxDisableUTP.setChecked(sets.DisableUTP)
-        checkBoxDisableUPNP.setChecked(sets.DisableUPNP)
-        checkBoxDisableDHT.setChecked(sets.DisableDHT)
-        checkBoxDisableUpload.setChecked(sets.DisableUpload)
-
-        editTextEncryption.setText(sets.Encryption.toString())
-        editTextConnectionsLimit.setText(sets.ConnectionsLimit.toString())
-        editTextDownloadRateLimit.setText(sets.DownloadRateLimit.toString())
-        editTextUploadRateLimit.setText(sets.UploadRateLimit.toString())
-
-        return true
     }
 
     fun saveSettings() {
@@ -172,33 +168,39 @@ class SettingsActivity : AppCompatActivity() {
         Preferences.setShowPreloadWnd(showWnd)
         val player = spinnerPlayer.selectedItem as Player
         Preferences.setPlayer(player.Package)
+        thread {
+            try {
+                val sets = ServerApi.readSettings()
 
-        try {
-            val sets = ServerSettings(
-                    editTextCacheSize.text.toString().toInt(),
-                    editTextPreloadBufferSize.text.toString().toInt(),
-                    spinnerRetracker.selectedItemPosition,
-                    checkBoxDisableTCP.isChecked,
-                    checkBoxDisableUTP.isChecked,
-                    checkBoxDisableUPNP.isChecked,
-                    checkBoxDisableDHT.isChecked,
-                    checkBoxDisableUpload.isChecked,
-                    editTextEncryption.text.toString().toInt(),
-                    editTextDownloadRateLimit.text.toString().toInt(),
-                    editTextUploadRateLimit.text.toString().toInt(),
-                    editTextConnectionsLimit.text.toString().toInt(),
-                    spinnerRequestStrategy.selectedItemPosition + 1)
+                sets.cacheSize = editTextCacheSize.text.toString().toLong() * (1024 * 1024)
+                sets.preloadBufferSize = editTextPreloadBufferSize.text.toString().toLong() * (1024 * 1024)
+                sets.retrackersMode = spinnerRetracker.selectedItemPosition
+                sets.disableTCP = checkBoxDisableTCP.isChecked
+                sets.disableUTP = checkBoxDisableUTP.isChecked
+                sets.disableUPNP = checkBoxDisableUPNP.isChecked
+                sets.disableDHT = checkBoxDisableDHT.isChecked
+                sets.disableUpload = checkBoxDisableUpload.isChecked
+                sets.encryption = editTextEncryption.text.toString().toInt()
+                sets.downloadRateLimit = editTextDownloadRateLimit.text.toString().toInt()
+                sets.uploadRateLimit = editTextUploadRateLimit.text.toString().toInt()
+                sets.connectionsLimit = editTextConnectionsLimit.text.toString().toInt()
 
-            thread {
-                val err = ServerApi.writeSettings(sets)
-                if (err.isNotEmpty())
-                    Handler(Looper.getMainLooper()).post {
-                        Toast.makeText(App.getContext(), R.string.error_sending_settings, Toast.LENGTH_SHORT).show()
+                thread {
+                    try {
+                        ServerApi.writeSettings(sets)
+                        Preferences.addSaveHost(addr)
+                        ServerApi.restartTorrentClient()
+                    } catch (e: Exception) {
+                        Handler(Looper.getMainLooper()).post {
+                            Toast.makeText(App.getContext(), R.string.error_sending_settings, Toast.LENGTH_SHORT).show()
+                        }
                     }
-                else
-                    Preferences.addSaveHost(addr)
+                }
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    Toast.makeText(App.getContext(), R.string.error_sending_settings, Toast.LENGTH_SHORT).show()
+                }
             }
-        } catch (e: Exception) {
-        }
+        }.join()
     }
 }

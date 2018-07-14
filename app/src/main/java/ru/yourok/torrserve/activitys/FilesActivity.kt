@@ -15,10 +15,10 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_files.*
 import ru.yourok.torrserve.R
 import ru.yourok.torrserve.adapters.TorrentListFileAdapter
-import ru.yourok.torrserve.serverhelper.File
 import ru.yourok.torrserve.serverhelper.Preferences
 import ru.yourok.torrserve.serverhelper.ServerApi
-import ru.yourok.torrserve.serverhelper.Torrent
+import ru.yourok.torrserve.serverhelper.server.File
+import ru.yourok.torrserve.serverhelper.server.Torrent
 import ru.yourok.torrserve.utils.Utils
 import kotlin.concurrent.thread
 
@@ -50,17 +50,12 @@ class FilesActivity : AppCompatActivity() {
         thread {
             try {
                 torrent = ServerApi.get(torrId)
-                if (torrent == null) {
-                    Toast.makeText(this, R.string.stat_server_is_not_running, Toast.LENGTH_SHORT).show()
-                    finish()
-                    return@thread
-                }
                 torrent?.let { torr ->
                     runOnUiThread {
-                        findViewById<TextView>(R.id.textViewTorrFileName).setText(torr.Name)
+                        findViewById<TextView>(R.id.textViewTorrFileName).setText(torr.Name())
                         textViewTorrSize.visibility = View.VISIBLE
                         buttonPlaylist.visibility = View.VISIBLE
-                        textViewTorrSize.setText(Utils.byteFmt(torr.Length))
+                        textViewTorrSize.setText(Utils.byteFmt(torr.Length()))
                     }
 
                     val adapter = TorrentListFileAdapter(this, torrId)
@@ -68,9 +63,9 @@ class FilesActivity : AppCompatActivity() {
                     runOnUiThread {
                         listViewFiles.adapter = adapter
                         listViewFiles.setOnItemClickListener { _, _, i, _ ->
-                            val file = torr.Files[i]
+                            val file = torr.Files()[i]
                             adapter.torrent?.let {
-                                it.Files[i].Viewed = true
+                                it.Files()[i].Viewed = true
                                 adapter.notifyDataSetChanged()
                             }
                             thread {
@@ -78,14 +73,17 @@ class FilesActivity : AppCompatActivity() {
                             }
                         }
                         listViewFiles.setOnItemLongClickListener { _, view, i, _ ->
-                            showPopupMenu(view, torr.Files[i])
+                            showPopupMenu(view, torr.Files()[i])
                             true
                         }
                         progressBar.visibility = View.GONE
                     }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                runOnUiThread {
+                    Toast.makeText(this, R.string.stat_server_is_not_running, Toast.LENGTH_SHORT).show()
+                    finish()
+                }
             }
         }
     }

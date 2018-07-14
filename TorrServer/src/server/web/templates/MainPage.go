@@ -199,9 +199,9 @@ var mainPage = `
 				var html = '<hr>';
 				var name = "";
 				if (tor.Status==1)
-					name = tor.Name+' '+humanizeSize(tor.Size)+' '+tor.Hash;
+					name = tor.Name+' '+humanizeSize(tor.Length)+' '+tor.Hash;
 				else
-					name = tor.Name+' '+humanizeSize(tor.Size);
+					name = tor.Name+' '+humanizeSize(tor.Length);
 			
 				html += '<div class="btn-group d-flex" role="group">';
 				html += '	<button type="button" class="btn btn-secondary wrap w-100" data-toggle="collapse" data-target="#info_'+tor.Hash+'">'+name+'</button>';
@@ -265,7 +265,7 @@ var mainPage = `
 							else
 								$('#preloadSpeed').text("Speed:");
 			
-							if (data.PreloadedBytes>0 && data.PreloadedBytes<data.PreloadSize){
+							if (data.PreloadSize>0 && data.PreloadedBytes<data.PreloadSize){
 								var prc = data.PreloadedBytes * 100 / data.PreloadSize;
 								if (prc>100) prc = 100;
 								$('#preloadProgress').width(prc+'%');

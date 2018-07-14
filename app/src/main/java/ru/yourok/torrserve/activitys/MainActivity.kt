@@ -20,7 +20,7 @@ import ru.yourok.torrserve.adapters.TorrentListAdapter
 import ru.yourok.torrserve.menu.TorrentListSelectionMenu
 import ru.yourok.torrserve.navigationBar.NavigationBar
 import ru.yourok.torrserve.serverhelper.ServerApi
-import ru.yourok.torrserve.serverhelper.Torrent
+import ru.yourok.torrserve.serverhelper.server.Torrent
 import ru.yourok.torrserve.services.TorrService
 import java.util.*
 import kotlin.concurrent.schedule
@@ -63,10 +63,10 @@ class MainActivity : AppCompatActivity() {
                 return@setOnItemClickListener
             }
 
-            if ((torrAdapter.getItem(i) as Torrent).Files.isEmpty())
+            if ((torrAdapter.getItem(i) as Torrent).Files().isEmpty())
                 return@setOnItemClickListener
 
-            val hash = (torrAdapter.getItem(i) as Torrent).Hash
+            val hash = (torrAdapter.getItem(i) as Torrent).Hash()
             val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
             progressBar.visibility = View.VISIBLE
             view.isEnabled = false
@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             while (isUpdate) {
-                torrAdapter?.checkList()
+                torrAdapter.checkList()
                 Thread.sleep(1000)
             }
         }

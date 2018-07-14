@@ -18,7 +18,7 @@ func NewYHH() *YoHoHo {
 }
 
 func (p *YoHoHo) Search(findString string) ([]*Torrent, error) {
-	fmt.Println("Find torrents:", findString)
+	fmt.Println("Yohoho finding:", findString)
 	return p.findTorrents(findString)
 }
 

@@ -7,9 +7,10 @@ import android.view.View
 import android.widget.*
 import ru.yourok.torrserve.R
 import ru.yourok.torrserve.adapters.TorrentListFileAdapter
-import ru.yourok.torrserve.serverhelper.File
 import ru.yourok.torrserve.serverhelper.ServerApi
-import ru.yourok.torrserve.serverhelper.Torrent
+import ru.yourok.torrserve.serverhelper.server.File
+import ru.yourok.torrserve.serverhelper.server.Torrent
+import ru.yourok.torrserve.serverhelper.server.TorrentPreload
 import ru.yourok.torrserve.services.TorrService
 import ru.yourok.torrserve.utils.Mime
 import kotlin.concurrent.thread
@@ -21,7 +22,12 @@ class ViewActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_view)
+
+        val attr = window.attributes
+        attr.width = (resources.displayMetrics.widthPixels * 0.90).toInt()
+        window.attributes = attr
 
         if (intent == null) {
             finish()
@@ -68,14 +74,14 @@ class ViewActivity : AppCompatActivity() {
         if (!isClosed) {
             setMessage(getString(R.string.connects_to_torrent))
             val tors = addTorrent()
-            if (tors.isEmpty()) {
+            if (tors == null) {
                 showToast(R.string.error_add_torrent)
                 finish()
                 return
             }
 
             if (!isClosed) {
-                wait(tors[0])?.let {
+                wait(tors)?.let {
                     if (!isClosed)
                         play(it)
                 } ?: let {
@@ -113,24 +119,29 @@ class ViewActivity : AppCompatActivity() {
 
     private fun wait(tor: Torrent): Torrent? {
         while (!isClosed) {
-            val info = ServerApi.info(tor.Hash)
-            if (info == null) {
+            val stats =
+                    try {
+                        ServerApi.stat(tor.Hash())
+                    } catch (e: Exception) {
+                        null
+                    }
+            if (stats == null) {
                 Thread.sleep(1000)
                 continue
             }
 
-            if (!info.IsGettingInfo)
+            if (stats.TorrentStatus() != TorrentPreload)
                 break
             var msg = getString(R.string.connects_to_torrent) + "\n" +
-                    info.Name + "\n" +
-                    info.Hash + "\n"
-            msg += getString(R.string.peers) + ": [" + info.ConnectedSeeders.toString() + "] " + info.ActivePeers.toString() + "/" + info.TotalPeers.toString()
+                    stats.Name() + "\n" +
+                    stats.Hash() + "\n"
+            msg += getString(R.string.peers) + ": [" + stats.ConnectedSeeders().toString() + "] " + stats.ActivePeers().toString() + "/" + stats.TotalPeers().toString()
             runOnUiThread {
                 findViewById<TextView>(R.id.textViewStatus).setText(msg)
             }
             Thread.sleep(1000)
         }
-        return ServerApi.get(tor.Hash)
+        return ServerApi.get(tor.Hash())
     }
 
     private fun play(tor: Torrent) {
@@ -149,7 +160,7 @@ class ViewActivity : AppCompatActivity() {
                     ServerApi.openPlayList(tor)
                     finish()
                 }
-                val adapter = TorrentListFileAdapter(this, tor.Hash)
+                val adapter = TorrentListFileAdapter(this, tor.Hash())
                 val listViewFiles = findViewById<ListView>(R.id.listViewTorrentFiles)
                 listViewFiles.adapter = adapter
                 listViewFiles.setOnItemClickListener { _, _, i, _ ->
@@ -164,27 +175,28 @@ class ViewActivity : AppCompatActivity() {
             }
         } else {
             val intent = Intent(this, FilesActivity::class.java)
-            intent.putExtra("Hash", tor.Hash)
+            intent.putExtra("Hash", tor.Hash())
             startActivity(intent)
             finish()
         }
     }
 
-    private fun addTorrent(): List<Torrent> {
+    private fun addTorrent(): Torrent? {
         try {
-            return ServerApi.add(torrentLink, saveInDB)
+            val hash = ServerApi.add(torrentLink, saveInDB)
+            return ServerApi.get(hash)
         } catch (e: Exception) {
             val msg = e.message ?: getString(R.string.error_add_torrent)
             runOnUiThread {
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
-            return emptyList()
+            return null
         }
     }
 
     private fun findPlayableFiles(tor: Torrent): Map<Int, File> {
         val retList = mutableMapOf<Int, File>()
-        tor.Files.forEachIndexed { index, it ->
+        tor.Files().forEachIndexed { index, it ->
             if (Mime.getMimeType(it.Name) != "*/*")
                 retList[index] = it
         }

@@ -88,6 +88,68 @@ var searchPage = `
     		max-width: 300px;
     		max-height: 170px;
    		}
+    
+		.sk-cube-grid {
+		  	width: 40px;
+		  	height: 40px;
+		  	margin: 10px auto;
+		}
+		
+		.sk-cube-grid .sk-cube {
+		  width: 33%;
+		  height: 33%;
+		  background-color: #333;
+		  float: left;
+		  -webkit-animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out;
+				  animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out; 
+		}
+		.sk-cube-grid .sk-cube1 {
+		  -webkit-animation-delay: 0.2s;
+				  animation-delay: 0.2s; }
+		.sk-cube-grid .sk-cube2 {
+		  -webkit-animation-delay: 0.3s;
+				  animation-delay: 0.3s; }
+		.sk-cube-grid .sk-cube3 {
+		  -webkit-animation-delay: 0.4s;
+				  animation-delay: 0.4s; }
+		.sk-cube-grid .sk-cube4 {
+		  -webkit-animation-delay: 0.1s;
+				  animation-delay: 0.1s; }
+		.sk-cube-grid .sk-cube5 {
+		  -webkit-animation-delay: 0.2s;
+				  animation-delay: 0.2s; }
+		.sk-cube-grid .sk-cube6 {
+		  -webkit-animation-delay: 0.3s;
+				  animation-delay: 0.3s; }
+		.sk-cube-grid .sk-cube7 {
+		  -webkit-animation-delay: 0s;
+				  animation-delay: 0s; }
+		.sk-cube-grid .sk-cube8 {
+		  -webkit-animation-delay: 0.1s;
+				  animation-delay: 0.1s; }
+		.sk-cube-grid .sk-cube9 {
+		  -webkit-animation-delay: 0.2s;
+				  animation-delay: 0.2s; }
+		
+		@-webkit-keyframes sk-cubeGridScaleDelay {
+		  0%, 70%, 100% {
+			-webkit-transform: scale3D(1, 1, 1);
+					transform: scale3D(1, 1, 1);
+		  } 35% {
+			-webkit-transform: scale3D(0, 0, 1);
+					transform: scale3D(0, 0, 1); 
+		  }
+		}
+		
+		@keyframes sk-cubeGridScaleDelay {
+		  0%, 70%, 100% {
+			-webkit-transform: scale3D(1, 1, 1);
+					transform: scale3D(1, 1, 1);
+		  } 35% {
+			-webkit-transform: scale3D(0, 0, 1);
+					transform: scale3D(0, 0, 1);
+		  } 
+		}
     </style>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -111,21 +173,6 @@ var searchPage = `
                 	</div>
 				</div>
 			{{end}}
-			{{if .IsTorrent}}
-				<div class="col-auto">
-					<div class="btn-group btn-group-toggle" data-toggle="buttons">
-						<label class="btn btn-secondary" onclick="update_parser('yohoho')">
-							<input type="radio" name="stype">YoHoHo
-						</label>
-						<label class="btn btn-secondary" onclick="update_parser('rutor')">
-							<input type="radio" name="stype">Rutor
-						</label>
-						<label class="btn btn-secondary" onclick="update_parser('tparser')">
-							<input type="radio" name="stype">TParser
-						</label>
-                	</div>
-				</div>
-			{{end}}
 				<div class="col-auto">
 					<div class="btn-group">
 						<a id="stMovies" class="btn btn-secondary" href="?vt=movie">Movies</a>
@@ -136,7 +183,17 @@ var searchPage = `
 			</div>
 		</div>
         <br>
-
+		{{if .IsTorrent}}
+		<div>
+			<div class="input-group">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">Filter</div>
+                </div>
+                <input type="text" name="search_filter" id="sFilter" placeholder="2017;S01|01x;LostFilm|Кубик в Кубе;720|1080|BDRemux" value="" class="form-control">
+            </div>
+		</div>
+		<br>
+		{{end}}
         <div id="sbName">
             <div class="input-group">
                 <div class="input-group-prepend">
@@ -145,7 +202,8 @@ var searchPage = `
                 <input type="text" name="search_movie" id="sName" value="" class="form-control">
             </div>
         </div>
-
+		<br>
+		{{if not .IsTorrent}}
         <div id="sbFilter">
 			<div class="container-fluid">
 				<div class="row">
@@ -184,16 +242,30 @@ var searchPage = `
 				</div>
 			</div>
         </div>
-
         <br>
+		{{end}}
 
         <button id="search" class="btn btn-primary w-100" type="button">Search</button>
         <br>
 		<br>
+		{{if .IsTorrent}}
+		<div id="loader" style="display:none" class="sk-cube-grid">
+		  <div class="sk-cube sk-cube1"></div>
+		  <div class="sk-cube sk-cube2"></div>
+		  <div class="sk-cube sk-cube3"></div>
+		  <div class="sk-cube sk-cube4"></div>
+		  <div class="sk-cube sk-cube5"></div>
+		  <div class="sk-cube sk-cube6"></div>
+		  <div class="sk-cube sk-cube7"></div>
+		  <div class="sk-cube sk-cube8"></div>
+		  <div class="sk-cube sk-cube9"></div>
+		</div>
+		{{end}}
+			
 		{{if not .IsTorrent}}
         <div id="movies" class="thumbnail-mousey">
 		{{range .Items}}
-			<div id="m{{.ID}}" onclick="showModal('{{.Name}}','{{.Overview}}','{{.Year}}','{{.Seasons}}','', '{{.Backdrop}}')">
+			<div id="m{{.ID}}" onclick="showModal('{{.OriginalName}}','{{.Name}}','{{.Overview}}','{{.Year}}','{{.Seasons}}','', '{{.Backdrop}}')">
 				<div class="thumbnail shadow">
 					<h3>
 						{{.Name}} ({{.Year}})<br>
@@ -226,7 +298,7 @@ var searchPage = `
 			<a rel="external" style="text-decoration: none;" href="/about">About</a>
 			</span>
     </footer>
-			
+	{{if not .IsTorrent}}
 	<div class="modal fade" id="infoModal" role="dialog">
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
@@ -239,16 +311,16 @@ var searchPage = `
 				<div class="modal-body">
 					<small id="infoOverview"></small>
 					<div style="clear:both"></div>
-					<div class="btn-group btn-group-toggle" data-toggle="buttons">
-						<label class="btn btn-primary" onclick="update_parser('yohoho')">
-							<input type="radio" name="stype">YoHoHo
-						</label>
-						<label class="btn btn-primary" onclick="update_parser('rutor')">
-							<input type="radio" name="stype">Rutor
-						</label>
-						<label class="btn btn-primary" onclick="update_parser('tparser')">
-							<input type="radio" name="stype">TParser
-						</label>
+					<div id="loader" class="sk-cube-grid">
+					  <div class="sk-cube sk-cube1"></div>
+					  <div class="sk-cube sk-cube2"></div>
+					  <div class="sk-cube sk-cube3"></div>
+					  <div class="sk-cube sk-cube4"></div>
+					  <div class="sk-cube sk-cube5"></div>
+					  <div class="sk-cube sk-cube6"></div>
+					  <div class="sk-cube sk-cube7"></div>
+					  <div class="sk-cube sk-cube8"></div>
+					  <div class="sk-cube sk-cube9"></div>
 					</div>
 					<br>
 					<div id="seasonsButtons" class="btn-group flex-wrap"></div>
@@ -260,7 +332,7 @@ var searchPage = `
 			</div>
 		</div>
 	</div>
-			
+	{{end}}
     <script>
 		var currentPage = 1;
         $(document).ready(function() {
@@ -288,15 +360,16 @@ var searchPage = `
 			if (params.get('query'))
 				$('#sName').val(params.get('query'));
 			
-			{{if .IsTorrent}}
-			if (params.get('parser'))
-				parser = params.get('parser');
-			{{end}}
-			
 			{{if not .IsTorrent}}
 			if (params.get('page'))
 				currentPage = params.get('page');
 			updatePages();
+			{{end}}
+			{{if .IsTorrent}}
+			if (params.get('ft')){
+				var fts = params.getAll('ft');
+				$('#sFilter').val(fts.join(";"));
+			}
 			{{end}}
 			
 			if (params.get('vt')=="movie" || !params.get('vt'))
@@ -326,11 +399,6 @@ var searchPage = `
 			}
 		}
 		{{end}}
-		var parser= "yohoho";
-			
-		function update_parser(pars){
-			parser = pars;
-		}
 		
         $("#sName").keyup(function(event) {
             if (event.keyCode === 13)
@@ -382,10 +450,14 @@ var searchPage = `
 			}
 			{{end}}
 			{{if .IsTorrent}}
-				if (parser)
-					qparam.push('parser='+parser);
 				var query = $('#sName').val();
 				if (query){
+					$('#loader').show(0);
+					var filter = $('#sFilter').val().split(";");
+					if (filter.length){
+						var ft = 'ft='+filter.join("&ft=");
+						qparam.push(ft);
+					}
 					qparam.push('query='+query);
 					window.location.href = '/search?'+qparam.join('&');
 				}
@@ -419,46 +491,68 @@ var searchPage = `
         }
 		{{end}}
 			
-		function showModal(Name, Overview, Year, SeasonsCount, Season, Backdrop){
-			$('#infoModal').modal('show');
+		function showModal(OrigName, Name, Overview, Year, SeasonsCount, Season, Backdrop){
+			$('#infoTorrents').empty();
 			$('#infoName').text(Name+ ' ' +Year);
 			var img = '<img src="'+Backdrop+'" class="rounded leftimg">';
 			$('#infoOverview').html(img + Overview);
-			var fndStr = Name;
+			$('#infoModal').modal('show');
+			$('#loader').fadeIn(700);
+			
+			var filter = [];
 			if (Year && !Season && !SeasonsCount)
-				fndStr += ' '+Year;
-			if (Season)
-				fndStr += ' S'+Season;
+				filter.push(Year);
+			if (Season){
+				var ses = Season.padStart(2,"0");
+				filter.push('S'+ses+'|'+ses+'x');
+			}
 			if (SeasonsCount>0){
-				var html = '<button type="button" class="btn btn-primary" onclick="showModal(\''+Name+'\',\''+Overview+'\',\''+Year+'\','+SeasonsCount+',\'\', \''+Backdrop+'\')">All</button>';
-				for (var i = 1; i < SeasonsCount; i++){
-					var ses = ('0' + i).slice(-2)
-					html += '<button type="button" class="btn btn-primary" onclick="showModal(\''+Name+'\',\''+Overview+'\',\''+Year+'\','+SeasonsCount+',\''+ses+'\', \''+Backdrop+'\')">S'+ses+'</button>';
+				var html = '<button type="button" class="btn btn-primary" onclick="showModal(\''+OrigName+'\',\''+Name+'\',\''+Overview+'\',\''+Year+'\','+SeasonsCount+',\'\', \''+Backdrop+'\')">All</button>';
+				for (var i = 1; i < +SeasonsCount+1; i++){
+					var ses = (""+i).padStart(2,"0");
+					html += '<button type="button" class="btn btn-primary" onclick="showModal(\''+OrigName+'\',\''+Name+'\',\''+Overview+'\',\''+Year+'\','+SeasonsCount+',\''+ses+'\', \''+Backdrop+'\')">S'+ses+'</button>';
 				}
 				$('#seasonsButtons').html(html);
 			}else{
 				$('#seasonsButtons').empty();
 			}
-			$.get('/search/torrent?query='+fndStr+'&parser='+parser)
-                .done(function(torrList) {
-					var html = '';
-					for (var key in torrList) {
-						torr = torrList[key];
-						var dl = '';
-						if (torr.PeersDl >= 0) {
-							dl += '| ▲ ' + torr.PeersUl;
-							dl += '| ▼ ' + torr.PeersDl;
-						}
-						html += '<div class="btn-group d-flex" role="group">'
-						html += '<button type="button" class="btn btn-secondary wrap w-100" onclick="doTorrent(\'' + torr.Magnet + '\', this)"><i class="fas fa-plus"></i> ' + torr.Name + " " + torr.Size + dl +'</button>';
-						html += '<a type="button" class="btn btn-secondary" href="/torrent/play?link='+encodeURIComponent(torr.Magnet)+'&m3u=true">...</a>'
-						html += '</div>';
+			
+			var fn = function(torrList) {
+				var html = '';
+				for (var key in torrList) {
+					torr = torrList[key];
+					var dl = '';
+					if (torr.PeersDl >= 0) {
+						dl += '| ▲ ' + torr.PeersUl;
+						dl += '| ▼ ' + torr.PeersDl;
 					}
-					$('#infoTorrents').html(html);
-				})
-				.fail(function(data) {
-					$('#infoTorrents').text(data.responseJSON.message);
-				});
+					html += '<div class="btn-group d-flex" role="group">'
+					html += '<button type="button" class="btn btn-secondary wrap w-100" onclick="doTorrent(\'' + torr.Magnet + '\', this)"><i class="fas fa-plus"></i> ' + torr.Name + " " + torr.Size + dl +'</button>';
+					html += '<a type="button" class="btn btn-secondary" href="/torrent/play?link='+encodeURIComponent(torr.Magnet)+'&m3u=true">...</a>'
+					html += '</div>';
+				}
+				$('#loader').fadeOut(700);
+				$('#infoTorrents').html(html);
+			};
+			
+			searchTorrent(OrigName,filter,function(torrList){
+				if (!torrList)
+					searchTorrent(Name,filter,fn);
+				else
+					fn(torrList);
+			});
+		}
+			
+		function searchTorrent(query, filter, done, fail){
+			var ftstr = 'ft='+filter.join("&ft=");
+			$.get('/search/torrent?query='+query+'&'+ftstr)
+			.done(function(torrList){
+				done(torrList);
+			})
+			.fail(function(data){
+				if (fail)
+					fail();
+			})
 		}
 
         function doTorrent(magnet, elem) {

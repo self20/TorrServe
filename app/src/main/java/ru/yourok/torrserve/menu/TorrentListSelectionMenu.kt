@@ -12,7 +12,7 @@ import ru.yourok.torrserve.R
 import ru.yourok.torrserve.activitys.InfoActivity
 import ru.yourok.torrserve.adapters.TorrentListAdapter
 import ru.yourok.torrserve.serverhelper.ServerApi
-import ru.yourok.torrserve.serverhelper.Torrent
+import ru.yourok.torrserve.serverhelper.server.Torrent
 import kotlin.concurrent.thread
 
 /**
@@ -38,7 +38,7 @@ class TorrentListSelectionMenu(val activity: Activity, val adapter: TorrentListA
                 var msg = ""
                 selected.forEach {
                     val torrent = (adapter.getItem(it) as Torrent)
-                    msg += "${torrent.Name}:\n${torrent.Magnet}\n\n"
+                    msg += "${torrent.Name()}:\n${torrent.Magnet()}\n\n"
                 }
                 if (msg.isNotEmpty()) {
                     val share = Intent(Intent.ACTION_SEND)
@@ -51,7 +51,7 @@ class TorrentListSelectionMenu(val activity: Activity, val adapter: TorrentListA
             R.id.itemInfoTorrent -> {
                 val hashs = mutableListOf<String>()
                 selected.forEach {
-                    val Id = (adapter.getItem(it) as Torrent).Hash
+                    val Id = (adapter.getItem(it) as Torrent).Hash()
                     hashs.add(Id)
                 }
                 val intent = Intent(activity, InfoActivity::class.java)
@@ -62,15 +62,17 @@ class TorrentListSelectionMenu(val activity: Activity, val adapter: TorrentListA
             }
             R.id.itemRemove -> {
                 selected.forEach {
-                    val Id = (adapter.getItem(it) as Torrent).Hash
+                    val Id = (adapter.getItem(it) as Torrent).Hash()
                     thread {
-                        val err = ServerApi.rem(Id)
-                        if (err.isNotEmpty()) {
+                        try {
+                            ServerApi.rem(Id)
+                            adapter.updateList()
+                        } catch (e: Exception) {
                             activity.runOnUiThread {
-                                Toast.makeText(activity, activity.getText(R.string.error_remove_torrent).toString() + ": " + err, Toast.LENGTH_SHORT).show()
+                                val msg = e.message.run { if (this != null) ": " + this else "" }
+                                Toast.makeText(activity, activity.getText(R.string.error_remove_torrent).toString() + msg, Toast.LENGTH_SHORT).show()
                             }
                         }
-                        adapter.updateList()
                     }
                 }
             }

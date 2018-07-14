@@ -13,7 +13,7 @@ import ru.yourok.torrserve.R
 import ru.yourok.torrserve.adapters.TorrentListAdapter
 import ru.yourok.torrserve.menu.TorrentListSelectionMenu
 import ru.yourok.torrserve.serverhelper.ServerApi
-import ru.yourok.torrserve.serverhelper.Torrent
+import ru.yourok.torrserve.serverhelper.server.Torrent
 import ru.yourok.torrserve.services.TorrService
 import kotlin.concurrent.thread
 
@@ -32,12 +32,12 @@ class TvMainActivity : AppCompatActivity() {
                 return@setOnItemClickListener
             }
 
-            if ((torrAdapter.getItem(i) as Torrent).Files.size == 0) {
+            if ((torrAdapter.getItem(i) as Torrent).Files().isEmpty()) {
                 return@setOnItemClickListener
             }
 
-            val name = (torrAdapter.getItem(i) as Torrent).Name
-            val hash = (torrAdapter.getItem(i) as Torrent).Hash
+            val name = (torrAdapter.getItem(i) as Torrent).Name()
+            val hash = (torrAdapter.getItem(i) as Torrent).Hash()
             val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
             progressBar.visibility = View.VISIBLE
             view.isEnabled = false
@@ -69,7 +69,7 @@ class TvMainActivity : AppCompatActivity() {
             thread {
                 val torrList = ServerApi.list()
                 torrList.forEach {
-                    ServerApi.rem(it.Hash)
+                    ServerApi.rem(it.Hash())
                 }
                 runOnUiThread {
                     val ada = this.findViewById<ListView>(R.id.listViewTorrent).adapter

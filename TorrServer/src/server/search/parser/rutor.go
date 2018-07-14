@@ -31,7 +31,7 @@ func NewRutor() *Rutor {
 }
 
 func (p *Rutor) Search(findString string) ([]*Torrent, error) {
-	fmt.Println("Find torrents:", findString)
+	fmt.Println("Rutor finding:", findString)
 	return p.findTorrents(findString)
 }
 

@@ -16,7 +16,7 @@ class AddActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add)
-        wait(getString(R.string.starting_server), {
+        wait(getString(R.string.starting_server)) {
             val run = TorrService.waitServer()
             runOnUiThread {
                 if (run)
@@ -24,7 +24,7 @@ class AddActivity : AppCompatActivity() {
                 else
                     textViewStatus.setText(R.string.error_server_start)
             }
-        })
+        }
         ///Intent open
         val magnet = intent.data?.toString() ?: ""
         editTextTorrLink.setText(magnet)
@@ -38,10 +38,10 @@ class AddActivity : AppCompatActivity() {
         }
 
         buttonAdd.setOnClickListener {
-            wait("", {
+            wait("") {
                 val torrList = ServerApi.list()
                 torrList.forEach {
-                    if (it.Magnet == editTextTorrLink.text.toString()) {
+                    if (it.Magnet() == editTextTorrLink.text.toString()) {
                         runOnUiThread {
                             textViewStatus.setText(R.string.error_torrent_with_this_link_exists)
                         }
@@ -58,7 +58,7 @@ class AddActivity : AppCompatActivity() {
                         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                     }
                 }
-            })
+            }
         }
 
         buttonCancel.setOnClickListener {
