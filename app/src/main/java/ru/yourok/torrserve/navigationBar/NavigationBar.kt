@@ -13,6 +13,7 @@ import ru.yourok.torrserve.Donate
 import ru.yourok.torrserve.R
 import ru.yourok.torrserve.activitys.AddActivity
 import ru.yourok.torrserve.activitys.SearchActivity
+import ru.yourok.torrserve.activitys.ServerLoaderActivity
 import ru.yourok.torrserve.activitys.SettingsActivity
 import ru.yourok.torrserve.adapters.TorrentListAdapter
 import ru.yourok.torrserve.serverhelper.ServerApi
@@ -72,6 +73,15 @@ object NavigationBar {
                     selectable = false
                     onClick { _ ->
                         Donate.donateDialog(activity)
+                        false
+                    }
+                }
+                divider {}
+                primaryItem(R.string.update) {
+                    icon = R.drawable.ic_sync_black_24dp
+                    selectable = false
+                    onClick { _ ->
+                        startActivity(Intent(activity, ServerLoaderActivity::class.java))
                         false
                     }
                 }

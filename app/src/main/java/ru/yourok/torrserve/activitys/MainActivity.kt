@@ -21,6 +21,7 @@ import ru.yourok.torrserve.menu.TorrentListSelectionMenu
 import ru.yourok.torrserve.navigationBar.NavigationBar
 import ru.yourok.torrserve.serverhelper.ServerApi
 import ru.yourok.torrserve.serverhelper.server.Torrent
+import ru.yourok.torrserve.serverloader.ServerLoader
 import ru.yourok.torrserve.services.TorrService
 import java.util.*
 import kotlin.concurrent.schedule
@@ -119,8 +120,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun startServer() {
         if (!ServerApi.echo()) {
-            progressBar.visibility = View.VISIBLE
             textViewStatus.visibility = View.VISIBLE
+            if (!ServerLoader.serverExists()) {
+                textViewStatus.setText(R.string.warn_server_not_exists)
+                return
+            }
+            progressBar.visibility = View.VISIBLE
             textViewStatus.setText(R.string.starting_server)
             thread {
                 if (TorrService.waitServer()) {

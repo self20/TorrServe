@@ -17,7 +17,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 26
         versionCode 61
-        versionName "1.0.61_test_19"
+        versionName "1.0.61_test_21"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
@@ -37,11 +37,6 @@ android {
 
     flavorDimensions 'main'
     productFlavors {
-        lite {
-            dimension "main"
-            signingConfig signingConfigs.freeRelease
-            applicationId "ru.yourok.torrserve.lite"
-        }
         free {
             dimension "main"
             signingConfig signingConfigs.freeRelease
@@ -59,12 +54,9 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.50"
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.50'
     implementation 'co.zsmb:materialdrawer-kt:1.3.4'
-
-    implementation "cz.msebera.android:httpclient:4.4.1.2"
-
-    freeImplementation project(':server')
+    implementation 'cz.msebera.android:httpclient:4.4.1.2'
 }
 
 project.afterEvaluate {

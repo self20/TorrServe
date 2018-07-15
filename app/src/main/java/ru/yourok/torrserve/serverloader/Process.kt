@@ -37,7 +37,9 @@ class Process(vararg val args: String) {
                 proc?.let { p ->
                     val line = p.inputStream.bufferedReader(Charset.defaultCharset()).readLine()
                     callbackOutput?.let {
-                        it.invoke(line)
+                        line?.let { ln ->
+                            it.invoke(ln)
+                        }
                     }
                 }
                 if (proc == null)
@@ -50,13 +52,27 @@ class Process(vararg val args: String) {
                 proc?.let { p ->
                     val line = p.errorStream.bufferedReader(Charset.defaultCharset()).readLine()
                     callbackError?.let {
-                        it.invoke(line)
+                        line?.let { ln ->
+                            it.invoke(ln)
+                        }
                     }
                 }
                 if (proc == null)
                     break
             }
         }
+    }
+
+    fun isRunning(): Boolean {
+        proc?.let {
+            return try {
+                it.exitValue()
+                false
+            } catch (e: Exception) {
+                true
+            }
+        }
+        return false
     }
 
     fun stop() {

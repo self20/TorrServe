@@ -108,15 +108,6 @@ for GOOS in $PLATFORMS_ARM; do
   done
 done
 
-# GOOS=android
-# CC_FOR_TARGET=/home/yourok/Android/Toolchain/bin/arm-linux-androideabi-gcc
-# for GOARM in 7 6 5; do
-# 	BIN_FILENAME="${OUTPUT}-${GOOS}-${GOARCH}${GOARM}"
-# 	CMD="CC_FOR_TARGET=/home/yourok/Android/Toolchain/bin/arm-linux-androideabi-gcc GOARM=${GOARM} GOOS=${GOOS} GOARCH=${GOARCH} go build -o ${BIN_FILENAME} main"
-# 	echo "${CMD}"
-#     eval "${CMD}" || FAILURES="${FAILURES} ${GOOS}/${GOARCH}${GOARM}" 
-# done
-
 # eval errors
 if [[ "${FAILURES}" != "" ]]; then
   echo ""
@@ -124,4 +115,6 @@ if [[ "${FAILURES}" != "" ]]; then
   exit 1
 fi
 
-./compile.sh
+./build-android.sh
+
+# ./compile.sh

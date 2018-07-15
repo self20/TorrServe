@@ -16,7 +16,8 @@ class SearchActivity : AppCompatActivity() {
         setContentView(R.layout.activity_search)
         val addr = ServerRequests.getHostUrl("/search")
         val webview = findViewById<WebView>(R.id.webViewSearch)
-        webview.getSettings().setJavaScriptEnabled(true)
+        webview.settings.javaScriptEnabled = true
+        webview.settings.useWideViewPort = true
         webview.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, req: WebResourceRequest): Boolean {
                 view.loadUrl(req.toString())

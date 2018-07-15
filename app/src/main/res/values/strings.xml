@@ -10,6 +10,7 @@
     <string name="add">Add</string>
     <string name="remove_all">Remove All</string>
     <string name="remove">Remove</string>
+    <string name="delete">Delete</string>
     <string name="settings">Settings</string>
     <string name="donate">Donate</string>
     <string name="playlist">Playlist</string>
@@ -22,6 +23,11 @@
     <string name="paypal" translatable="false">PayPal</string>
     <string name="yandex_money" translatable="false">Yandex Money</string>
     <string name="google_play" translatable="false">Google Play</string>
+
+    <string name="update">Update</string>
+    <string name="update_server_remotly">Update from net</string>
+    <string name="update_server_localy">Update from folder Download</string>
+    <string name="version">Version</string>
 
     <string name="open">Open</string>
     <string name="send">Send</string>
@@ -80,6 +86,10 @@
     <string name="error_sending_settings">Error sending settings</string>
 
     <string name="error_remove_torrent">Error remove torrent</string>
+
+    <string name="warn_server_not_exists">Server not exist</string>
+    <string name="warn_error_download_server">Error downloading server</string>
+    <string name="warn_no_localy_updates">No local update</string>
 
     <string name="retrackers">Retrackers</string>
     <string-array name="retracker_mode">
