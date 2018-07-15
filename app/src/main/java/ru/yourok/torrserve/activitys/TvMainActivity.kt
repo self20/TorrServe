@@ -86,6 +86,10 @@ class TvMainActivity : AppCompatActivity() {
             Donate.donateDialog(this)
         }
 
+        buttonDonate.setOnClickListener {
+            startActivity(Intent(this, ServerLoaderActivity::class.java))
+        }
+
         buttonSearch.setOnClickListener {
             startActivity(Intent(this, SearchActivity::class.java))
         }
