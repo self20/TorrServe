@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/backgroundContainer"
+    tools:context="ru.yourok.torrserve.activitys.VideoReviewActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:background="#99000000"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:background="@color/lighter_gray"
+                    android:layout_margin="10dp"
+                    android:id="@+id/imageViewPoster"
+                    android:layout_width="120dp"
+                    android:layout_height="180dp" />
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_weight="1.5"
+                        android:text="Video name"
+                        android:id="@+id/textViewVideoName"
+                        android:layout_height="match_parent"
+                        android:layout_width="match_parent"
+                        android:layout_marginBottom="10dp"
+                        android:textColor="#ddd"
+                        android:shadowColor="#fff"
+                        android:shadowDx="0"
+                        android:shadowDy="0"
+                        android:shadowRadius="50"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+                    <TextView
+                        android:layout_weight="1"
+                        android:text="Overview"
+                        android:id="@+id/textViewOverview"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:textColor="#ddd"
+                        android:shadowColor="#fff"
+                        android:shadowDx="0"
+                        android:shadowDy="0"
+                        android:shadowRadius="50" />
+
+                    <Button
+                        android:visibility="gone"
+                        android:layout_weight="1.5"
+                        android:id="@+id/buttonSeasons"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="@string/seasons" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <ProgressBar
+                android:visibility="gone"
+                android:padding="0dp"
+                android:layout_margin="0dp"
+                android:id="@+id/progressBarLoading"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:indeterminate="true"
+                android:max="100"
+                android:scaleY="5"
+                android:layout_width="match_parent"
+                android:layout_height="2dp" />
+
+            <ru.yourok.torrserve.componet.ListViewAutoSize
+                android:id="@+id/listViewSearchTorrent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

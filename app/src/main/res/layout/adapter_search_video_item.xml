@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="120dp"
+    android:layout_height="180dp">
+
+    <ImageView
+        android:id="@+id/imageViewPoster"
+        android:layout_width="120dp"
+        android:layout_height="180dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/imageViewPoster"
+        android:layout_gravity="bottom"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textViewMovieName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:background="#99000000"
+            android:textColor="#ddd"
+            android:shadowColor="#fff"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="50"
+            android:text="Film name"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/textViewMovieDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:background="#99000000"
+            android:textColor="#ddd"
+            android:shadowColor="#fff"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="50"
+            android:text="2018-06-01"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/textViewMovieGenres"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:background="#99000000"
+            android:textColor="#ddd"
+            android:shadowColor="#fff"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="50"
+            android:text="Film"
+            android:textSize="13sp" />
+    </LinearLayout>
+</RelativeLayout>
