@@ -269,7 +269,7 @@ var mainPage = `
 								var prc = data.PreloadedBytes * 100 / data.PreloadSize;
 								if (prc>100) prc = 100;
 								$('#preloadProgress').width(prc+'%');
-								$('#preloadBuffer').text("Loaded: " + humanizeSize(data.PreloadSize) + " / " + humanizeSize(data.PreloadLength)+" "+prc+"%");
+								$('#preloadBuffer').text("Loaded: " + humanizeSize(data.PreloadedBytes) + " / " + humanizeSize(data.PreloadSize)+" "+prc+"%");
 							}else{
 								$('#preloadProgress').width('100%');
 								$('#preloadBuffer').text("Loaded: " + humanizeSize(data.BytesReadUsefulData));

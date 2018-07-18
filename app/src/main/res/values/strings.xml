@@ -15,10 +15,6 @@
     <string name="donate">Donate</string>
     <string name="playlist">Playlist</string>
 
-    <string name="page">Page</string>
-    <string name="ascend">Ascend</string>
-    <string name="descend">Descend</string>
-
     <string name="donate_msg">Your donation helps me to develop further, improve the program and create new ones</string>
     <string name="paypal" translatable="false">PayPal</string>
     <string name="yandex_money" translatable="false">Yandex Money</string>
@@ -79,7 +75,6 @@
 
     <string name="error_torrent_not_found">Error torrent not found</string>
     <string name="error_server_start">Server start error</string>
-    <string name="error_torrent_with_this_link_exists">Torrent with this link is exists</string>
     <string name="error_open_torrent">Error open torrent</string>
     <string name="error_add_torrent">Error add torrent</string>
     <string name="error_retrieving_settings">Error retrieving settings</string>
@@ -99,11 +94,22 @@
         <item>Replace retrackers</item>
     </string-array>
 
+
+    <string name="seasons">Seasons</string>
     <string name="search">Search</string>
-    <string name="search_type">Search type</string>
-    <string-array name="search_types">
-        <item>Search by name</item>
-        <item>Search now watching</item>
-        <item>Search by filter</item>
+
+    <string name="movies">Movies</string>
+    <string name="shows">Shows</string>
+    <string name="torrents">Torrents</string>
+
+    <string name="page">Page</string>
+    <string name="filter">Filter</string>
+    <string name="year">Year</string>
+    <string name="sort">Sort</string>
+    <string name="genres">Genres</string>
+
+    <string-array name="search_ftype">
+        <item>By name</item>
+        <item>Discover</item>
     </string-array>
 </resources>

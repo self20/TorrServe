@@ -64,7 +64,8 @@ class TorrService : Service() {
     private fun stopServer() {
         NotificationServer.Close(this)
         if (ServerApi.echo()) {
-
+            ServerApi.shutdownServer()
+            ServerLoader.stop()
             Handler(this.getMainLooper()).post(Runnable {
                 Toast.makeText(this, R.string.server_stoped, Toast.LENGTH_LONG).show()
             })

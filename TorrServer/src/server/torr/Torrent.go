@@ -228,7 +228,7 @@ func (t *Torrent) CloseReader(reader torrent.Reader) {
 	t.muReader.Lock()
 	reader.Close()
 	delete(t.readers, reader)
-	t.expiredTime = time.Now().Add(time.Second * 20)
+	t.expiredTime = time.Now().Add(time.Second * 5)
 	t.muReader.Unlock()
 }
 
@@ -294,7 +294,7 @@ func (t *Torrent) Preload(file *torrent.File, size int64) {
 	var lastSize int64 = 0
 	errCount := 0
 	for t.status == TorrentPreload {
-		t.expiredTime = time.Now().Add(time.Minute * 5)
+		t.expiredTime = time.Now().Add(time.Minute * 1)
 		t.PreloadedBytes = t.Torrent.BytesCompleted()
 		fmt.Println("Preload:", file.Torrent().InfoHash().HexString(), bytes.Format(t.PreloadedBytes), "/", bytes.Format(t.PreloadSize), "Speed:", utils.Format(t.DownloadSpeed), "Peers:[", t.Torrent.Stats().ConnectedSeeders, "]", t.Torrent.Stats().ActivePeers, "/", t.Torrent.Stats().TotalPeers)
 		if t.PreloadedBytes >= t.PreloadSize {

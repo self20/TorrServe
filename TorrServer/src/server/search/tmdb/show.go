@@ -197,6 +197,7 @@ func listShows(endpoint string, params napping.Params, page int) (Shows, int) {
 				return nil
 			})
 			if results != nil {
+				totalResults = results.TotalResults
 				var wgItems sync.WaitGroup
 				wgItems.Add(len(results.Results))
 				for s, show := range results.Results {

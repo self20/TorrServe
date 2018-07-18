@@ -3,7 +3,6 @@ package ru.yourok.torrserve.activitys
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.view.KeyEvent
 import android.view.View
 import android.widget.ListView
 import android.widget.ProgressBar
@@ -14,6 +13,7 @@ import ru.yourok.torrserve.adapters.TorrentListAdapter
 import ru.yourok.torrserve.menu.TorrentListSelectionMenu
 import ru.yourok.torrserve.serverhelper.ServerApi
 import ru.yourok.torrserve.serverhelper.server.Torrent
+import ru.yourok.torrserve.serverloader.ServerLoader
 import ru.yourok.torrserve.services.TorrService
 import kotlin.concurrent.thread
 
@@ -86,7 +86,7 @@ class TvMainActivity : AppCompatActivity() {
             Donate.donateDialog(this)
         }
 
-        buttonDonate.setOnClickListener {
+        buttonUpdate.setOnClickListener {
             startActivity(Intent(this, ServerLoaderActivity::class.java))
         }
 
@@ -131,43 +131,16 @@ class TvMainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        event?.let {
-            when (keyCode) {
-            //Add
-                KeyEvent.KEYCODE_1, KeyEvent.KEYCODE_NUMPAD_1, KeyEvent.KEYCODE_BUTTON_1 -> {
-                    buttonAdd.performClick()
-                }
-            //Remove All
-                KeyEvent.KEYCODE_2, KeyEvent.KEYCODE_NUMPAD_2, KeyEvent.KEYCODE_BUTTON_2 -> {
-                    buttonRemoveAll.performClick()
-                }
-            //Playlist
-                KeyEvent.KEYCODE_3, KeyEvent.KEYCODE_NUMPAD_3, KeyEvent.KEYCODE_BUTTON_3 -> {
-                    buttonPlaylist.performClick()
-                }
-            //Donate
-                KeyEvent.KEYCODE_4, KeyEvent.KEYCODE_NUMPAD_4, KeyEvent.KEYCODE_BUTTON_4 -> {
-                    buttonDonate.performClick()
-                }
-            //Exit
-                KeyEvent.KEYCODE_5, KeyEvent.KEYCODE_NUMPAD_5, KeyEvent.KEYCODE_BUTTON_5 -> {
-                    buttonExit.performClick()
-                }
-            //Settings
-                KeyEvent.KEYCODE_6, KeyEvent.KEYCODE_NUMPAD_6, KeyEvent.KEYCODE_BUTTON_6 -> {
-                    buttonSettings.performClick()
-                }
-                else -> return super.onKeyUp(keyCode, event)
-            }
-        }
-        return super.onKeyUp(keyCode, event)
-    }
-
     private fun startServer() {
+        progressBar.visibility = View.GONE
+        textViewStatus.visibility = View.GONE
         if (!ServerApi.echo()) {
-            progressBar.visibility = View.VISIBLE
             textViewStatus.visibility = View.VISIBLE
+            if (!ServerLoader.serverExists()) {
+                textViewStatus.setText(R.string.warn_server_not_exists)
+                return
+            }
+            progressBar.visibility = View.VISIBLE
             textViewStatus.setText(R.string.starting_server)
             thread {
                 if (TorrService.waitServer()) {

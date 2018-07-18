@@ -160,9 +160,54 @@ func getTorrent(c echo.Context) ([]*parser.Torrent, error) {
 	}
 	torrs := torrent.Search(query, filter)
 	sort.Slice(torrs, func(i, j int) bool {
+		gri := getGrTorr(torrs[i])
+		grj := getGrTorr(torrs[j])
+		if gri != grj {
+			return gri < grj
+		}
+
+		if torrs[i].PeersUl == -1 && torrs[j].PeersUl == -1 {
+			return torrs[i].Size > torrs[j].Size
+		}
+
 		return torrs[i].PeersUl > torrs[j].PeersUl
 	})
 	return torrs, nil
+}
+
+//gr 0 - 50 or more
+//gr 1 - 30 - 50 gb
+//gr 2 - 15 - 30 gb
+//gr 3 - 0 - 15 gb
+func getGrTorr(t *parser.Torrent) int {
+	szStr := ""
+	if t.Size[len(t.Size)-2:] == "GB" {
+		szStr = strings.TrimSpace(t.Size[:len(t.Size)-2])
+	}
+	if t.Size[len(t.Size)-4:] == "ГБ" {
+		szStr = strings.TrimSpace(t.Size[:len(t.Size)-4])
+	}
+
+	if szStr != "" {
+		sz, _ := strconv.ParseFloat(szStr, 32)
+		if sz > 50 {
+			return 0
+		}
+		if sz > 30 {
+			return 1
+		}
+		if sz > 15 {
+			return 2
+		}
+		if sz > 5 {
+			return 3
+		}
+		if sz > 1 {
+			return 4
+		}
+		return 5
+	}
+	return 6
 }
 
 func getMovies(c echo.Context) (tmdb.Movies, int) {
@@ -356,7 +401,7 @@ func movToPageInfo(c echo.Context, movies tmdb.Movies, all int) *PageInfo {
 func tvToPageInfo(c echo.Context, shows tmdb.Shows, all int) *PageInfo {
 	pi := new(PageInfo)
 	pi.Genres = tmdb.GetTVGenres(c.QueryParam("language"))
-	pi.Sorts = []string{"vote_average.asc", "vote_average.desc", "vote_average.asc", "first_air_date.desc", "first_air_date.asc", "popularity.desc", "popularity.asc"}
+	pi.Sorts = []string{"vote_average.desc", "vote_average.asc", "first_air_date.desc", "first_air_date.asc", "popularity.desc", "popularity.asc"}
 
 	limit := tmdb.ResultsPerPage * tmdb.PagesAtOnce
 	pi.Pages = all/limit + 1

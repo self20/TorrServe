@@ -104,7 +104,16 @@ class ServerLoaderActivity : AppCompatActivity() {
             return
         }
         ServerLoader.stop()
-        ServerLoader.copyLocal()
+        if (!ServerLoader.copyLocal()) {
+            Handler(Looper.getMainLooper()).post {
+                val msg = "Error copy server: Download/TorrServer-android-${ServerLoader.getArch()}"
+                findViewById<TextView>(R.id.update_info).setText(msg)
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                updateVersion()
+                findViewById<ProgressBar>(R.id.progress_bar).visibility = View.GONE
+            }
+            return
+        }
         ServerLoader.run()
         Handler(Looper.getMainLooper()).post {
             findViewById<TextView>(R.id.update_info).setText(R.string.stat_server_is_running)

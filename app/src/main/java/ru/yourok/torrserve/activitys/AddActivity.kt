@@ -39,16 +39,6 @@ class AddActivity : AppCompatActivity() {
 
         buttonAdd.setOnClickListener {
             wait("") {
-                val torrList = ServerApi.list()
-                torrList.forEach {
-                    if (it.Magnet() == editTextTorrLink.text.toString()) {
-                        runOnUiThread {
-                            textViewStatus.setText(R.string.error_torrent_with_this_link_exists)
-                        }
-                        return@wait
-                    }
-                }
-
                 try {
                     ServerApi.add(editTextTorrLink.text.toString(), true)
                     finish()

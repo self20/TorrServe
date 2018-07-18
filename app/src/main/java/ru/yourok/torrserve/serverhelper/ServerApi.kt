@@ -112,6 +112,10 @@ object ServerApi {
         ServerRequests.restartTorrentClient()
     }
 
+    fun shutdownServer() {
+        ServerRequests.serverShutdown()
+    }
+
     fun openPlayList(torrent: Torrent) {
         if (torrent.Hash().isEmpty())
             return

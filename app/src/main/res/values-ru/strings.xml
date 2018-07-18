@@ -12,10 +12,6 @@
     <string name="donate">Пожертвование</string>
     <string name="playlist">Плейлист</string>
 
-    <string name="page">Страница</string>
-    <string name="ascend">По возрастанию</string>
-    <string name="descend">По убыванию</string>
-
     <string name="donate_msg">Ваше пожертвование помогает мне развиваться дальше, улучшать программу и создавать новые</string>
 
     <string name="update">Обновить</string>
@@ -73,7 +69,6 @@
 
     <string name="error_torrent_not_found">Ошибка торрент не найден</string>
     <string name="error_server_start">Ошибка запуска сервера</string>
-    <string name="error_torrent_with_this_link_exists">Торрент с этой ссылкой существует</string>
     <string name="error_open_torrent">Ошибка при открытии торрента</string>
     <string name="error_add_torrent">Ошибка при добавлении торрента</string>
     <string name="error_retrieving_settings">Ошибка при получении настроек</string>
@@ -81,7 +76,7 @@
 
     <string name="error_remove_torrent">Ошибка удаления торрента</string>
 
-    <string name="warn_server_not_exists">Сервер отсутствует, пожалуйсата обновите сервер</string>
+    <string name="warn_server_not_exists">Сервер отсутствует</string>
     <string name="warn_error_download_server">Ошибка при загрузки сервера</string>
     <string name="warn_no_localy_updates">Нет локальных обновлений</string>
 
@@ -93,11 +88,21 @@
         <item>Заменить ретрекеры</item>
     </string-array>
 
+    <string name="seasons">Серии</string>
     <string name="search">Поиск</string>
-    <string name="search_type">Тип поиска</string>
-    <string-array name="search_types">
-        <item>Искать по имени</item>
-        <item>Сейчас смотрят</item>
-        <item>Искать по фильтру</item>
+
+    <string name="movies">Фильмы</string>
+    <string name="shows">Сериалы</string>
+    <string name="torrents">Торренты</string>
+
+    <string name="page">Страница</string>
+    <string name="filter">Фильтр</string>
+    <string name="year">Год</string>
+    <string name="sort">Сортировка</string>
+    <string name="genres">Жанры</string>
+
+    <string-array name="search_ftype">
+        <item>По имени</item>
+        <item>По параметрам</item>
     </string-array>
 </resources>

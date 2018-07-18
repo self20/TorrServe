@@ -114,10 +114,44 @@ object ServerRequests {
 
     fun serverShutdown() {
         val url = getHostUrl("/shutdown")
-        Post(url, "")
+        try {
+            Post(url, "")
+        } catch (e: Exception) {
+        }
     }
 
-    ///////////////////////////////////////////////////////////
+    fun searchMovies(params: List<String>): JSONArray {
+        var url = getHostUrl("/search/movie?")
+        url += params.joinToString("&")
+        return JSONArray(Get(fixLink(url)))
+    }
+
+    fun searchShows(params: List<String>): JSONArray {
+        var url = getHostUrl("/search/show?")
+        url += params.joinToString("&")
+        return JSONArray(Get(fixLink(url)))
+    }
+
+    fun searchTorrent(query: String, filter: List<String>): JSONArray {
+        var url = getHostUrl("/search/torrent")
+        url += "?query=$query"
+        if (filter.isNotEmpty())
+            url += "&ft=" + filter.joinToString("&ft=")
+        return JSONArray(Get(fixLink(url)))
+    }
+
+    fun searchConfig(): JSONObject {
+        var url = getHostUrl("/search/config?type=config")
+        val cfg = JSONObject(Get(url))
+        url = getHostUrl("/search/config?type=genres")
+        val genres = JSONObject(Get(url))
+        val js = JSONObject()
+        js.put("Config", cfg)
+        js.put("Genres", genres)
+        return js
+    }
+
+///////////////////////////////////////////////////////////
 
     fun fixLink(link: String): String {
         try {

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"time"
 
 	"server/settings"
 	"server/torr"
@@ -105,10 +106,13 @@ func echoPage(c echo.Context) error {
 }
 
 func shutdownPage(c echo.Context) error {
-	Stop()
-	settings.CloseDB()
-	os.Exit(0)
-	return nil
+	go func() {
+		Stop()
+		settings.CloseDB()
+		time.Sleep(time.Second * 2)
+		os.Exit(0)
+	}()
+	return c.NoContent(http.StatusOK)
 }
 
 func HTTPErrorHandler(err error, c echo.Context) {

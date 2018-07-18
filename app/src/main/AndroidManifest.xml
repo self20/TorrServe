@@ -378,7 +378,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".activitys.SearchActivity" />
-        <activity android:name=".activitys.ServerLoaderActivity"></activity>
+        <activity android:name=".activitys.ServerLoaderActivity" />
+        <activity android:name=".activitys.VideoReviewActivity"></activity>
     </application>
 
 </manifest>

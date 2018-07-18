@@ -35,6 +35,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        requestPermissionWithRationale()
+
         var isAndroidTV = false
         val uiModeManager = getSystemService(UI_MODE_SERVICE) as UiModeManager
         if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
@@ -53,8 +55,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         drawer = NavigationBar.setup(this)
-
-        requestPermissionWithRationale()
 
         val listViewTorrent = findViewById<ListView>(R.id.listViewTorrent)
         listViewTorrent.adapter = torrAdapter
@@ -119,6 +119,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startServer() {
+        progressBar.visibility = View.GONE
+        textViewStatus.visibility = View.GONE
         if (!ServerApi.echo()) {
             textViewStatus.visibility = View.VISIBLE
             if (!ServerLoader.serverExists()) {

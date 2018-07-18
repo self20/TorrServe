@@ -6,6 +6,7 @@ import android.util.Log
 import cz.msebera.android.httpclient.client.methods.HttpGet
 import cz.msebera.android.httpclient.impl.client.HttpClients
 import ru.yourok.torrserve.App
+import ru.yourok.torrserve.utils.Utils
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -40,11 +41,13 @@ object ServerLoader {
     fun copyLocal(): Boolean {
         val file = checkLocal()
         file?.let {
-            servPath.delete()
-            val input = FileInputStream(file)
-            copy(input, servPath)
-            servPath.setExecutable(true)
-            return true
+            if (file.canRead()) {
+                servPath.delete()
+                val input = FileInputStream(file)
+                copy(input, servPath)
+                servPath.setExecutable(true)
+                return true
+            }
         }
         return false
     }
@@ -64,6 +67,8 @@ object ServerLoader {
             servPath.delete()
             val output = FileOutputStream(servPath)
             response.entity.writeTo(output)
+            output.flush()
+            output.close()
             servPath.setExecutable(true)
             return ""
         } else {
@@ -110,7 +115,7 @@ object ServerLoader {
         if (!ServerLoader.serverExists())
             return
         if (process == null || !process!!.isRunning()) {
-            val process = Process(servPath.path, "-d", servPath.parent)
+            val process = Process(servPath.path, "-d", Utils.getAppPath())
             process.onOutput {
                 Log.i("GoLog", it)
             }

@@ -29,7 +29,7 @@ func Search(query string, filterStrings []string) []*parser.Torrent {
 	go func() {
 		lst, err := parser.NewYHH().Search(query)
 		if err != nil {
-			fmt.Println("Rutor search err:", err)
+			fmt.Println("Yohoho search err:", err)
 			return
 		}
 		mu.Lock()
@@ -41,7 +41,7 @@ func Search(query string, filterStrings []string) []*parser.Torrent {
 	go func() {
 		lst, err := parser.NewTParser().Search(query)
 		if err != nil {
-			fmt.Println("Rutor search err:", err)
+			fmt.Println("TParser search err:", err)
 			return
 		}
 		mu.Lock()
@@ -84,8 +84,6 @@ func filter(list []*parser.Torrent, filterStrings []string) []*parser.Torrent {
 		}
 		if !isFilter {
 			filtered = append(filtered, t)
-		} else {
-			fmt.Println("Filter:", t.Name)
 		}
 	}
 	return filtered
@@ -99,8 +97,6 @@ func removeDublicate(list []*parser.Torrent) []*parser.Torrent {
 		if _, ok := encountered[getHash(t)]; !ok {
 			encountered[getHash(t)] = struct{}{}
 			result = append(result, t)
-		} else {
-			fmt.Println("Duplicate:", t.Name)
 		}
 	}
 	return result

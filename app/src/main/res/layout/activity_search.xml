@@ -4,11 +4,176 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:padding="5dp"
     tools:context=".activitys.SearchActivity">
 
-    <WebView
-        android:id="@+id/webViewSearch"
+    <ProgressBar
+        android:visibility="gone"
+        android:padding="0dp"
+        android:layout_margin="0dp"
+        android:id="@+id/progressBarLoading"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:indeterminate="true"
+        android:max="100"
+        android:scaleY="5"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="2dp" />
 
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/buttonMovies"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/movies" />
+
+        <Button
+            android:id="@+id/buttonShows"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/shows" />
+
+        <Button
+            android:id="@+id/buttonTorrent"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/torrents" />
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/searchScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Spinner
+                android:id="@+id/spinnerSearchType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/search_ftype" />
+
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/fTypeByName"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:id="@+id/fTypeTorrent"
+                    android:orientation="vertical"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/filter" />
+
+                    <EditText
+                        android:id="@+id/editTextFilter"
+                        android:hint="2017;S01|01x;LostFilm|Кубик в Кубе;720|1080|BDRemux"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/name" />
+
+                <EditText
+                    android:id="@+id/editTextName"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/fTypeDiscover"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:layout_weight="1"
+                    android:id="@+id/buttonFTYear"
+                    android:text="@string/year"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:layout_weight="1"
+                    android:id="@+id/buttonFTSort"
+                    android:text="@string/sort"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:layout_weight="1"
+                    android:id="@+id/buttonFTGenres"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/genres" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/buttonSearch"
+                android:text="@string/search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <ru.yourok.torrserve.componet.GridViewAutoSize
+                android:id="@+id/gridViewSearchVideo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnWidth="120dp"
+                android:gravity="center"
+                android:horizontalSpacing="2dp"
+                android:numColumns="auto_fit"
+                android:stretchMode="spacingWidthUniform"
+                android:verticalSpacing="2dp" />
+
+            <ru.yourok.torrserve.componet.ListViewAutoSize
+                android:id="@+id/listViewSearchTorrent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <LinearLayout
+                android:id="@+id/pages"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/buttonPrev"
+                    android:layout_weight="1"
+                    android:text="&lt;&lt;"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:id="@+id/buttonNext"
+                    android:layout_weight="1"
+                    android:text="&gt;&gt;"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

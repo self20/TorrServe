@@ -527,7 +527,7 @@ var searchPage = `
 						dl += '| ▼ ' + torr.PeersDl;
 					}
 					html += '<div class="btn-group d-flex" role="group">'
-					html += '<button type="button" class="btn btn-secondary wrap w-100" onclick="doTorrent(\'' + torr.Magnet + '\', this)"><i class="fas fa-plus"></i> ' + torr.Name + " " + torr.Size + dl +'</button>';
+					html += '<button type="button" class="btn btn-secondary wrap w-100" onclick="doTorrent(\'' + torr.Magnet + '\', this)"><i class="fas fa-plus"></i> ' + torr.Name + " | " + torr.Size + dl +'</button>';
 					html += '<a type="button" class="btn btn-secondary" href="/torrent/play?link='+encodeURIComponent(torr.Magnet)+'&m3u=true">...</a>'
 					html += '</div>';
 				}
